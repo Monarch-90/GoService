@@ -21,3 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "GoService"
 include(":app")
+include(":core")
+include(":feature_schedule")
+include(":feature_clients")
+include(":feature_supplies")
+include(":feature_windows")

@@ -3,52 +3,65 @@ package com.avetiso.feature_schedule
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.avetiso.feature_schedule.adapter.AppointmentAdapter
+import com.avetiso.feature_schedule.data.Appointment
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.core.nextMonth
+import com.kizitonwose.calendar.core.previousMonth
 import com.kizitonwose.calendar.view.MonthDayBinder
+import com.kizitonwose.calendar.view.MonthScrollListener
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
 
-// Убираем лишние импорты и добавляем новые
-class ScheduleFragment : Fragment(R.layout.fragment_schedule) { // Передаем макет в конструктор
+class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private var binding: FragmentScheduleBinding? = null
-
-    // Переменная для хранения выбранной даты
     private var selectedDate: LocalDate? = null
     private val dateFormatter = DateTimeFormatter.ofPattern("dd")
+
+    // Создаем адаптер
+    private val appointmentAdapter = AppointmentAdapter()
+
+    // Создаем "искусственные" данные для теста
+    private val dummyAppointments = mapOf(
+        LocalDate.now() to listOf(
+            Appointment(LocalTime.of(10, 0), "Маникюр", "Анна", 90),
+            Appointment(LocalTime.of(12, 30), "Педикюр", "Мария", 120)
+        ),
+        LocalDate.now().plusDays(1) to listOf(
+            Appointment(LocalTime.of(11, 0), "Стрижка", "Ольга", 60)
+        )
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentScheduleBinding.bind(view)
 
         val currentBinding = binding ?: return
-        val calendarView = currentBinding.calendarView
 
-// Новый блок с передачей обработчика
+        // Настраиваем RecyclerView
+        currentBinding.recyclerViewAppointments.adapter = appointmentAdapter
+
+        // ... код календаря ...
+        val calendarView = currentBinding.calendarView
         calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
-            // Передаем в конструктор наш обработчик
             override fun create(view: View) = DayViewContainer(view) { day ->
-                // Логика, которая выполняется при клике на день
                 if (selectedDate != day.date) {
                     val oldDate = selectedDate
                     selectedDate = day.date
-                    // Обновляем старую и новую ячейки
                     oldDate?.let { calendarView.notifyDateChanged(it) }
                     calendarView.notifyDateChanged(day.date)
-
-                    // TODO: Здесь будем загружать записи для `selectedDate`
-                    Toast.makeText(
-                        requireContext(),
-                        "Выбрана дата: ${day.date}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // Обновляем список записей
+                    updateAppointments(day.date)
                 }
             }
 
@@ -82,9 +95,39 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) { // Переда�
         calendarView.scrollToMonth(currentMonth)
         // ...
 
+        calendarView.monthScrollListener = object : MonthScrollListener {
+            override fun invoke(month: CalendarMonth) {
+                val monthTitle =
+                    month.yearMonth.month.getDisplayName(TextStyle.FULL_STANDALONE, Locale("ru"))
+                        .replaceFirstChar { it.uppercase() }
+                val yearTitle = month.yearMonth.year.toString()
+                currentBinding.textMonthTitle.text = "$monthTitle $yearTitle"
+            }
+        }
+
+        // ЛИСЕНЕРЫ ДЛЯ КНОПОК-СТРЕЛОК
+        currentBinding.buttonNextMonth.setOnClickListener {
+            calendarView.findFirstVisibleMonth()?.let {
+                calendarView.smoothScrollToMonth(it.yearMonth.nextMonth)
+            }
+        }
+
+        currentBinding.buttonPreviousMonth.setOnClickListener {
+            calendarView.findFirstVisibleMonth()?.let {
+                calendarView.smoothScrollToMonth(it.yearMonth.previousMonth)
+            }
+        }
+
         currentBinding.buttonAddAppointment.setOnClickListener {
             Toast.makeText(requireContext(), "Добавить новую запись", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun updateAppointments(date: LocalDate) {
+        // Получаем записи на выбранную дату из наших данных
+        // или пустой список, если записей нет
+        val appointments = dummyAppointments[date].orEmpty()
+        appointmentAdapter.submitList(appointments)
     }
 
     override fun onDestroyView() {

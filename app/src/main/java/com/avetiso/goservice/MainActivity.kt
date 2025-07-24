@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        // Очищаем binding, чтобы избежать утечек памяти
         binding = null
         super.onDestroy()
     }

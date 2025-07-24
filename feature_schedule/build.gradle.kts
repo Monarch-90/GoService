@@ -15,6 +15,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        isCoreLibraryDesugaringEnabled = true
     }
 
     buildFeatures {
@@ -37,4 +39,11 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
+
+    // Calendar
+    implementation(libs.kizitonwose.calendar.view)
+    implementation(libs.kizitonwose.calendar.core)
+
+    // Desugar (десахаризация)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

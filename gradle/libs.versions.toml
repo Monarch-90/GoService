@@ -13,6 +13,8 @@ espressoCore = "3.6.1"
 appcompat = "1.7.1"
 material = "1.12.0"
 navigationFragmentKtx = "2.9.2"
+kizitonwoseCalendar = "2.8.0"
+desugarJdkLibs = "2.1.5"
 
 [libraries]
 # AndroidX
@@ -20,7 +22,7 @@ androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayo
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
-# MAterial Design
+# Material Design
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Navigation
@@ -35,6 +37,13 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+# Calendar
+kizitonwose-calendar-view = { group = "com.kizitonwose.calendar", name = "view", version.ref = "kizitonwoseCalendar" }
+kizitonwose-calendar-core = { group = "com.kizitonwose.calendar", name = "core", version.ref = "kizitonwoseCalendar" }
+
+# Desugar (десахаризация)
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

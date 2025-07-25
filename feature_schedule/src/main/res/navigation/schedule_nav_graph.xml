@@ -8,6 +8,16 @@
         android:id="@+id/scheduleFragment"
         android:name="com.avetiso.feature_schedule.ScheduleFragment"
         android:label="fragment_schedule"
-        tools:layout="@layout/fragment_schedule" />
+        tools:layout="@layout/fragment_schedule">
+        <action
+            android:id="@+id/action_scheduleFragment_to_addAppointmentFragment"
+            app:destination="@id/addAppointmentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addAppointmentFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.AddAppointmentFragment"
+        android:label="fragment_add_appointment"
+        tools:layout="@layout/fragment_add_appointment" />
 
 </navigation>

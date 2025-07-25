@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -46,4 +47,13 @@ dependencies {
 
     // Desugar (десахаризация)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // ViewModel & Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.fragment.ktx)
+
+    // Hilt (для ViewModel)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }

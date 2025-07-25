@@ -2,8 +2,8 @@ package com.avetiso.feature_schedule
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.avetiso.feature_schedule.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.data.Appointment
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
@@ -119,7 +119,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         }
 
         currentBinding.buttonAddAppointment.setOnClickListener {
-            Toast.makeText(requireContext(), "Добавить новую запись", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_scheduleFragment_to_addAppointmentFragment)
         }
     }
 

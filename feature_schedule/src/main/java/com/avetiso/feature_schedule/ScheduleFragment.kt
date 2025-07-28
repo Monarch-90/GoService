@@ -14,6 +14,7 @@ import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthScrollListener
+import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -22,6 +23,7 @@ import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
 
+@AndroidEntryPoint
 class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private var binding: FragmentScheduleBinding? = null

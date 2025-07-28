@@ -18,6 +18,31 @@
         android:id="@+id/addAppointmentFragment"
         android:name="com.avetiso.feature_schedule.add_appointment.AddAppointmentFragment"
         android:label="fragment_add_appointment"
-        tools:layout="@layout/fragment_add_appointment" />
+        tools:layout="@layout/fragment_add_appointment">
+        <action
+            android:id="@+id/action_addAppointmentFragment_to_addServiceFragment"
+            app:destination="@id/addServiceFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/step1SelectServiceFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.Step1SelectServiceFragment"
+        android:label="Step1SelectServiceFragment" />
+
+    <fragment
+        android:id="@+id/addServiceFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.AddServiceFragment"
+        android:label="AddServiceFragment"
+        tools:layout="@layout/fragment_add_service">
+        <action
+            android:id="@+id/action_addServiceFragment_to_selectCategoryFragment"
+            app:destination="@id/selectCategoryFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectCategoryFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.category.SelectCategoryFragment"
+        android:label="SelectCategoryFragment"
+        tools:layout="@layout/fragment_select_category"/>
 
 </navigation>

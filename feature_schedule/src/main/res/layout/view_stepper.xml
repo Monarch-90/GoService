@@ -9,20 +9,20 @@
     <TextView
         android:id="@+id/step1_text"
         style="@style/StepperText"
-        tools:text="Услуги" />
+        android:text="Услуги" />
 
     <View style="@style/StepperLine" />
 
     <TextView
         android:id="@+id/step2_text"
         style="@style/StepperText"
-        tools:text="Время" />
+        android:text="Время" />
 
     <View style="@style/StepperLine" />
 
     <TextView
         android:id="@+id/step3_text"
         style="@style/StepperText"
-        tools:text="Клиент" />
+        android:text="Клиент" />
 
 </LinearLayout>

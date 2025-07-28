@@ -10,10 +10,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
+import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentState
+import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddAppointmentBinding
 import com.avetiso.feature_schedule.databinding.ViewStepperBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
 
     private var binding: FragmentAddAppointmentBinding? = null
@@ -39,8 +44,18 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         // Подписываемся на изменения состояния
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    updateUi(state)
+                launch {
+                    viewModel.state.collect { state ->
+                        updateUi(state)
+                    }
+                }
+
+                // НОВАЯ ПОДПИСКА: на события навигации
+                launch {
+                    viewModel.navigationEvents.collect {
+                        // Выполняем навигацию отсюда!
+                        findNavController().navigate(R.id.action_addAppointmentFragment_to_addServiceFragment)
+                    }
                 }
             }
         }

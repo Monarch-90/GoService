@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import com.avetiso.feature_schedule.theme.MyPickerAppTheme
 import com.chargemap.compose.numberpicker.NumberPicker
 
 class DurationPickerDialogFragment : DialogFragment() {
@@ -36,7 +36,7 @@ class DurationPickerDialogFragment : DialogFragment() {
                 val initialHour = arguments?.getInt("hour") ?: 0
                 val initialMinute = arguments?.getInt("minute") ?: 0
 
-                MaterialTheme {
+                MyPickerAppTheme {
                     DurationPickerDialog(
                         initialHour = initialHour,
                         initialMinute = initialMinute,

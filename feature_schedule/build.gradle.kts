@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.compose.compiler)
 }
 
 android {
@@ -22,6 +24,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true
     }
 }
 
@@ -56,4 +59,17 @@ dependencies {
     // Hilt (для ViewModel)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    // BOM - импортируем его как платформу
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
+
+    // Основные библиотеки Compose (версии возьмутся из BOM)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.compose.ui.tooling)
+
+    // For time select
+    implementation(libs.chargemap.numberpicker)
 }

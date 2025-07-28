@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginBottom="8dp"
     android:background="@drawable/item_appointment_bg"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="16dp">
-
-    <TextView
-        android:id="@+id/text_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorPrimary"
-        android:textSize="10sp"
-        tools:text="10:00" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -36,14 +26,19 @@
             tools:text="Маникюр с покрытием" />
 
         <TextView
-            android:id="@+id/text_client_name"
+            android:id="@+id/text_service_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:drawablePadding="4dp"
-            app:drawableStartCompat="@drawable/ic_person"
-            tools:text="Анна" />
-
+            tools:text="1500 BYN • 1 ч 30 мин" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/button_remove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/ic_remove" />
 
 </LinearLayout>

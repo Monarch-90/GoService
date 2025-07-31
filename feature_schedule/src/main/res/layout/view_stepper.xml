@@ -6,21 +6,21 @@
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/step1_text"
         style="@style/StepperText"
         android:text="Услуги" />
 
     <View style="@style/StepperLine" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/step2_text"
         style="@style/StepperText"
         android:text="Время" />
 
     <View style="@style/StepperLine" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/step3_text"
         style="@style/StepperText"
         android:text="Клиент" />

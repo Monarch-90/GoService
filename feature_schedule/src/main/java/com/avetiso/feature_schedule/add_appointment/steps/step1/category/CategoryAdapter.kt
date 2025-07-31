@@ -1,31 +1,42 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.category
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import com.avetiso.common_ui.actions.ActionsViewHolder
+import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.core.entity.CategoryEntity
 import com.avetiso.feature_schedule.databinding.ItemCategoryBinding
 
-class CategoryAdapter(
-    private val onCategoryClick: (CategoryEntity) -> Unit
-) : ListAdapter<CategoryEntity, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
+class CategoryAdapter :
+    ListAdapter<CategoryEntity, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = CategoryViewHolder(
-        ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-        onCategoryClick
-    )
+    var actions: RecyclerViewActions<CategoryEntity>? = null
 
-    override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) = holder.bind(getItem(position))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
+        val binding =
+            ItemCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CategoryViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
+        val category = getItem(position)
+        holder.bind(category)
+        // Используем безопасный вызов ?.
+        actions?.bindViewHolderActions(holder, category)
+    }
 
     class CategoryViewHolder(
         private val binding: ItemCategoryBinding,
-        private val onCategoryClick: (CategoryEntity) -> Unit
-    ) : RecyclerView.ViewHolder(binding.root) {
+    ) : ActionsViewHolder(binding) {
+        override val actionsContainer: View = binding.actionsContainer.root
+        override val editButton: View = binding.actionsContainer.buttonEdit
+        override val deleteButton: View = binding.actionsContainer.buttonDelete
+
         fun bind(category: CategoryEntity) {
             binding.textCategoryName.text = category.name
-            binding.root.setOnClickListener { onCategoryClick(category) }
         }
     }
 

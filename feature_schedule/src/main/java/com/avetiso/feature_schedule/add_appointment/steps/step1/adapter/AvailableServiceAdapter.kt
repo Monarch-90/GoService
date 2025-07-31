@@ -9,14 +9,16 @@ import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.databinding.ItemAvailableServiceBinding
 
 class AvailableServiceAdapter(
-    private val onServiceSelected: (ServiceEntity, Boolean) -> Unit
+    private val onServiceSelected: (ServiceEntity, Boolean) -> Unit,
 ) : ListAdapter<ServiceEntity, AvailableServiceAdapter.ServiceViewHolder>(DiffCallback) {
 
     private var selectedServices: Set<ServiceEntity> = emptySet()
 
     fun updateSelection(selected: Set<ServiceEntity>) {
-        selectedServices = selected
-        // notifyDataSetChanged() здесь не нужен, т.к. bind сам всё проверит
+        if (selectedServices != selected) {
+            selectedServices = selected
+            notifyDataSetChanged() // Для адаптера это самый простой способ перерисовать видимые элементы
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ServiceViewHolder(
@@ -31,11 +33,12 @@ class AvailableServiceAdapter(
 
     class ServiceViewHolder(
         private val binding: ItemAvailableServiceBinding,
-        private val onServiceSelected: (ServiceEntity, Boolean) -> Unit
+        private val onServiceSelected: (ServiceEntity, Boolean) -> Unit,
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(service: ServiceEntity, isSelected: Boolean) {
             binding.textServiceName.text = service.name
-            binding.textServiceDetails.text = "${service.price} BYN • ${service.durationMinutes} мин"
+            binding.textServiceDetails.text =
+                "${service.price} BYN • ${service.durationMinutes} мин"
             binding.checkboxSelectService.setOnCheckedChangeListener(null) // Убираем старый лисенер
             binding.checkboxSelectService.isChecked = isSelected
             binding.checkboxSelectService.setOnCheckedChangeListener { _, checked ->

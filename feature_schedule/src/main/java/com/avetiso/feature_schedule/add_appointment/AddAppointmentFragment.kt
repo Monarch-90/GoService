@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.add_appointment
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -33,15 +34,28 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         currentBinding.viewPager.adapter = AddAppointmentViewPagerAdapter(this)
         currentBinding.viewPager.isUserInputEnabled = false
 
-        currentBinding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+        setupClickListeners(currentBinding)
+        observeViewModel()
+    }
+
+    private fun setupClickListeners(currentBinding: FragmentAddAppointmentBinding) {
+        // 1. Системная кнопка "назад"
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            handleBackPress()
         }
 
+        // 2. Кнопка "назад" в Toolbar
+        currentBinding.toolbar.setNavigationOnClickListener {
+            handleBackPress()
+        }
+
+        // 3. Кнопка "Далее/Готово"
         currentBinding.buttonNext.setOnClickListener {
             viewModel.handleEvent(AddAppointmentEvent.NextButtonClicked)
         }
+    }
 
-        // Подписываемся на изменения состояния
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -50,7 +64,7 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                     }
                 }
 
-                // НОВАЯ ПОДПИСКА: на события навигации
+                // ПОДПИСКА: на события навигации
                 launch {
                     viewModel.navigationEvents.collect {
                         // Выполняем навигацию отсюда!
@@ -58,6 +72,20 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Централизованный метод для обработки ВСЕХ действий "назад".
+     */
+    private fun handleBackPress() {
+        val currentStep = viewModel.state.value.currentStep
+        if (currentStep > 0) {
+            // Если это не первый шаг, переключаемся на предыдущий
+            viewModel.handleEvent(AddAppointmentEvent.BackPressed)
+        } else {
+            // Если мы на первом шаге, выходим с экрана
+            findNavController().navigateUp()
         }
     }
 

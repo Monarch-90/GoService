@@ -4,4 +4,5 @@ import com.avetiso.core.entity.ServiceEntity
 
 sealed interface Step1Event {
     data class ServiceSelected(val service: ServiceEntity, val isSelected: Boolean) : Step1Event
+    data class SearchQueryChanged(val query: String) : Step1Event // Новое событие для изменения поискового запроса. Поиск услуг
 }

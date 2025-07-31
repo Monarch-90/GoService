@@ -20,7 +20,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_previous_month"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
                 android:padding="8dp"
                 android:src="@drawable/ic_chevron_left" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_month_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
                 android:textColor="@android:color/black"
                 tools:text="Июль 2025" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_next_month"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,31 +60,31 @@
         android:paddingVertical="12dp"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="ПН" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="ВТ" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="СР" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="ЧТ" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="ПТ" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="СБ" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
             android:text="ВС" />
 

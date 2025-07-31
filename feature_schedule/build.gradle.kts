@@ -37,6 +37,7 @@ kotlin {
 dependencies {
 
     implementation(project(":core")) // Все фичи зависят от core
+    implementation(project(":common_ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

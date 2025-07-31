@@ -2,13 +2,9 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1
 
 import android.os.Bundle
 import android.view.View
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -20,8 +16,6 @@ import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.steps.step1.mvi.AddServiceViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddServiceBinding
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -50,7 +44,10 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             viewModel.setDuration(hour, minute)
         }
 
-        setupMenu()
+        binding?.buttonSave?.setOnClickListener {
+            saveService()
+        }
+
         setupFields()
         observeState()
     }
@@ -77,31 +74,17 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         setupCurrencySpinner()
     }
 
-    private fun setupMenu() {
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.add_service_menu, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                if (menuItem.itemId == R.id.action_save) {
-                    saveService() // <-- ВЫЗОВ МЕТОДА СОХРАНЕНИЯ
-                    return true
-                }
-                return false
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-    }
-
     private fun saveService() {
         // Сначала сбрасываем все предыдущие ошибки
         binding?.inputLayoutName?.error = null
         binding?.inputLayoutPrice?.error = null
         binding?.textCategory?.background = null // Убираем рамку
+        binding?.textDuration?.background = null // Убираем рамку
 
         val name = binding?.inputEditTextName?.text?.toString()
         val category = binding?.textCategory?.text?.toString()
         val priceStr = binding?.inputEditTextPrice?.text?.toString()
+        val duration = binding?.textDuration?.text?.toString()
 
         // Получаем актуальное состояние прямо из ViewModel
         val currentState = viewModel.uiState.value
@@ -112,18 +95,28 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
 
             category.isNullOrBlank() || category == "Выбрать категорию" -> {
-                // Применяем нашу красную рамку к TextView
+                // Применяем красную рамку к TextView
                 binding?.textCategory?.setBackgroundResource(R.drawable.error_border)
                 // Можно также показать короткое сообщение
                 Toast.makeText(
                     requireContext(),
-                    "Пожалуйста, выберите категорию",
+                    "Выберите категорию",
                     Toast.LENGTH_SHORT
                 ).show()
             }
 
             priceStr.isNullOrBlank() -> {
                 binding?.inputLayoutPrice?.error = "Укажите цену"
+            }
+
+            duration.isNullOrBlank() || duration == "0 ч 00 мин" -> {
+                // Применяем красную рамку к TextView
+                binding?.textDuration?.setBackgroundResource(R.drawable.error_border)
+                Toast.makeText(
+                    requireContext(),
+                    "Укажите продолжительность",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             else -> {
@@ -198,14 +191,19 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
         binding?.spinnerCurrency?.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long,
+                ) {
                     // Сообщаем ViewModel об изменении
                     viewModel.setCurrency(currencies[position])
                 }
+
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
     }
-
 
 
     private fun updateDurationText(hour: Int, minute: Int) {

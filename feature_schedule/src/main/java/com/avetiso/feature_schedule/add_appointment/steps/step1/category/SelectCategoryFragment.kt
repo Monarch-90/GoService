@@ -1,97 +1,135 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.category
 
-import android.app.AlertDialog
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.core.entity.CategoryEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.databinding.DialogAddCategoryBinding
 import com.avetiso.feature_schedule.databinding.FragmentSelectCategoryBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
+private const val TAG = "TouchDebug"
 
 @AndroidEntryPoint
 class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
     private var binding: FragmentSelectCategoryBinding? = null
     private val viewModel: SelectCategoryViewModel by viewModels()
+    private var actions: RecyclerViewActions<CategoryEntity>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSelectCategoryBinding.bind(view)
 
-        setupMenu()
+        setupRecyclerView()
+        setupClickListeners()
+        observeViewModel()
+    }
 
-        val categoryAdapter = CategoryAdapter { category ->
-            // Возвращаем результат предыдущему экрану
-            setFragmentResult("category_selection", bundleOf("selected_category_name" to category.name))
+    private fun setupRecyclerView() {
+        val currentBinding = binding ?: return
+        val categoryAdapter = CategoryAdapter()
+
+        currentBinding.recyclerViewCategories.adapter = categoryAdapter
+        currentBinding.recyclerViewCategories.layoutManager = LinearLayoutManager(requireContext())
+
+        actions = RecyclerViewActions(
+            fragment = this,
+            recyclerView = currentBinding.recyclerViewCategories,
+            adapter = categoryAdapter,
+            getItemId = { category -> category.id },
+            getItemName = { category -> category.name },
+            onEdit = { category ->
+                showCategoryInputDialog(category)
+            },
+            onDelete = { category ->
+                viewModel.deleteCategory(category)
+            },
+            onItemClick = { category ->
+                setFragmentResult(
+                    "category_selection",
+                    bundleOf("selected_category_name" to category.name)
+                )
+                findNavController().navigateUp()
+            }
+        )
+
+        // Просто присваиваем actions в адаптер.
+        categoryAdapter.actions = actions
+    }
+
+    private fun setupClickListeners() {
+        val currentBinding = binding ?: return
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            handleBackPress()
+        }
+        currentBinding.toolbar.setNavigationOnClickListener {
+            handleBackPress()
+        }
+        currentBinding.fabAddCategory.setOnClickListener {
+            if (actions?.activeItemId != null) {
+                actions?.dismissActions()
+            } else {
+                showCategoryInputDialog()
+            }
+        }
+    }
+
+    private fun handleBackPress() {
+        if (actions?.activeItemId != null) {
+            actions?.dismissActions()
+        } else {
             findNavController().navigateUp()
         }
+    }
 
-        binding?.recyclerViewCategories?.adapter = categoryAdapter
-        binding?.toolbar?.setNavigationOnClickListener { findNavController().navigateUp() }
-
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.categories.collect { categories ->
-                    categoryAdapter.submitList(categories)
-                }
+            viewModel.categories.collectLatest { categories ->
+                (binding?.recyclerViewCategories?.adapter as? CategoryAdapter)?.submitList(
+                    categories
+                )
             }
         }
     }
 
-    private fun setupMenu() {
-        requireActivity().addMenuProvider(object : androidx.core.view.MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.select_category_menu, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: android.view.MenuItem): Boolean {
-                if (menuItem.itemId == R.id.action_add_category) {
-                    showAddCategoryDialog()
-                    return true
-                }
-                return false
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-    }
-
-    private fun showAddCategoryDialog() {
+    private fun showCategoryInputDialog(category: CategoryEntity? = null) {
+        val isEditMode = category != null
         val dialogBinding = DialogAddCategoryBinding.inflate(layoutInflater)
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Новая категория")
-            .setView(dialogBinding.root)
-            .setPositiveButton("Добавить", null) // Обработчик установим ниже
-            .setNegativeButton("Отмена", null)
-            .create()
 
-        dialog.setOnShowListener {
-            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            positiveButton.setOnClickListener {
-                val name = dialogBinding.inputEditTextCategoryName.text.toString()
+        if (isEditMode) {
+            dialogBinding.inputEditTextCategoryName.setText(category?.name)
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(if (isEditMode) "Редактировать категорию" else "Новая категория")
+            .setView(dialogBinding.root)
+            .setNegativeButton("Отмена", null)
+            .setPositiveButton(if (isEditMode) "Сохранить" else "Добавить") { _, _ ->
+                val name = dialogBinding.inputEditTextCategoryName.text.toString().trim()
                 if (name.isNotBlank()) {
-                    viewModel.addCategory(name)
-                    dialog.dismiss()
-                } else {
-                    dialogBinding.inputLayoutCategoryName.error = "Название не может быть пустым"
+                    viewModel.addOrUpdateCategory(name, category?.id)
                 }
             }
-        }
-        dialog.show()
+            .show()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+        actions = null
     }
 }

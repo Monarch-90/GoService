@@ -13,13 +13,15 @@ class DayViewContainer(
 ) : ViewContainer(view) {
 
     val textView: TextView = view.findViewById(R.id.day_text)
-    lateinit var day: CalendarDay // "lateinit" здесь безопасен, т.к. он всегда устанавливается в bind
+    var day: CalendarDay? = null
 
     init {
         view.setOnClickListener {
             // Вызываем обработчик только для дней текущего месяца
-            if (day.position == DayPosition.MonthDate) {
-                onDayClick(day)
+            day?.let { currentDay ->
+                if (currentDay.position == DayPosition.MonthDate) {
+                    onDayClick(currentDay)
+                }
             }
         }
     }

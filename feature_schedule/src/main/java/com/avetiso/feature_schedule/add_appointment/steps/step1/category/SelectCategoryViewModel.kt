@@ -12,15 +12,25 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SelectCategoryViewModel @Inject constructor(
-    private val categoryDao: CategoryDao
+    private val categoryDao: CategoryDao,
 ) : ViewModel() {
 
     val categories = categoryDao.getAllCategories()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun addCategory(name: String) {
+    fun deleteCategory(category: CategoryEntity) {
         viewModelScope.launch {
-            categoryDao.insertCategory(CategoryEntity(name = name))
+            categoryDao.deleteCategory(category)
+        }
+    }
+
+    fun addOrUpdateCategory(name: String, id: Long? = null) {
+        viewModelScope.launch {
+            if (id == null) {
+                categoryDao.insertCategory(CategoryEntity(name = name))
+            } else {
+                categoryDao.updateCategory(CategoryEntity(id = id, name = name))
+            }
         }
     }
 }

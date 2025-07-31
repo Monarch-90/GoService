@@ -12,6 +12,19 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow_back" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/step_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Выбор услуг"
+        android:layout_marginStart="70dp"
+        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/toolbar"
+        app:layout_constraintStart_toStartOf="@+id/toolbar"
+        app:layout_constraintTop_toTopOf="@+id/toolbar" />
+
     <include
         android:id="@+id/stepper"
         layout="@layout/view_stepper"

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_edit"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Редактировать"
+        android:padding="8dp"
+        android:src="@drawable/ic_edit"
+        app:tint="?attr/colorOnSurface"
+        tools:tint="#000000" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_delete"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Удалить"
+        android:padding="8dp"
+        android:src="@drawable/ic_delete"
+        app:tint="?attr/colorError"
+        tools:tint="#FD4848" />
+
+</LinearLayout>

@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -89,9 +90,21 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
     }
 
+    private fun setupInputFields() {
+        // Для текстовых полей используем TextWatcher
+        binding?.inputEditTextName?.addTextChangedListener {
+            // Как только пользователь начинает печатать, убираем ошибку
+            binding?.inputLayoutName?.error = null
+        }
+        binding?.inputEditTextPrice?.addTextChangedListener {
+            binding?.inputLayoutPrice?.error = null
+        }
+    }
+
     private fun setupFields() {
         binding?.toolbar?.setNavigationOnClickListener { findNavController().navigateUp() }
 
+        setupInputFields()
         setupDurationPicker()
         setupCategoryPicker()
         setupPriceToggle()
@@ -113,12 +126,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun saveService() {
-        // Сначала сбрасываем все предыдущие ошибки
-        binding?.inputLayoutName?.error = null
-        binding?.inputLayoutPrice?.error = null
-        binding?.textCategory?.background = null // Убираем рамку
-        binding?.textDuration?.background = null // Убираем рамку
-
         val name = binding?.inputEditTextName?.text?.toString()
         val category = binding?.textCategory?.text?.toString()
         val priceStr = binding?.inputEditTextPrice?.text?.toString()
@@ -183,7 +190,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun setupDurationPicker() {
         binding?.textDuration?.setOnClickListener {
-            // Берём актуальные значения из ViewModel перед открытием диалога
+            // Сбрасываем фон ПЕРЕД открытием диалога
+            binding?.textDuration?.background = null
+
             val currentState = viewModel.uiState.value
             showDurationPickerDialog(currentState.selectedHour, currentState.selectedMinute)
         }
@@ -201,6 +210,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun setupCategoryPicker() {
         binding?.textCategory?.setOnClickListener {
+            // Сбрасываем фон ПЕРЕД переходом на другой экран
+            binding?.textCategory?.background = null
+
             findNavController().navigate(R.id.action_addServiceFragment_to_selectCategoryFragment)
         }
     }

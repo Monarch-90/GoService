@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="active_item_bg_color">#1F808080</color>
+    <color name="custom_black_white">#000000</color>
 </resources>

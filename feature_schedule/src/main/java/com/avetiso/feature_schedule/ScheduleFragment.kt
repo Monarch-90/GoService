@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.avetiso.feature_schedule.adapter.AppointmentAdapter
@@ -80,7 +81,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                         textView.setTextColor(requireContext().getColor(android.R.color.white))
                     } else {
                         textView.background = null
-                        textView.setTextColor(requireContext().getColor(android.R.color.black))
+                        textView.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.feature_schedule.R.color.custom_black_white))
                     }
                 } else {
                     textView.visibility = View.INVISIBLE

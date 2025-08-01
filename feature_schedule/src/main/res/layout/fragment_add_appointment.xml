@@ -45,6 +45,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/stepper" />
 
+    <View
+        android:id="@+id/bottom_divider_shadow"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:background="@drawable/bottom_fade_divider"
+        app:layout_constraintBottom_toTopOf="@id/button_next"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_next"
         android:layout_width="wrap_content"

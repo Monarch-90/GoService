@@ -1,4 +1,3 @@
-// В файле ui/theme/Theme.kt
 package com.avetiso.feature_schedule.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme

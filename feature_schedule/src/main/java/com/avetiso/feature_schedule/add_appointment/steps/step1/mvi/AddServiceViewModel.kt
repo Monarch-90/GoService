@@ -45,7 +45,13 @@ class AddServiceViewModel @Inject constructor(
 
     fun saveService(service: ServiceEntity) {
         viewModelScope.launch {
-            serviceDao.insertService(service)
+            // Если id == 0, значит, это новая сущность.
+            // Если id != 0, значит, мы редактируем существующую.
+            if (service.id == 0L) {
+                serviceDao.insertService(service)
+            } else {
+                serviceDao.updateService(service)
+            }
         }
     }
 }

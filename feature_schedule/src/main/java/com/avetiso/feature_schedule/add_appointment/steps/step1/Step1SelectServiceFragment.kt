@@ -8,7 +8,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.AddAppointmentFragmentDirections
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.steps.step1.adapter.AvailableServiceAdapter
@@ -30,6 +34,7 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
     private val parentViewModel: AddAppointmentViewModel by viewModels({ requireParentFragment() })
 
     private var serviceAdapter: AvailableServiceAdapter? = null
+    private var actions: RecyclerViewActions<ServiceEntity>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,6 +46,17 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
         binding?.buttonAddService?.setOnClickListener {
             parentViewModel.handleEvent(AddAppointmentEvent.NavigateToAddService)
         }
+
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        savedStateHandle?.getLiveData<Boolean>("service_updated")
+            ?.observe(viewLifecycleOwner) { updated ->
+                if (updated) {
+                    // Принудительно обновляем поиск, чтобы перезапросить данные
+                    viewModel.handleEvent(Step1Event.SearchQueryChanged(binding?.editTextSearch?.text.toString()))
+                    // Сбрасываем флаг, чтобы не было повторных обновлений
+                    savedStateHandle.remove<Boolean>("service_updated")
+                }
+            }
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -63,11 +79,35 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
     }
 
     private fun setupRecyclerView() {
-        // Лямбда отправляет событие РОДИТЕЛЬСКОМУ ViewModel
-        serviceAdapter = AvailableServiceAdapter { service, isSelected ->
-            parentViewModel.handleEvent(AddAppointmentEvent.ServiceSelected(service, isSelected))
-        }
+        // Создаем адаптер без лямбды
+        serviceAdapter = AvailableServiceAdapter()
         binding?.recyclerViewSelectedServices?.adapter = serviceAdapter
+
+        // Инициализируем наш механизм действий
+        actions = RecyclerViewActions(
+            fragment = this,
+            recyclerView = binding!!.recyclerViewSelectedServices,
+            adapter = serviceAdapter!!,
+            getItemId = { service -> service.id },
+            getItemName = { service -> service.name },
+            onEdit = { service ->
+                // Ваша логика перехода на экран редактирования
+                val direction = AddAppointmentFragmentDirections.actionAddAppointmentFragmentToAddServiceFragment(service)
+                // Используем основной NavController родительского фрагмента для навигации
+                requireParentFragment().findNavController().navigate(direction)
+            },
+            onDelete = { service ->
+                // Вызываем новый метод в ViewModel для удаления
+                viewModel.deleteService(service)
+            },
+            onItemClick = { service ->
+                // Здесь сохраняется ваша логика выбора услуги
+                val isCurrentlySelected = parentViewModel.state.value.selectedServices.contains(service)
+                parentViewModel.handleEvent(AddAppointmentEvent.ServiceSelected(service, !isCurrentlySelected))
+            }
+        )
+        // Передаем actions в адаптер
+        serviceAdapter?.actions = actions
     }
 
     private fun setupSearch() {
@@ -81,5 +121,6 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
         super.onDestroyView()
         binding = null
         serviceAdapter = null
+        actions = null
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,7 +8,7 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="8dp">
+    android:paddingVertical="12dp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -17,26 +18,54 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_name"
+            style="@style/textSize_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBodyLarge"
-            tools:text="Маникюр с покрытием"
-            style="@style/textSize_15"/>
+            android:textColor="?android:attr/textColorPrimary"
+            tools:text="Маникюр с покрытием" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_service_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorPrimary"
+            tools:text="Ногтевой сервис" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="10sp"
             android:layout_marginTop="4dp"
-            tools:text="1500 BYN • 1 ч 30 мин" />
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="от 1500 BYN • 1 ч 30 мин" />
+
     </LinearLayout>
 
-    
-
-    <CheckBox
-        android:id="@+id/checkbox_select_service"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp" />
+        android:layout_marginStart="16dp">
+
+        <ImageView
+            android:id="@+id/image_view_selected_check"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_check"
+            android:visibility="gone"
+            app:tint="?attr/colorPrimary"
+            tools:visibility="visible" />
+
+        <include
+            android:id="@+id/actions_container"
+            layout="@layout/view_action_icons" />
+
+    </FrameLayout>
 
 </LinearLayout>

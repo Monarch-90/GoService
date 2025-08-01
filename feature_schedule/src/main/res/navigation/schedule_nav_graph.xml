@@ -19,15 +19,23 @@
         android:name="com.avetiso.feature_schedule.add_appointment.AddAppointmentFragment"
         android:label="fragment_add_appointment"
         tools:layout="@layout/fragment_add_appointment">
+
         <action
             android:id="@+id/action_addAppointmentFragment_to_addServiceFragment"
-            app:destination="@id/addServiceFragment" />
+            app:destination="@id/addServiceFragment">
+            <argument
+                android:name="serviceToEdit"
+                android:defaultValue="@null"
+                app:argType="com.avetiso.core.entity.ServiceEntity"
+                app:nullable="true" />
+        </action>
     </fragment>
 
     <fragment
         android:id="@+id/step1SelectServiceFragment"
         android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.Step1SelectServiceFragment"
-        android:label="Step1SelectServiceFragment" />
+        android:label="Step1SelectServiceFragment"
+        tools:layout="@layout/fragment_step1_select_service"/>
 
     <fragment
         android:id="@+id/addServiceFragment"
@@ -37,12 +45,18 @@
         <action
             android:id="@+id/action_addServiceFragment_to_selectCategoryFragment"
             app:destination="@id/selectCategoryFragment" />
+
+        <argument
+            android:name="serviceToEdit"
+            app:argType="com.avetiso.core.entity.ServiceEntity"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
     <fragment
         android:id="@+id/selectCategoryFragment"
         android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.category.SelectCategoryFragment"
         android:label="SelectCategoryFragment"
-        tools:layout="@layout/fragment_select_category"/>
+        tools:layout="@layout/fragment_select_category" />
 
 </navigation>

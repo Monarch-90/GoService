@@ -1,5 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.category
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
@@ -114,17 +115,41 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             dialogBinding.inputEditTextCategoryName.setText(category?.name)
         }
 
-        MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (isEditMode) "Редактировать категорию" else "Новая категория")
             .setView(dialogBinding.root)
             .setNegativeButton("Отмена", null)
-            .setPositiveButton(if (isEditMode) "Сохранить" else "Добавить") { _, _ ->
+            .setPositiveButton(if (isEditMode) "Сохранить" else "Добавить", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.setOnClickListener {
                 val name = dialogBinding.inputEditTextCategoryName.text.toString().trim()
-                if (name.isNotBlank()) {
-                    viewModel.addOrUpdateCategory(name, category?.id)
+                dialogBinding.inputLayoutCategoryName.error = null
+
+                val currentCategories = viewModel.categories.value
+                val hasDuplicate = currentCategories.any {
+                    // В режиме редактирования исключаем проверку на саму себя
+                    (if (isEditMode) it.id != category?.id else true) &&
+                            it.name.equals(name, ignoreCase = true)
+                }
+
+                when {
+                    name.isBlank() -> {
+                        dialogBinding.inputLayoutCategoryName.error = "Название не может быть пустым"
+                    }
+                    hasDuplicate -> {
+                        dialogBinding.inputLayoutCategoryName.error = "Такая категория уже существует"
+                    }
+                    else -> {
+                        viewModel.addOrUpdateCategory(name, category?.id)
+                        dialog.dismiss()
+                    }
                 }
             }
-            .show()
+        }
+        dialog.show()
     }
 
     override fun onDestroyView() {

@@ -3,6 +3,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1.category
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.avetiso.common_ui.actions.ActionsViewHolder
@@ -37,6 +38,10 @@ class CategoryAdapter :
 
         fun bind(category: CategoryEntity) {
             binding.textCategoryName.text = category.name
+        }
+
+        override fun toggleActions(show: Boolean) {
+            actionsContainer.isVisible = show
         }
     }
 

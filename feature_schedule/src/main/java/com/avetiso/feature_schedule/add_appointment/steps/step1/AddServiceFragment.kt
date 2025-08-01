@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.steps.step1.mvi.AddServiceViewModel
@@ -25,9 +26,25 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private var binding: FragmentAddServiceBinding? = null
     private val viewModel: AddServiceViewModel by viewModels()
 
+    // Получаем аргументы, переданные через Safe Args
+    private val args: AddServiceFragmentArgs by navArgs()
+    private var serviceToEdit: ServiceEntity? = null
+
+    // ФЛАГ, чтобы отследить первую загрузку
+    private var isInitialDataLoaded = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAddServiceBinding.bind(view)
+
+        // Проверяем, пришел ли объект для редактирования
+        serviceToEdit = args.serviceToEdit
+
+        // Заполняем поля только один раз, при первом создании View
+        if (serviceToEdit != null && !isInitialDataLoaded) {
+            populateFieldsForEdit(serviceToEdit!!)
+            isInitialDataLoaded = true // Ставим флаг, что данные загружены
+        }
 
         // Слушаем результат с экрана выбора категории
         setFragmentResultListener("category_selection") { _, bundle ->
@@ -60,6 +77,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                     updateDurationText(state.selectedHour, state.selectedMinute)
                     // Можно также обновлять и другие элементы, если они будут в ViewModel
                     // binding?.toggleButtonPriceFrom?.isChecked = state.isPriceFrom
+
+                    // Мы управляем состоянием группы кнопок
+                    if (state.isPriceFrom) {
+                        binding?.toggleButtonPriceFrom?.check(R.id.button_price_from)
+                    } else {
+                        binding?.toggleButtonPriceFrom?.uncheck(R.id.button_price_from)
+                    }
                 }
             }
         }
@@ -72,6 +96,20 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         setupCategoryPicker()
         setupPriceToggle()
         setupCurrencySpinner()
+    }
+
+    private fun populateFieldsForEdit(service: ServiceEntity) {
+        binding?.toolbar?.title = "Редактировать услугу"
+        binding?.inputEditTextName?.setText(service.name)
+        binding?.textCategory?.text = service.categoryName
+        binding?.inputEditTextPrice?.setText(service.price.toString())
+
+        // Обновляем состояние в ViewModel, чтобы все работало корректно
+        val hours = service.durationMinutes / 60
+        val minutes = service.durationMinutes % 60
+        viewModel.setDuration(hours, minutes)
+        viewModel.setPriceFrom(service.isPriceFrom)
+        viewModel.setCurrency(service.currency)
     }
 
     private fun saveService() {
@@ -122,7 +160,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             else -> {
                 // Все проверки пройдены, можно сохранять
                 val durationInMinutes = currentState.selectedHour * 60 + currentState.selectedMinute
-                val newService = ServiceEntity(
+                val serviceToSave = ServiceEntity(
+                    // Если мы редактируем, используем существующий id, иначе оставляем 0 (для новой)
+                    id = serviceToEdit?.id ?: 0L,
                     name = name,
                     categoryName = category,
                     isPriceFrom = currentState.isPriceFrom,
@@ -131,11 +171,10 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                     durationMinutes = durationInMinutes
                 )
 
-                viewModel.saveService(newService)
-
+                viewModel.saveService(serviceToSave)
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                    "new_service",
-                    newService
+                    "service_updated",
+                    true
                 )
                 findNavController().navigateUp()
             }

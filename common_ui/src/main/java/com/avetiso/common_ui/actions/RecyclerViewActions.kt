@@ -31,12 +31,16 @@ class RecyclerViewActions<T>(
             recyclerView = recyclerView,
             onLongPress = { position -> handleLongPress(position) },
             onItemClick = { position ->
-                if (activeItemId == null) {
-                    adapter.currentList.getOrNull(position)?.let { item ->
-                        onItemClick?.invoke(item)
-                    }
-                } else {
+                val clickedItem =
+                    adapter.currentList.getOrNull(position) ?: return@ItemActionTouchListener
+                val isActionMenuOpen = activeItemId != null
+
+                // Если меню действий открыто, любой клик его просто закрывает.
+                if (isActionMenuOpen) {
                     dismissActions()
+                } else {
+                    // Если меню было закрыто, то это обычный клик для выбора.
+                    onItemClick?.invoke(clickedItem)
                 }
             },
             onEmptySpaceClick = { dismissActions() }
@@ -48,10 +52,6 @@ class RecyclerViewActions<T>(
                 dismissActions()
             }
         })
-    }
-
-    private fun findViewHolderUnder(view: View): ActionsViewHolder? {
-        return recyclerView.getChildViewHolder(view) as? ActionsViewHolder
     }
 
     private fun handleLongPress(position: Int) {
@@ -84,9 +84,7 @@ class RecyclerViewActions<T>(
         val itemId = getItemId(item)
         val isActionsVisible = (itemId == activeItemId)
 
-        // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-        // Теперь используется `actionsContainer` для управления видимостью.
-        holder.actionsContainer.isVisible = isActionsVisible
+        holder.toggleActions(isActionsVisible)
 
         if (isActionsVisible) {
             holder.editButton.setOnClickListener {

@@ -92,6 +92,14 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
     private fun updateUi(state: AddAppointmentState) {
         val currentBinding = binding ?: return
 
+        // Обновляем заголовок в зависимости от текущего шага
+        currentBinding.stepTitle.text = when (state.currentStep) {
+            0 -> getString(R.string.add_appointment_step_1_title)
+            1 -> getString(R.string.add_appointment_step_2_title)
+            2 -> getString(R.string.add_appointment_step_3_title)
+            else -> "" // На случай непредвиденного шага
+        }
+
         // Обновляем ViewPager
         currentBinding.viewPager.setCurrentItem(state.currentStep, true)
 

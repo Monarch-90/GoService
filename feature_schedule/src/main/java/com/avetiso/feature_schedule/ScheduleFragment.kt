@@ -57,36 +57,59 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         // ... код календаря ...
         val calendarView = currentBinding.calendarView
         calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
-            override fun create(view: View) = DayViewContainer(view) { day ->
-                if (selectedDate != day.date) {
-                    val oldDate = selectedDate
-                    selectedDate = day.date
-                    oldDate?.let { calendarView.notifyDateChanged(it) }
-                    calendarView.notifyDateChanged(day.date)
-                    // Обновляем список записей
-                    updateAppointments(day.date)
-                }
-            }
+            override fun create(view: View) = DayViewContainer.create(view)
 
+            // Вся логика теперь находится здесь, в методе bind
             override fun bind(container: DayViewContainer, data: CalendarDay) {
-                // Остальная часть bind-метода, как в шаге 3
-                container.day = data
-                val textView = container.textView
+                // Прямой доступ к View через биндинг
+                val textView = container.binding.dayText
+                val verticalDivider = container.binding.verticalDivider
+
                 textView.text = dateFormatter.format(data.date)
 
+                // Установка клика
+                container.binding.root.setOnClickListener {
+                    if (data.position == DayPosition.MonthDate && selectedDate != data.date) {
+                        val oldDate = selectedDate
+                        selectedDate = data.date
+                        oldDate?.let { calendarView.notifyDateChanged(it) }
+                        calendarView.notifyDateChanged(data.date)
+                        updateAppointments(data.date)
+                    }
+                }
+
+                // Логика отображения
                 if (data.position == DayPosition.MonthDate) {
                     textView.visibility = View.VISIBLE
                     if (data.date == selectedDate) {
-                        textView.setBackgroundResource(R.drawable.calendar_day_selected_bg)
+                        textView.alpha = 1.0f // Убираем тусклость
                         textView.setTextColor(requireContext().getColor(android.R.color.white))
+                        // Можете вернуть фон, если он нужен для выделения
+                        // textView.setBackgroundResource(R.drawable.calendar_day_selected_bg)
                     } else {
+                        textView.alpha = 1.0f // Убираем тусклость для всего текста
                         textView.background = null
-                        textView.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.feature_schedule.R.color.custom_black_white))
+                        textView.setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.custom_black_white
+                            )
+                        )
                     }
                 } else {
                     textView.visibility = View.INVISIBLE
                 }
+
+                // ИСПРАВЛЕННАЯ ЛОГИКА СКРЫТИЯ ЛИНИИ (БЕЗ lateinit И БЕЗ ОШИБОК)
+                val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
+                val lastDayOfWeek = firstDayOfWeek.plus(6)
+                if (data.date.dayOfWeek == lastDayOfWeek) {
+                    verticalDivider.visibility = View.INVISIBLE
+                } else {
+                    verticalDivider.visibility = View.VISIBLE
+                }
             }
+
         }
 
         // ... код настройки месяцев и скролла ...

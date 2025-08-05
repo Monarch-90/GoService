@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         tools:text="Выбор услуг"
         android:layout_marginStart="70dp"
-        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:textColor="@color/custom_black_white"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/toolbar"

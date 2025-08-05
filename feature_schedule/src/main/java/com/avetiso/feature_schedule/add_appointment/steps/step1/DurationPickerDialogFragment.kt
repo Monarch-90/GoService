@@ -22,9 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import com.avetiso.feature_schedule.theme.MyPickerAppTheme
+import com.avetiso.feature_schedule.utils.MyPickerAppTheme
 import com.chargemap.compose.numberpicker.NumberPicker
-import java.time.format.TextStyle
 
 class DurationPickerDialogFragment : DialogFragment() {
 

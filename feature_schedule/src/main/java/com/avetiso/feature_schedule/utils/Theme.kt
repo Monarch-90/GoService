@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.theme
+package com.avetiso.feature_schedule.utils
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

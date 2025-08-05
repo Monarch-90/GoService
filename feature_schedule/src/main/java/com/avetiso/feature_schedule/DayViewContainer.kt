@@ -1,28 +1,27 @@
 package com.avetiso.feature_schedule
 
 import android.view.View
-import android.widget.TextView
-import com.kizitonwose.calendar.core.CalendarDay
-import com.kizitonwose.calendar.core.DayPosition
+import com.avetiso.feature_schedule.databinding.CalendarDayLayoutBinding
 import com.kizitonwose.calendar.view.ViewContainer
 
-// Добавляем в конструктор функцию-обработчик клика
-class DayViewContainer(
-    view: View,
-    private val onDayClick: (CalendarDay) -> Unit,
-) : ViewContainer(view) {
+/**
+ * Контейнер для ячейки дня, использующий View Binding.
+ * Конструктор приватный, чтобы создание шло через удобный метод create.
+ */
+class DayViewContainer private constructor(
+    // Храним объект биндинга, а не просто View
+    val binding: CalendarDayLayoutBinding,
+) : ViewContainer(binding.root) {
 
-    val textView: TextView = view.findViewById(R.id.day_text)
-    var day: CalendarDay? = null
-
-    init {
-        view.setOnClickListener {
-            // Вызываем обработчик только для дней текущего месяца
-            day?.let { currentDay ->
-                if (currentDay.position == DayPosition.MonthDate) {
-                    onDayClick(currentDay)
-                }
-            }
+    companion object {
+        /**
+         * Фабричный метод для создания экземпляра DayViewContainer из View.
+         * Это позволяет инкапсулировать логику создания биндинга.
+         */
+        fun create(view: View): DayViewContainer {
+            // Создаем биндинг из готового View, которое надула библиотека
+            val binding = CalendarDayLayoutBinding.bind(view)
+            return DayViewContainer(binding)
         }
     }
 }

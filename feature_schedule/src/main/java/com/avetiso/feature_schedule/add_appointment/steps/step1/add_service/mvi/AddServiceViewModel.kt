@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step1.mvi
+package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +17,7 @@ class AddServiceViewModel @Inject constructor(
 ) : ViewModel() {
 
     // Приватный MutableStateFlow для хранения и изменения состояния
-    private val _uiState = MutableStateFlow(AddServiceUiState())
+    private val _uiState = MutableStateFlow(AddServiceState())
 
     // Публичный StateFlow только для чтения из UI
     val uiState = _uiState.asStateFlow()

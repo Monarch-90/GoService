@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step1
+package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui
 
 import android.graphics.Color
 import android.os.Bundle
@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
@@ -93,7 +94,7 @@ private fun DurationPickerDialog(
                     range = 0..23,
                     label = { "$it ч" },
                     dividersColor = MaterialTheme.colorScheme.secondary, // Цвет разделителей
-                    textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
                 )
                 NumberPicker(
                     value = selectedMinuteIndex,
@@ -101,7 +102,7 @@ private fun DurationPickerDialog(
                     range = 0 until minuteDisplayValues.size,
                     label = { minuteDisplayValues[it] + " мин" },
                     dividersColor = MaterialTheme.colorScheme.secondary, // Цвет разделителей
-                    textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
                 )
             }
         },

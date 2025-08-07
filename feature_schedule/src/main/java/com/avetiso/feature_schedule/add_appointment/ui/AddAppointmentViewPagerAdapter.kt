@@ -1,8 +1,8 @@
-package com.avetiso.feature_schedule.add_appointment
+package com.avetiso.feature_schedule.add_appointment.ui
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.avetiso.feature_schedule.add_appointment.steps.step1.Step1SelectServiceFragment
+import com.avetiso.feature_schedule.add_appointment.steps.step1.ui.Step1SelectServiceFragment
 import com.avetiso.feature_schedule.add_appointment.steps.step2.Step2SelectTimeFragment
 import com.avetiso.feature_schedule.add_appointment.steps.step3.Step3SelectClientFragment
 

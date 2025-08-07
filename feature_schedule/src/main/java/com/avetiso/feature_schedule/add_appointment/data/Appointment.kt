@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.data
+package com.avetiso.feature_schedule.add_appointment.data
 
 import java.time.LocalTime
 

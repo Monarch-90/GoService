@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment
+package com.avetiso.feature_schedule.add_appointment.ui
 
 import android.os.Bundle
 import android.view.View

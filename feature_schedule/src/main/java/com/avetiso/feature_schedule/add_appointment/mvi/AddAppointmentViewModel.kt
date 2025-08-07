@@ -2,7 +2,7 @@ package com.avetiso.feature_schedule.add_appointment.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.avetiso.feature_schedule.add_appointment.ADD_APPOINTMENT_PAGE_COUNT
+import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

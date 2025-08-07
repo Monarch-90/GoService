@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule
+package com.avetiso.feature_schedule.calendar.ui
 
 import android.view.View
 import com.avetiso.feature_schedule.databinding.CalendarDayLayoutBinding

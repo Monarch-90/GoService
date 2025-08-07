@@ -16,7 +16,7 @@
 
     <fragment
         android:id="@+id/addAppointmentFragment"
-        android:name="com.avetiso.feature_schedule.add_appointment.AddAppointmentFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.ui.AddAppointmentFragment"
         android:label="fragment_add_appointment"
         tools:layout="@layout/fragment_add_appointment">
 
@@ -33,13 +33,13 @@
 
     <fragment
         android:id="@+id/step1SelectServiceFragment"
-        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.Step1SelectServiceFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.ui.Step1SelectServiceFragment"
         android:label="Step1SelectServiceFragment"
         tools:layout="@layout/fragment_step1_select_service"/>
 
     <fragment
         android:id="@+id/addServiceFragment"
-        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.AddServiceFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui.AddServiceFragment"
         android:label="AddServiceFragment"
         tools:layout="@layout/fragment_add_service">
         <action
@@ -55,7 +55,7 @@
 
     <fragment
         android:id="@+id/selectCategoryFragment"
-        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.category.SelectCategoryFragment"
+        android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.category.SelectCategoryFragment"
         android:label="SelectCategoryFragment"
         tools:layout="@layout/fragment_select_category" />
 

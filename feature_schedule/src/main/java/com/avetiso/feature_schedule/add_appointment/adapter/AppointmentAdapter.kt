@@ -1,11 +1,11 @@
-package com.avetiso.feature_schedule.adapter
+package com.avetiso.feature_schedule.add_appointment.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.avetiso.feature_schedule.data.Appointment
+import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.databinding.ItemAppointmentBinding
 import java.time.format.DateTimeFormatter
 

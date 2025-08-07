@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step1
+package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui
 
 import android.os.Bundle
 import android.view.View
@@ -16,7 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
-import com.avetiso.feature_schedule.add_appointment.steps.step1.mvi.AddServiceViewModel
+import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddServiceBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step1
+package com.avetiso.feature_schedule.add_appointment.steps.step1.ui
 
 import android.os.Bundle
 import android.view.View
@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
-import com.avetiso.feature_schedule.add_appointment.AddAppointmentFragmentDirections
+import com.avetiso.feature_schedule.add_appointment.ui.AddAppointmentFragmentDirections
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.steps.step1.adapter.AvailableServiceAdapter
@@ -92,7 +92,10 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
             getItemName = { service -> service.name },
             onEdit = { service ->
                 // Ваша логика перехода на экран редактирования
-                val direction = AddAppointmentFragmentDirections.actionAddAppointmentFragmentToAddServiceFragment(service)
+                val direction =
+                    AddAppointmentFragmentDirections.actionAddAppointmentFragmentToAddServiceFragment(
+                        service
+                    )
                 // Используем основной NavController родительского фрагмента для навигации
                 requireParentFragment().findNavController().navigate(direction)
             },
@@ -102,8 +105,14 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
             },
             onItemClick = { service ->
                 // Здесь сохраняется ваша логика выбора услуги
-                val isCurrentlySelected = parentViewModel.state.value.selectedServices.contains(service)
-                parentViewModel.handleEvent(AddAppointmentEvent.ServiceSelected(service, !isCurrentlySelected))
+                val isCurrentlySelected =
+                    parentViewModel.state.value.selectedServices.contains(service)
+                parentViewModel.handleEvent(
+                    AddAppointmentEvent.ServiceSelected(
+                        service,
+                        !isCurrentlySelected
+                    )
+                )
             }
         )
         // Передаем actions в адаптер

@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step1.category
+package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

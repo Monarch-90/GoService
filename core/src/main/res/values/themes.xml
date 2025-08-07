@@ -9,8 +9,8 @@
         <item name="android:colorBackground">@color/background_color</item>
         <item name="colorSurface">@color/surface_color</item>
 
-        <item name="colorOnBackground">@color/text_color</item>
-        <item name="colorOnSurface">@color/text_color</item>
+        <item name="colorOnBackground">@color/custom_black_white</item>
+        <item name="colorOnSurface">@color/custom_black_white</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

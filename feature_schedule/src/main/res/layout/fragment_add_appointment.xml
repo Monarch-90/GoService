@@ -16,14 +16,14 @@
         android:id="@+id/step_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Выбор услуг"
         android:layout_marginStart="70dp"
         android:textColor="@color/custom_black_white"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/toolbar"
         app:layout_constraintStart_toStartOf="@+id/toolbar"
-        app:layout_constraintTop_toTopOf="@+id/toolbar" />
+        app:layout_constraintTop_toTopOf="@+id/toolbar"
+        tools:text="Выбор услуг" />
 
     <include
         android:id="@+id/stepper"
@@ -40,19 +40,10 @@
         android:id="@+id/view_pager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/button_next"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/stepper" />
-
-    <View
-        android:id="@+id/bottom_divider_shadow"
-        android:layout_width="0dp"
-        android:layout_height="4dp"
-        android:background="@drawable/bottom_fade_divider"
-        app:layout_constraintBottom_toTopOf="@id/button_next"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_next"

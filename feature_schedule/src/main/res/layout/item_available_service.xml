@@ -29,20 +29,19 @@
             android:id="@+id/text_service_category"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="@color/custom_main"
+            android:textSize="12sp"
             tools:text="Ногтевой сервис" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?android:attr/textColorSecondary"
+            android:textSize="10sp"
             tools:text="от 1500 BYN • 1 ч 30 мин" />
 
     </LinearLayout>
@@ -52,14 +51,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_selected_check"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_check"
             android:visibility="gone"
-            app:tint="?attr/colorPrimary"
+            app:tint="@color/custom_main"
             tools:visibility="visible" />
 
         <include

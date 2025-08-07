@@ -1,13 +1,13 @@
 package com.avetiso.common_ui.actions
 
-import android.view.View
-import androidx.core.view.isVisible
+import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.R
+import com.avetiso.common_ui.databinding.CustomDialogBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 private const val TAG = "TouchDebug"
@@ -99,13 +99,31 @@ class RecyclerViewActions<T>(
     }
 
     private fun showDeleteConfirmationDialog(item: T) {
-        MaterialAlertDialogBuilder(fragment.requireContext())
-            .setTitle(fragment.getString(R.string.delete_dialog_title))
-            .setMessage(fragment.getString(R.string.delete_dialog_message, getItemName(item)))
-            .setNegativeButton(fragment.getString(R.string.action_cancel), null)
-            .setPositiveButton(fragment.getString(R.string.action_delete)) { _, _ ->
-                onDelete(item)
-            }
-            .show()
+        // "Надуваем" кастомный макет
+        val binding = CustomDialogBinding.inflate(LayoutInflater.from(fragment.requireContext()))
+
+        // Текст из string
+        binding.tvMessage.text =
+            fragment.getString(R.string.delete_dialog_message, getItemName(item))
+
+        // Создаем диалог, передавая ему готовый макет
+        val dialog = MaterialAlertDialogBuilder(fragment.requireContext())
+            .setView(binding.root)
+            .create()
+
+        // Назначаем слушателей нажатий на наши кнопки
+        binding.btnNegative.setOnClickListener {
+            dialog.dismiss() // Просто закрываем диалог
+        }
+        binding.btnPositive.setOnClickListener {
+            onDelete(item)   // Выполняем действие
+            dialog.dismiss() // Или закрываем диалог
+        }
+
+        // Показываем диалог
+        dialog.show()
+
+        // Скругление фона
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.corners_window)
     }
 }

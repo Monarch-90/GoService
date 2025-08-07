@@ -119,7 +119,7 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         val activeBg =
             ContextCompat.getDrawable(requireContext(), R.drawable.stepper_indicator_active)
         val inactiveBg =
-            ContextCompat.getDrawable(requireContext(), R.drawable.stepper_indicator_inactive)
+            ContextCompat.getDrawable(requireContext(), com.avetiso.core.R.drawable.stepper_indicator_inactive)
         val activeColor = ContextCompat.getColor(requireContext(), android.R.color.white)
         val inactiveColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
 

@@ -5,33 +5,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 
-// 1. Палитра для ТЁМНОЙ темы
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFBB86FC), // purple_200
-    secondary = Color(0xFF03DAC5), // teal_200
-    surface = Color(0xFF1E1E1E), // цвет фона диалога
-    onSurface = Color(0xFFFFFFFF) // цвет текста на фоне диалога
-)
-
-// 2. Палитра для СВЕТЛОЙ темы
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF6200EE), // purple_500
-    secondary = Color(0xFF03DAC5), // teal_200
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF000000)
-)
-
-// 3. Наш главный композбл темы
 @Composable
 fun MyPickerAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
+    // Палитры теперь определяются здесь, внутри @Composable функции
+
+    // 1. Палитра для ТЁМНОЙ темы из ресурсов
+    val darkColorScheme = darkColorScheme(
+        primary = colorResource(com.avetiso.core.R.color.white), // цвет кнопок, текста и цифр
+        secondary = colorResource(com.avetiso.core.R.color.custom_main), // цвет полос
+        surface = colorResource(com.avetiso.core.R.color.custom_dialog_background), // цвет фона
+    )
+
+    // 2. Палитра для СВЕТЛОЙ темы из ресурсов
+    val lightColorScheme = lightColorScheme(
+        primary = colorResource(com.avetiso.core.R.color.black), // цвет кнопок, текста и цифр
+        secondary = colorResource(com.avetiso.core.R.color.custom_main), // цвет полос
+        surface = colorResource(com.avetiso.core.R.color.custom_dialog_background), // цвет фона
+    )
+
     val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> darkColorScheme
+        else -> lightColorScheme
     }
 
     MaterialTheme(

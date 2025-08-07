@@ -164,11 +164,12 @@
         app:layout_constraintTop_toBottomOf="@id/calendar_view"
         tools:listitem="@layout/item_appointment" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/button_add_appointment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_margin="16dp"
+        app:tint="@color/custom_main"
         android:contentDescription="Add Appointment"
         android:src="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="parent"

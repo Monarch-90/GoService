@@ -29,7 +29,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private var binding: FragmentScheduleBinding? = null
     private var selectedDate: LocalDate? = null
-    private val dateFormatter = DateTimeFormatter.ofPattern("dd")
+    private val today = LocalDate.now()
+    private val dateFormatter = DateTimeFormatter.ofPattern("d")
 
     // Создаем адаптер
     private val appointmentAdapter = AppointmentAdapter()
@@ -61,13 +62,13 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
             // Вся логика теперь находится здесь, в методе bind
             override fun bind(container: DayViewContainer, data: CalendarDay) {
-                // Прямой доступ к View через биндинг
+                // Получаем доступ к View через биндинг
                 val textView = container.binding.dayText
                 val verticalDivider = container.binding.verticalDivider
 
+                // Устанавливаем текст и обработчик клика
                 textView.text = dateFormatter.format(data.date)
 
-                // Установка клика
                 container.binding.root.setOnClickListener {
                     if (data.position == DayPosition.MonthDate && selectedDate != data.date) {
                         val oldDate = selectedDate
@@ -78,31 +79,43 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                     }
                 }
 
-                // Логика отображения
+                // --- ЛОГИКА ВЫДЕЛЕНИЯ ДНЯ ---
+
+                // Сначала сбрасываем все стили к состоянию по умолчанию
+                textView.background = null
+                textView.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        com.avetiso.core.R.color.custom_black_white
+                    )
+                )
+                textView.alpha = 1.0f
+
                 if (data.position == DayPosition.MonthDate) {
                     textView.visibility = View.VISIBLE
-                    if (data.date == selectedDate) {
-                        textView.alpha = 1.0f // Убираем тусклость
-                        textView.setTextColor(requireContext().getColor(android.R.color.white))
-                        // Можете вернуть фон, если он нужен для выделения
-                        // textView.setBackgroundResource(R.drawable.calendar_day_selected_bg)
-                    } else {
-                        textView.alpha = 1.0f // Убираем тусклость для всего текста
-                        textView.background = null
-                        textView.setTextColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.custom_black_white
-                            )
-                        )
+
+                    // Проверяем состояние дня и применяем нужный стиль
+                    when (data.date) {
+                        // 1. Если день ВЫБРАН пользователем (высший приоритет)
+                        selectedDate -> {
+                            textView.setTextColor(requireContext().getColor(android.R.color.white))
+                            textView.setBackgroundResource(com.avetiso.core.R.color.custom_main)
+                        }
+                        // 2. Если это СЕГОДНЯШНИЙ день (и он не выбран)
+                        today -> {
+                            textView.setBackgroundResource(com.avetiso.core.R.color.surface_color)
+                            textView.setTextColor(requireContext().getColor(com.avetiso.core.R.color.black_white_invert))
+                            textView.textSize = 20f
+                        }
                     }
                 } else {
                     textView.visibility = View.INVISIBLE
                 }
 
-                // ИСПРАВЛЕННАЯ ЛОГИКА СКРЫТИЯ ЛИНИИ (БЕЗ lateinit И БЕЗ ОШИБОК)
+                // --- ЛОГИКА СКРЫТИЯ ВЕРТИКАЛЬНОЙ ЛИНИИ ---
                 val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
                 val lastDayOfWeek = firstDayOfWeek.plus(6)
+
                 if (data.date.dayOfWeek == lastDayOfWeek) {
                     verticalDivider.visibility = View.INVISIBLE
                 } else {

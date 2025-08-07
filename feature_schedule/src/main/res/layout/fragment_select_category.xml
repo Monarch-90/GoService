@@ -27,13 +27,14 @@
 
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/fab_add_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="Добавить категорию"
-        app:srcCompat="@drawable/ic_add" />
+        app:srcCompat="@drawable/ic_add"
+        app:tint="@color/custom_main" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

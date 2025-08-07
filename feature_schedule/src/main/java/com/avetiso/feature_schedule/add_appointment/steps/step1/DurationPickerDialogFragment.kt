@@ -1,5 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,13 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -54,6 +56,12 @@ class DurationPickerDialogFragment : DialogFragment() {
             }
         }
     }
+
+    // ✅ ШАГ 1: Делаем фон окна диалога прозрачным
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+    }
 }
 
 @Composable
@@ -63,14 +71,17 @@ private fun DurationPickerDialog(
     onTimeSelected: (hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedHour by remember { mutableStateOf(initialHour) }
-    var selectedMinuteIndex by remember { mutableStateOf(initialMinute / 5) }
+    var selectedHour by remember { mutableIntStateOf(initialHour) }
+    var selectedMinuteIndex by remember { mutableIntStateOf(initialMinute / 5) }
 
     val minuteDisplayValues = (0..55 step 5).map { String.format("%02d", it) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Выберите продолжительность") },
+        containerColor = MaterialTheme.colorScheme.surface, // Цвет фона диалога из темы
+        titleContentColor = MaterialTheme.colorScheme.primary, // Цвет заголовка из темы
+        textContentColor = MaterialTheme.colorScheme.primary, // Цвет текста из темы
         text = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -81,14 +92,16 @@ private fun DurationPickerDialog(
                     onValueChange = { selectedHour = it },
                     range = 0..23,
                     label = { "$it ч" },
-                    textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                    dividersColor = MaterialTheme.colorScheme.secondary, // Цвет разделителей
+                    textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
                 )
                 NumberPicker(
                     value = selectedMinuteIndex,
                     onValueChange = { selectedMinuteIndex = it },
                     range = 0 until minuteDisplayValues.size,
                     label = { minuteDisplayValues[it] + " мин" },
-                    textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                    dividersColor = MaterialTheme.colorScheme.secondary, // Цвет разделителей
+                    textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
                 )
             }
         },

@@ -113,6 +113,9 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
                         !isCurrentlySelected
                     )
                 )
+            },
+            onActionsShown = {
+                parentViewModel.handleEvent(AddAppointmentEvent.ClearSelection)
             }
         )
         // Передаем actions в адаптер

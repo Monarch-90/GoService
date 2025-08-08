@@ -64,7 +64,8 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
                     bundleOf("selected_category_name" to category.name)
                 )
                 findNavController().navigateUp()
-            }
+            },
+            onActionsShown = {}
         )
 
         // Просто присваиваем actions в адаптер.
@@ -137,11 +138,15 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
                 when {
                     name.isBlank() -> {
-                        dialogBinding.inputLayoutCategoryName.error = "Название не может быть пустым"
+                        dialogBinding.inputLayoutCategoryName.error =
+                            "Название не может быть пустым"
                     }
+
                     hasDuplicate -> {
-                        dialogBinding.inputLayoutCategoryName.error = "Такая категория уже существует"
+                        dialogBinding.inputLayoutCategoryName.error =
+                            "Такая категория уже существует"
                     }
+
                     else -> {
                         viewModel.addOrUpdateCategory(name, category?.id)
                         dialog.dismiss()

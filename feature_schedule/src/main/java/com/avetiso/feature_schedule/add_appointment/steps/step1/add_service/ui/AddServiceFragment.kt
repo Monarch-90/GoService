@@ -60,6 +60,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             val hour = bundle.getInt("hour")
             val minute = bundle.getInt("minute")
             viewModel.setDuration(hour, minute)
+            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
         }
 
         binding?.buttonSave?.setOnClickListener {

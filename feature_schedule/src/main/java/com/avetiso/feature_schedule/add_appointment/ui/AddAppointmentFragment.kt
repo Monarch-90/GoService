@@ -49,8 +49,13 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
             handleBackPress()
         }
 
-        // 3. Кнопка "Далее/Готово"
+        // 3. Кнопка "Далее"
         currentBinding.buttonNext.setOnClickListener {
+            viewModel.handleEvent(AddAppointmentEvent.NextButtonClicked)
+        }
+
+        // 4. Кнопка "Готово"
+        currentBinding.buttonDone.setOnClickListener {
             viewModel.handleEvent(AddAppointmentEvent.NextButtonClicked)
         }
     }
@@ -104,12 +109,18 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         currentBinding.viewPager.setCurrentItem(state.currentStep, true)
 
         // Обновляем кнопку
-        currentBinding.buttonNext.isEnabled = state.isNextButtonEnabled
-        if (state.currentStep == ADD_APPOINTMENT_PAGE_COUNT - 1) {
-            currentBinding.buttonNext.text = "Готово"
-        } else {
-            currentBinding.buttonNext.text = "Далее"
-        }
+//        currentBinding.buttonNext.visibility =
+//            if (state.isNextButtonEnabled) View.VISIBLE else View.GONE
+
+        // Новый код для управления видимостью кнопок
+        val isLastStep = (state.currentStep == ADD_APPOINTMENT_PAGE_COUNT - 1)
+
+// Показываем/скрываем кнопку "Далее" (стрелка)
+        currentBinding.buttonNext.visibility =
+            if (!isLastStep && state.isNextButtonEnabled) View.VISIBLE else View.GONE
+// Показываем/скрываем кнопку "Готово"
+        currentBinding.buttonDone.visibility =
+            if (isLastStep && state.isNextButtonEnabled) View.VISIBLE else View.GONE
 
         // Обновляем степпер
         updateStepper(currentBinding.stepper, state.currentStep)
@@ -119,7 +130,10 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         val activeBg =
             ContextCompat.getDrawable(requireContext(), R.drawable.stepper_indicator_active)
         val inactiveBg =
-            ContextCompat.getDrawable(requireContext(), com.avetiso.core.R.drawable.stepper_indicator_inactive)
+            ContextCompat.getDrawable(
+                requireContext(),
+                com.avetiso.core.R.drawable.stepper_indicator_inactive
+            )
         val activeColor = ContextCompat.getColor(requireContext(), android.R.color.white)
         val inactiveColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
 

@@ -7,18 +7,33 @@
     android:orientation="vertical"
     android:paddingHorizontal="16dp">
 
-    <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/edit_text_search"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Поиск услуги" />
+        android:layout_marginTop="16dp">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/surface_color"
+            android:hint="Поиск услуги"
+            android:paddingStart="30dp" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center"
+            android:src="@drawable/ic_search"
+            android:tint="@color/surface_color" />
+    </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_add_service"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="8dp"
         android:text="Добавить услугу" />
 

@@ -1,6 +1,8 @@
 package com.avetiso.feature_schedule.calendar.ui
 
 import android.content.Context
+import android.graphics.Typeface.BOLD
+import android.util.TypedValue
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.avetiso.feature_schedule.calendar.mvi.CalendarEvent
@@ -63,16 +65,15 @@ class CalendarManager(
         val textView = container.binding.dayText
         val selectedDate = viewModel.state.value.selectedDate
 
+        // 1. ПОЛНЫЙ СБРОС СТИЛЕЙ для каждой ячейки перед настройкой
+        // Это решает проблемы с "переезжанием" стилей при прокрутке.
         textView.text = data.date.dayOfMonth.toString()
-        container.binding.root.setOnClickListener {
-            if (data.position == DayPosition.MonthDate) {
-                viewModel.handleEvent(CalendarEvent.DateSelected(data.date))
-            }
-        }
-
-        // Сброс стилей
+        textView.typeface = null // Сбрасываем жирность
+        textView.setTextSize(
+            TypedValue.COMPLEX_UNIT_SP,
+            14f
+        ) // Возвращаем стандартный размер (например, 14sp)
         textView.background = null
-
         textView.setTextColor(
             ContextCompat.getColor(
                 context,
@@ -80,24 +81,37 @@ class CalendarManager(
             )
         )
 
+        container.binding.root.setOnClickListener {
+            if (data.position == DayPosition.MonthDate) {
+                viewModel.handleEvent(CalendarEvent.DateSelected(data.date))
+            }
+        }
+
         if (data.position == DayPosition.MonthDate) {
             textView.visibility = View.VISIBLE
-            when (data.date) {
-                selectedDate -> {
-                    textView.setTextColor(ContextCompat.getColor(context, android.R.color.white))
-                    textView.setBackgroundResource(com.avetiso.core.R.color.custom_main)
-                }
 
-                today -> {
-                    textView.setBackgroundResource(com.avetiso.core.R.color.surface_color)
-                    textView.setTextColor(
-                        ContextCompat.getColor(
-                            context,
-                            com.avetiso.core.R.color.custom_black_white
-                        )
-                    )
-                }
+            // 2. ПРИМЕНЯЕМ СТИЛИ ДЛЯ "СЕГОДНЯ"
+            // Эта проверка выполняется всегда.
+            if (data.date == today) {
+                textView.setBackgroundResource(com.avetiso.core.R.color.surface_color)
+                textView.setTypeface(textView.typeface, BOLD)
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
             }
+
+            // 3. ПОВЕРХ ПРИМЕНЯЕМ СТИЛИ ДЛЯ "ВЫБРАННОГО ДНЯ"
+            // Эта проверка тоже выполняется всегда.
+            if (data.date == selectedDate) {
+                textView.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        com.avetiso.core.R.color.white
+                    )
+                )
+                textView.setBackgroundResource(com.avetiso.core.R.color.custom_main)
+                // Обратите внимание: размер и жирность, установленные выше, сохранятся.
+                // Мы перекрашиваем только фон и цвет текста.
+            }
+
         } else {
             textView.visibility = View.INVISIBLE
         }

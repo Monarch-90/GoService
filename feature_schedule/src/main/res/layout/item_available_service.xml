@@ -7,8 +7,15 @@
     android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
+    android:paddingHorizontal="6dp"
     android:paddingVertical="12dp">
+
+    <View
+        android:id="@+id/image_view_selected_check"
+        android:layout_width="3dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/custom_main" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -43,28 +50,10 @@
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="10sp"
             tools:text="от 1500 BYN • 1 ч 30 мин" />
-
     </LinearLayout>
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_selected_check"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_check"
-            android:visibility="gone"
-            app:tint="@color/custom_main"
-            tools:visibility="visible" />
-
-        <include
-            android:id="@+id/actions_container"
-            layout="@layout/view_action_icons" />
-
-    </FrameLayout>
-
+    <include
+        android:id="@+id/actions_container"
+        layout="@layout/view_action_icons" />
 </LinearLayout>

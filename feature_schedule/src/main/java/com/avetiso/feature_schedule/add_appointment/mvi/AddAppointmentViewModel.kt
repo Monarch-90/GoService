@@ -75,6 +75,15 @@ class AddAppointmentViewModel : ViewModel() {
                     _navigationChannel.send(Unit)
                 }
             }
+
+            is AddAppointmentEvent.ClearSelection -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        selectedServices = emptySet(), // Очищаем список выделенных услуг
+                        isNextButtonEnabled = false      // Выключаем кнопку "Далее"
+                    )
+                }
+            }
         }
     }
 

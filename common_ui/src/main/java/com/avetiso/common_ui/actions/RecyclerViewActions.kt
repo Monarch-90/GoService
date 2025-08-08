@@ -21,6 +21,7 @@ class RecyclerViewActions<T>(
     private val onEdit: (T) -> Unit,
     private val onDelete: (T) -> Unit,
     private val onItemClick: ((T) -> Unit)? = null,
+    private val onActionsShown: () -> Unit,
 ) {
     var activeItemId: Any? = null
         private set
@@ -55,6 +56,9 @@ class RecyclerViewActions<T>(
     }
 
     private fun handleLongPress(position: Int) {
+        // Это сбросит выделение во ViewModel ПЕРЕД тем, как мы покажем иконки.
+        onActionsShown()
+
         val newActiveItem = adapter.currentList.getOrNull(position) ?: return
         val newActiveId = getItemId(newActiveItem)
 

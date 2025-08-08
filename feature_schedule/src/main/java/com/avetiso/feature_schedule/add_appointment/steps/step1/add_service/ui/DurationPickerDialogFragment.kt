@@ -1,5 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,7 +15,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +30,17 @@ import com.chargemap.compose.numberpicker.NumberPicker
 
 class DurationPickerDialogFragment : DialogFragment() {
 
+    // --- ШАГ 1: Фрагмент теперь "владеет" состоянием ---
+    private var selectedHour by mutableIntStateOf(0)
+    private var selectedMinute by mutableIntStateOf(0)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Инициализируем состояние из аргументов при создании фрагмента
+        selectedHour = arguments?.getInt("hour") ?: 0
+        selectedMinute = arguments?.getInt("minute") ?: 0
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,20 +48,14 @@ class DurationPickerDialogFragment : DialogFragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val initialHour = arguments?.getInt("hour") ?: 0
-                val initialMinute = arguments?.getInt("minute") ?: 0
-
                 MyPickerAppTheme {
+                    // --- ШАГ 2: Передаем состояние и лямбды для его обновления в Composable ---
                     DurationPickerDialog(
-                        initialHour = initialHour,
-                        initialMinute = initialMinute,
-                        onTimeSelected = { hour, minute ->
-                            setFragmentResult(
-                                "duration_selection",
-                                bundleOf("hour" to hour, "minute" to minute)
-                            )
-                            dismiss()
-                        },
+                        hour = selectedHour,
+                        minute = selectedMinute,
+                        onHourChange = { selectedHour = it },
+                        onMinuteChange = { selectedMinute = it },
+                        onConfirm = { dismiss() }, // Кнопка "ОК" теперь просто закрывает диалог
                         onDismiss = { dismiss() }
                     )
                 }
@@ -58,58 +63,73 @@ class DurationPickerDialogFragment : DialogFragment() {
         }
     }
 
-    // ✅ ШАГ 1: Делаем фон окна диалога прозрачным
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Делаем фон системного окна прозрачным, чтобы Compose мог рисовать свой фон
         dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        // --- ШАГ 3: Отправляем результат ПРИ ЛЮБОМ ЗАКРЫТИИ ---
+        // Этот метод вызывается всегда, и у нас есть доступ к последнему состоянию.
+        setFragmentResult(
+            "duration_selection",
+            bundleOf("hour" to selectedHour, "minute" to selectedMinute)
+        )
     }
 }
 
+/**
+ * Эта Composable-функция теперь "глупая" (stateless).
+ * Она не хранит состояние, а только отображает его и сообщает об изменениях наверх.
+ */
 @Composable
 private fun DurationPickerDialog(
-    initialHour: Int,
-    initialMinute: Int,
-    onTimeSelected: (hour: Int, minute: Int) -> Unit,
+    hour: Int,
+    minute: Int,
+    onHourChange: (Int) -> Unit,
+    onMinuteChange: (Int) -> Unit,
+    onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedHour by remember { mutableIntStateOf(initialHour) }
-    var selectedMinuteIndex by remember { mutableIntStateOf(initialMinute / 5) }
-
     val minuteDisplayValues = (0..55 step 5).map { String.format("%02d", it) }
+    // Индекс для пикера минут вычисляется на лету
+    val minuteIndex = minute / 5
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Выберите продолжительность") },
-        containerColor = MaterialTheme.colorScheme.surface, // Цвет фона диалога из темы
-        titleContentColor = MaterialTheme.colorScheme.primary, // Цвет заголовка из темы
-        textContentColor = MaterialTheme.colorScheme.primary, // Цвет текста из темы
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.primary,
+        textContentColor = MaterialTheme.colorScheme.primary,
         text = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 16.dp)
             ) {
                 NumberPicker(
-                    value = selectedHour,
-                    onValueChange = { selectedHour = it },
+                    value = hour,
+                    onValueChange = onHourChange, // Сообщаем наверх об изменении часа
                     range = 0..23,
                     label = { "$it ч" },
-                    dividersColor = MaterialTheme.colorScheme.secondary, // Цвет разделителей
-                    textStyle = TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
+                    dividersColor = MaterialTheme.colorScheme.secondary,
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
                 )
                 NumberPicker(
-                    value = selectedMinuteIndex,
-                    onValueChange = { selectedMinuteIndex = it },
+                    value = minuteIndex,
+                    onValueChange = { newIndex ->
+                        onMinuteChange(newIndex * 5) // Сообщаем наверх об изменении минут
+                    },
                     range = 0 until minuteDisplayValues.size,
                     label = { minuteDisplayValues[it] + " мин" },
-                    dividersColor = MaterialTheme.colorScheme.secondary, // Цвет разделителей
-                    textStyle = TextStyle(color = MaterialTheme.colorScheme.primary) // Цвет текста
+                    dividersColor = MaterialTheme.colorScheme.secondary,
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onTimeSelected(selectedHour, selectedMinuteIndex * 5)
-            }) {
+            TextButton(onClick = onConfirm) { // Просто вызываем onConfirm
                 Text("ОК")
             }
         },

@@ -10,7 +10,7 @@
     android:orientation="horizontal"
     android:padding="16dp">
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,16 +26,16 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_name"
+            style="@style/textSize_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textSize="13sp"
             android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
             tools:text="Маникюр с покрытием" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_client_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

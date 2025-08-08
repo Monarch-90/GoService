@@ -13,8 +13,21 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="?attr/android:colorBackground"
             app:navigationIcon="@drawable/ic_close"
-            app:title="Новая услуга" />
+            app:title="Новая услуга">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="22dp"
+                android:src="@drawable/ic_check"
+                android:text="Сохранить"
+                app:tint="@color/custom_black_white" />
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -39,22 +52,23 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_name"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Категория" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_category"
                 style="@style/SelectableField"
                 android:text="Выбрать категорию" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -106,16 +120,16 @@
 
             </LinearLayout>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Продолжительность" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_duration"
                 style="@style/SelectableField"
-                android:text="Выбрать время" />
+                tools:text="0 ч 00 мин" />
 
         </LinearLayout>
 

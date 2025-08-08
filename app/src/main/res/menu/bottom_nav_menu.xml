@@ -1,14 +1,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/schedule_nav_graph"
-        android:icon="@drawable/ic_schedule" android:title="Расписание" />
+        android:icon="@drawable/ic_schedule"
+        android:title="Расписание" />
     <item
         android:id="@+id/clients_nav_graph"
-        android:icon="@drawable/ic_clients" android:title="Клиенты" />
+        android:icon="@drawable/ic_clients"
+        android:title="Клиенты" />
     <item
         android:id="@+id/supplies_nav_graph"
-        android:icon="@drawable/ic_supplies" android:title="Расходники" />
+        android:icon="@drawable/ic_supplies"
+        android:title="Расходники" />
     <item
         android:id="@+id/windows_nav_graph"
-        android:icon="@drawable/ic_windows" android:title="Окошки" />
+        android:icon="@drawable/ic_windows"
+        android:title="Окошки" />
 </menu>

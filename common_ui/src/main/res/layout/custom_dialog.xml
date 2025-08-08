@@ -1,0 +1,63 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Удаление\n"
+        android:textColor="@color/custom_black_white"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/custom_black_white"
+        android:textSize="15sp"
+        tools:text='"Ресницы"' />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_negative"
+            android:layout_width="150dp"
+            android:layout_height="42dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/corners_btn"
+            android:backgroundTint="@color/surface_color"
+            android:gravity="center"
+            android:text="@string/action_cancel"
+            android:textAllCaps="false"
+            android:textColor="@color/custom_black_white"
+            android:textSize="16sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_positive"
+            android:layout_width="150dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/corners_btn"
+            android:backgroundTint="@color/surface_color"
+            android:gravity="center"
+            android:text="@string/action_delete"
+            android:textAllCaps="false"
+            android:textColor="@color/red"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

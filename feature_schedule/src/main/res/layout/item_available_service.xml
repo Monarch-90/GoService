@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="8dp">
+    android:paddingHorizontal="6dp"
+    android:paddingVertical="12dp">
+
+    <View
+        android:id="@+id/image_view_selected_check"
+        android:layout_width="3dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/custom_main" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -15,26 +23,37 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_name"
+            style="@style/textSize_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBodyLarge"
-            tools:text="Маникюр с покрытием"
-            android:textSize="13sp"/>
+            android:textColor="?android:attr/textColorPrimary"
+            tools:text="Маникюр с покрытием" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_service_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/custom_main"
+            android:textSize="12sp"
+            tools:text="Ногтевой сервис" />
+
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            tools:text="1500 BYN • 1 ч 30 мин" />
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="10sp"
+            tools:text="от 1500 BYN • 1 ч 30 мин" />
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/checkbox_select_service"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp" />
 
+    <include
+        android:id="@+id/actions_container"
+        layout="@layout/view_action_icons" />
 </LinearLayout>

@@ -16,16 +16,16 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_name"
+            style="@style/textSize_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textSize="13sp"
             android:textStyle="bold"
             tools:text="Маникюр с покрытием" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_service_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
             tools:text="1500 BYN • 1 ч 30 мин" />
     </LinearLayout>
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/button_remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

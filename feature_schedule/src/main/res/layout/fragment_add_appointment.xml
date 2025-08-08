@@ -12,6 +12,19 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow_back" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/step_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:textColor="@color/custom_black_white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/toolbar"
+        app:layout_constraintStart_toStartOf="@+id/toolbar"
+        app:layout_constraintTop_toTopOf="@+id/toolbar"
+        tools:text="Выбор услуг" />
+
     <include
         android:id="@+id/stepper"
         layout="@layout/view_stepper"
@@ -27,17 +40,28 @@
         android:id="@+id/view_pager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/button_next"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/stepper" />
 
-    <com.google.android.material.button.MaterialButton
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/button_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Далее"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_margin="14dp"
+        app:tint="@color/custom_main"
+        android:src="@drawable/ic_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_done"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        app:tint="@color/custom_main"
+        android:layout_margin="14dp"
+        android:src="@drawable/ic_check"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

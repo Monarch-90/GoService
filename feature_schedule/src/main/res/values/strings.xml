@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">feature_schedule</string>
+    <string name="add_appointment_step_1_title">Выбор услуг</string>
+    <string name="add_appointment_step_2_title">Выбор времени</string>
+    <string name="add_appointment_step_3_title">Выбор клиента</string>
 </resources>

@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp">
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_text_search"
+            android:id="@+id/et_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/surface_color"
@@ -29,16 +29,17 @@
     </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_add_service"
+        android:id="@+id/btn_add_service"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
+        android:baselineAligned="false"
         android:text="Добавить услугу" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_selected_services"
+        android:id="@+id/rv_selected_services"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"

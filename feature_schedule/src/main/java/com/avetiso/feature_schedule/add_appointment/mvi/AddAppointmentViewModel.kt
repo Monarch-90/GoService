@@ -24,12 +24,11 @@ class AddAppointmentViewModel : ViewModel() {
             is AddAppointmentEvent.NextButtonClicked -> {
                 val currentStep = _state.value.currentStep
                 if (currentStep < ADD_APPOINTMENT_PAGE_COUNT - 1) {
+                    val nextStep = currentStep + 1
                     _state.update {
                         it.copy(
-                            currentStep = currentStep + 1,
-                            // Кнопка сразу будет неактивна,
-                            // но это состояние будет пересчитано при возврате назад
-                            isNextButtonEnabled = false
+                            currentStep = nextStep,
+                            isNextButtonEnabled = isStepComplete(nextStep, it) // Проверяем сразу
                         )
                     }
                 } else {
@@ -70,6 +69,38 @@ class AddAppointmentViewModel : ViewModel() {
                 }
             }
 
+            is AddAppointmentEvent.TimeSlotClicked -> {
+                _state.update { currentState ->
+                    val newSelection = currentState.selectedTimeSlots.toMutableSet()
+                    // Если слот уже есть в наборе, удаляем (снятие выделения).
+                    // Иначе - добавляем (выделение).
+                    if (newSelection.contains(event.timeSlot)) {
+                        newSelection.remove(event.timeSlot)
+                    } else {
+                        newSelection.add(event.timeSlot)
+                    }
+                    val newState = currentState.copy(selectedTimeSlots = newSelection)
+                    newState.copy(
+                        isNextButtonEnabled = isStepComplete(
+                            newState.currentStep,
+                            newState
+                        )
+                    )
+                }
+            }
+
+            is AddAppointmentEvent.ClearTimeSlotSelection -> {
+                _state.update { currentState ->
+                    val newState = currentState.copy(selectedTimeSlots = emptySet())
+                    newState.copy(
+                        isNextButtonEnabled = isStepComplete(
+                            newState.currentStep,
+                            newState
+                        )
+                    )
+                }
+            }
+
             is AddAppointmentEvent.NavigateToAddService -> {
                 viewModelScope.launch {
                     _navigationChannel.send(Unit)
@@ -94,7 +125,7 @@ class AddAppointmentViewModel : ViewModel() {
     private fun isStepComplete(step: Int, state: AddAppointmentState): Boolean {
         return when (step) {
             0 -> state.selectedServices.isNotEmpty()
-            1 -> false // TODO: Добавить логику для шага 2 (выбрано ли время)
+            1 -> state.selectedTimeSlots.isNotEmpty()
             2 -> false // TODO: Добавить логику для шага 3 (выбран ли клиент)
             else -> false
         }

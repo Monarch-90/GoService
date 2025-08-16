@@ -6,14 +6,14 @@
     android:paddingTop="24dp">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/input_layout_category_name"
+        android:id="@+id/il_category_name"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Название категории">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/input_edit_text_category_name"
+            android:id="@+id/iet_category_name"
             android:layout_width="match_parent"
             android:inputType="textCapSentences"
             android:layout_height="wrap_content" />

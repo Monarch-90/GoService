@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.avetiso.common_ui.compose_picker.ComposePickerDialogFragment
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceViewModel
@@ -57,13 +58,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             "duration_selection",
             this // `this` - это ссылка на сам AddServiceFragment
         ) { _, bundle ->
-            val hour = bundle.getInt("hour")
-            val minute = bundle.getInt("minute")
+            val hour = bundle.getInt(ComposePickerDialogFragment.RESULT_HOUR)
+            val minute = bundle.getInt(ComposePickerDialogFragment.RESULT_MINUTE)
             viewModel.setDuration(hour, minute)
             binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
         }
 
-        binding?.buttonSave?.setOnClickListener {
+        binding?.btnSave?.setOnClickListener {
             saveService()
         }
 
@@ -82,9 +83,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
                     // Мы управляем состоянием группы кнопок
                     if (state.isPriceFrom) {
-                        binding?.toggleButtonPriceFrom?.check(R.id.button_price_from)
+                        binding?.toggleBtnPriceFrom?.check(R.id.btn_price_from)
                     } else {
-                        binding?.toggleButtonPriceFrom?.uncheck(R.id.button_price_from)
+                        binding?.toggleBtnPriceFrom?.uncheck(R.id.btn_price_from)
                     }
                 }
             }
@@ -93,12 +94,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun setupInputFields() {
         // Для текстовых полей используем TextWatcher
-        binding?.inputEditTextName?.addTextChangedListener {
+        binding?.ietName?.addTextChangedListener {
             // Как только пользователь начинает печатать, убираем ошибку
-            binding?.inputLayoutName?.error = null
+            binding?.ilName?.error = null
         }
-        binding?.inputEditTextPrice?.addTextChangedListener {
-            binding?.inputLayoutPrice?.error = null
+        binding?.ietPrice?.addTextChangedListener {
+            binding?.ilPrice?.error = null
         }
     }
 
@@ -114,9 +115,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun populateFieldsForEdit(service: ServiceEntity) {
         binding?.toolbar?.title = "Редактировать услугу"
-        binding?.inputEditTextName?.setText(service.name)
+        binding?.ietName?.setText(service.name)
         binding?.textCategory?.text = service.categoryName
-        binding?.inputEditTextPrice?.setText(service.price.toString())
+        binding?.ietPrice?.setText(service.price.toString())
 
         // Обновляем состояние в ViewModel, чтобы все работало корректно
         val hours = service.durationMinutes / 60
@@ -127,9 +128,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun saveService() {
-        val name = binding?.inputEditTextName?.text?.toString()
+        val name = binding?.ietName?.text?.toString()
         val category = binding?.textCategory?.text?.toString()
-        val priceStr = binding?.inputEditTextPrice?.text?.toString()
+        val priceStr = binding?.ietPrice?.text?.toString()
         val duration = binding?.textDuration?.text?.toString()
 
         // Получаем актуальное состояние прямо из ViewModel
@@ -137,7 +138,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
         when {
             name.isNullOrBlank() -> {
-                binding?.inputLayoutName?.error = "Название не может быть пустым"
+                binding?.ilName?.error = "Название не может быть пустым"
             }
 
             category.isNullOrBlank() || category == "Выбрать категорию" -> {
@@ -152,7 +153,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
 
             priceStr.isNullOrBlank() -> {
-                binding?.inputLayoutPrice?.error = "Укажите цену"
+                binding?.ilPrice?.error = "Укажите цену"
             }
 
             duration.isNullOrBlank() || duration == "0 ч 00 мин" -> {
@@ -200,13 +201,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
-        val dialog = DurationPickerDialogFragment().apply {
-            arguments = Bundle().apply {
-                putInt("hour", hour)
-                putInt("minute", minute)
-            }
-        }
-        dialog.show(childFragmentManager, "DurationPickerDialogFragment")
+        val dialog = ComposePickerDialogFragment.newInstance(
+            title = "Выберите продолжительность",
+            resultKey = "duration_selection",
+            initialHour = hour,
+            initialMinute = minute
+        )
+        dialog.show(childFragmentManager, "HourMinutePickerDialogFragment")
     }
 
     private fun setupCategoryPicker() {
@@ -219,7 +220,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun setupPriceToggle() {
-        binding?.toggleButtonPriceFrom?.addOnButtonCheckedListener { _, _, isChecked ->
+        binding?.toggleBtnPriceFrom?.addOnButtonCheckedListener { _, _, isChecked ->
             // Сообщаем ViewModel об изменении
             viewModel.setPriceFrom(isChecked)
         }

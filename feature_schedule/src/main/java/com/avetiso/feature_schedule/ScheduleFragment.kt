@@ -53,7 +53,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         binding = currentBinding
 
         // Настройка RecyclerView остается здесь
-        currentBinding.recyclerViewAppointments.adapter = appointmentAdapter
+        currentBinding.rvAppointments.adapter = appointmentAdapter
 
         // Инициализируем и настраиваем календарь
         calendarManager = CalendarManager(
@@ -71,17 +71,17 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private fun setupClickListeners() {
         val currentBinding = binding ?: return
-        currentBinding.buttonNextMonth.setOnClickListener {
+        currentBinding.btnNextMonth.setOnClickListener {
             currentBinding.calendarView.findFirstVisibleMonth()?.let {
                 currentBinding.calendarView.smoothScrollToMonth(it.yearMonth.nextMonth)
             }
         }
-        currentBinding.buttonPreviousMonth.setOnClickListener {
+        currentBinding.btnPreviousMonth.setOnClickListener {
             currentBinding.calendarView.findFirstVisibleMonth()?.let {
                 currentBinding.calendarView.smoothScrollToMonth(it.yearMonth.previousMonth)
             }
         }
-        currentBinding.buttonAddAppointment.setOnClickListener {
+        currentBinding.btnAddAppointment.setOnClickListener {
             findNavController().navigate(R.id.action_scheduleFragment_to_addAppointmentFragment)
         }
     }

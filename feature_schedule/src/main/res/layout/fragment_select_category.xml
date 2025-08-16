@@ -18,7 +18,7 @@
             app:title="Выбор категории" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_categories"
+            android:id="@+id/rv_categories"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"

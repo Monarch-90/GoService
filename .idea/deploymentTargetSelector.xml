@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-08-07T14:44:08.743499681Z">
+        <DropdownSelection timestamp="2025-08-15T14:17:31.265330515Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=11246575" />
@@ -26,9 +26,6 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="feature_windows">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="common_ui">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

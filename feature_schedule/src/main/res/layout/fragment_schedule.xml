@@ -20,7 +20,7 @@
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/button_previous_month"
+                android:id="@+id/btn_previous_month"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -39,7 +39,7 @@
                 tools:text="Июль 2025" />
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/button_next_month"
+                android:id="@+id/btn_next_month"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -152,7 +152,7 @@
         app:layout_constraintTop_toBottomOf="@id/layout_days_of_week" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_appointments"
+        android:id="@+id/rv_appointments"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
@@ -165,7 +165,7 @@
         tools:listitem="@layout/item_appointment" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/button_add_appointment"
+        android:id="@+id/btn_add_appointment"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_margin="16dp"

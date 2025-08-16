@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step3
+package com.avetiso.feature_schedule.add_appointment.steps.step3.ui
 
 import androidx.fragment.app.Fragment
 import com.avetiso.feature_schedule.R

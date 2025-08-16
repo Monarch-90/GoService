@@ -56,8 +56,8 @@ class AvailableServiceAdapter :
 
         // Реализуем обязательные поля из ActionsViewHolder
         override val actionsContainer: View = includedBinding.root
-        override val editButton: View = includedBinding.buttonEdit
-        override val deleteButton: View = includedBinding.buttonDelete
+        override val editButton: View = includedBinding.btnEdit
+        override val deleteButton: View = includedBinding.btnDelete
 
         // Метод bind не вешает слушатели, а только отображает данные
         fun bind(service: ServiceEntity, isSelected: Boolean) {
@@ -88,15 +88,16 @@ class AvailableServiceAdapter :
             binding.textServiceDetails.text =
                 "$priceString • ${service.durationMinutes} мин"
 
-            binding.imageViewSelectedCheck.isVisible = isSelected
+            binding.ivSelectedCheck.isVisible = isSelected
         }
 
         // Реализуем метод, который будет скрывать/показывать чекбокс или иконки
         override fun toggleActions(show: Boolean) {
             actionsContainer.isVisible = show
+            binding.llItemContainer.alpha = if (show) 0.2f else 1.0f
 
             if (show) {
-                binding.imageViewSelectedCheck.visibility = View.GONE
+                binding.ivSelectedCheck.visibility = View.GONE
             }
         }
     }

@@ -50,12 +50,12 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         }
 
         // 3. Кнопка "Далее"
-        currentBinding.buttonNext.setOnClickListener {
+        currentBinding.btnNext.setOnClickListener {
             viewModel.handleEvent(AddAppointmentEvent.NextButtonClicked)
         }
 
         // 4. Кнопка "Готово"
-        currentBinding.buttonDone.setOnClickListener {
+        currentBinding.btnDone.setOnClickListener {
             viewModel.handleEvent(AddAppointmentEvent.NextButtonClicked)
         }
     }
@@ -116,10 +116,10 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         val isLastStep = (state.currentStep == ADD_APPOINTMENT_PAGE_COUNT - 1)
 
 // Показываем/скрываем кнопку "Далее" (стрелка)
-        currentBinding.buttonNext.visibility =
+        currentBinding.btnNext.visibility =
             if (!isLastStep && state.isNextButtonEnabled) View.VISIBLE else View.GONE
 // Показываем/скрываем кнопку "Готово"
-        currentBinding.buttonDone.visibility =
+        currentBinding.btnDone.visibility =
             if (isLastStep && state.isNextButtonEnabled) View.VISIBLE else View.GONE
 
         // Обновляем степпер

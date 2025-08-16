@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.avetiso.core.data.AppDatabase
 import com.avetiso.core.data.dao.CategoryDao
 import com.avetiso.core.data.dao.ServiceDao
+import com.avetiso.core.data.dao.TimeSlotDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,5 +37,11 @@ object DatabaseModule {
     @Singleton
     fun provideCategoryDao(appDatabase: AppDatabase): CategoryDao {
         return appDatabase.categoryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTimeSlotDao(appDatabase: AppDatabase): TimeSlotDao {
+        return appDatabase.timeSlotDao()
     }
 }

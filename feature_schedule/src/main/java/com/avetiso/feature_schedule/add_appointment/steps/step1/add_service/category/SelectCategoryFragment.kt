@@ -43,12 +43,12 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         val currentBinding = binding ?: return
         val categoryAdapter = CategoryAdapter()
 
-        currentBinding.recyclerViewCategories.adapter = categoryAdapter
-        currentBinding.recyclerViewCategories.layoutManager = LinearLayoutManager(requireContext())
+        currentBinding.rvCategories.adapter = categoryAdapter
+        currentBinding.rvCategories.layoutManager = LinearLayoutManager(requireContext())
 
         actions = RecyclerViewActions(
             fragment = this,
-            recyclerView = currentBinding.recyclerViewCategories,
+            recyclerView = currentBinding.rvCategories,
             adapter = categoryAdapter,
             getItemId = { category -> category.id },
             getItemName = { category -> category.name },
@@ -101,7 +101,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.categories.collectLatest { categories ->
-                (binding?.recyclerViewCategories?.adapter as? CategoryAdapter)?.submitList(
+                (binding?.rvCategories?.adapter as? CategoryAdapter)?.submitList(
                     categories
                 )
             }
@@ -113,7 +113,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         val dialogBinding = DialogAddCategoryBinding.inflate(layoutInflater)
 
         if (isEditMode) {
-            dialogBinding.inputEditTextCategoryName.setText(category?.name)
+            dialogBinding.ietCategoryName.setText(category?.name)
         }
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -126,8 +126,8 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         dialog.setOnShowListener {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             positiveButton.setOnClickListener {
-                val name = dialogBinding.inputEditTextCategoryName.text.toString().trim()
-                dialogBinding.inputLayoutCategoryName.error = null
+                val name = dialogBinding.ietCategoryName.text.toString().trim()
+                dialogBinding.ilCategoryName.error = null
 
                 val currentCategories = viewModel.categories.value
                 val hasDuplicate = currentCategories.any {
@@ -138,12 +138,12 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
                 when {
                     name.isBlank() -> {
-                        dialogBinding.inputLayoutCategoryName.error =
+                        dialogBinding.ilCategoryName.error =
                             "Название не может быть пустым"
                     }
 
                     hasDuplicate -> {
-                        dialogBinding.inputLayoutCategoryName.error =
+                        dialogBinding.ilCategoryName.error =
                             "Такая категория уже существует"
                     }
 

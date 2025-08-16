@@ -18,7 +18,7 @@
             app:title="Новая услуга">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/button_save"
+                android:id="@+id/btn_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
@@ -43,14 +43,14 @@
             android:padding="16dp">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_name"
+                android:id="@+id/il_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Наименование услуги">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_name"
+                    android:id="@+id/iet_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences" />
@@ -81,14 +81,14 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/toggle_button_price_from"
+                    android:id="@+id/toggle_btn_price_from"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:selectionRequired="false"
                     app:singleSelection="true">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_price_from"
+                        android:id="@+id/btn_price_from"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/input_layout_price"
+                    android:id="@+id/il_price"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
                     android:hint="Сумма">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/input_edit_text_price"
+                        android:id="@+id/iet_price"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal" />

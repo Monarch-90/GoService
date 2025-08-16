@@ -33,8 +33,8 @@ class CategoryAdapter :
         private val binding: ItemCategoryBinding,
     ) : ActionsViewHolder(binding) {
         override val actionsContainer: View = binding.actionsContainer.root
-        override val editButton: View = binding.actionsContainer.buttonEdit
-        override val deleteButton: View = binding.actionsContainer.buttonDelete
+        override val editButton: View = binding.actionsContainer.btnEdit
+        override val deleteButton: View = binding.actionsContainer.btnDelete
 
         fun bind(category: CategoryEntity) {
             binding.textCategoryName.text = category.name

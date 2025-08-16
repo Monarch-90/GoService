@@ -43,7 +43,7 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
         setupRecyclerView()
         setupSearch()
 
-        binding?.buttonAddService?.setOnClickListener {
+        binding?.btnAddService?.setOnClickListener {
             parentViewModel.handleEvent(AddAppointmentEvent.NavigateToAddService)
         }
 
@@ -52,7 +52,7 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
             ?.observe(viewLifecycleOwner) { updated ->
                 if (updated) {
                     // Принудительно обновляем поиск, чтобы перезапросить данные
-                    viewModel.handleEvent(Step1Event.SearchQueryChanged(binding?.editTextSearch?.text.toString()))
+                    viewModel.handleEvent(Step1Event.SearchQueryChanged(binding?.etSearch?.text.toString()))
                     // Сбрасываем флаг, чтобы не было повторных обновлений
                     savedStateHandle.remove<Boolean>("service_updated")
                 }
@@ -81,12 +81,12 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
     private fun setupRecyclerView() {
         // Создаем адаптер без лямбды
         serviceAdapter = AvailableServiceAdapter()
-        binding?.recyclerViewSelectedServices?.adapter = serviceAdapter
+        binding?.rvSelectedServices?.adapter = serviceAdapter
 
         // Инициализируем наш механизм действий
         actions = RecyclerViewActions(
             fragment = this,
-            recyclerView = binding!!.recyclerViewSelectedServices,
+            recyclerView = binding!!.rvSelectedServices,
             adapter = serviceAdapter!!,
             getItemId = { service -> service.id },
             getItemName = { service -> service.name },
@@ -123,7 +123,7 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
     }
 
     private fun setupSearch() {
-        binding?.editTextSearch?.addTextChangedListener { editable ->
+        binding?.etSearch?.addTextChangedListener { editable ->
             val query = editable.toString()
             viewModel.handleEvent(Step1Event.SearchQueryChanged(query))
         }

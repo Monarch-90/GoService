@@ -8,7 +8,7 @@
     android:orientation="horizontal">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/button_edit"
+        android:id="@+id/btn_edit"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -19,7 +19,7 @@
         tools:tint="@color/black" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/button_delete"
+        android:id="@+id/btn_delete"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"

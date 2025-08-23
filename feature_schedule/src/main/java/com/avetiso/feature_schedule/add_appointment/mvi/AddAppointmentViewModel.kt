@@ -101,6 +101,25 @@ class AddAppointmentViewModel : ViewModel() {
                 }
             }
 
+            is AddAppointmentEvent.ClientSelected -> {
+                _state.update {
+                    it.copy(
+                        // Логика переключения: если кликнули по уже выбранному, снимаем выбор
+                        selectedClient = if (it.selectedClient == event.client) null else event.client,
+                        isNextButtonEnabled = it.selectedClient != event.client // Кнопка активна, если мы выбрали нового клиента
+                    )
+                }
+            }
+
+            is AddAppointmentEvent.ClearClientSelection -> { // <-- ДОБАВЛЕНО
+                _state.update {
+                    it.copy(
+                        selectedClient = null,
+                        isNextButtonEnabled = false
+                    )
+                }
+            }
+
             is AddAppointmentEvent.NavigateToAddService -> {
                 viewModelScope.launch {
                     _navigationChannel.send(Unit)
@@ -126,7 +145,7 @@ class AddAppointmentViewModel : ViewModel() {
         return when (step) {
             0 -> state.selectedServices.isNotEmpty()
             1 -> state.selectedTimeSlots.isNotEmpty()
-            2 -> false // TODO: Добавить логику для шага 3 (выбран ли клиент)
+            2 -> state.selectedClient != null
             else -> false
         }
     }

@@ -17,39 +17,39 @@
         android:background="@color/custom_main" />
 
     <LinearLayout
-        android:id="@+id/ll_item_container"
+        android:id="@+id/ll_client_item_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_service_name"
+            android:id="@+id/tv_client_name"
             style="@style/textSize_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBodyLarge"
             android:textColor="?android:attr/textColorPrimary"
-            tools:text="Маникюр с покрытием" />
+            tools:text="Иванова Анастасия" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_service_category"
+            android:id="@+id/tv_client_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textColor="@color/custom_main"
             android:textSize="12sp"
-            tools:text="Ногтевой сервис" />
+            tools:text="+375 (29) 123-45-67" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_service_details"
+            android:id="@+id/tv_instagram"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="10sp"
-            tools:text="от 1500 BYN • 1 ч 30 мин" />
+            tools:text="\@instagram" />
     </LinearLayout>
 
     <include

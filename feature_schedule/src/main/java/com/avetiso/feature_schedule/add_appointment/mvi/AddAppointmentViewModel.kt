@@ -101,6 +101,15 @@ class AddAppointmentViewModel : ViewModel() {
                 }
             }
 
+            is AddAppointmentEvent.ClientSelected -> {
+                _state.update {
+                    it.copy(
+                        selectedClient = event.client,
+                        isNextButtonEnabled = true
+                    )
+                }
+            }
+
             is AddAppointmentEvent.NavigateToAddService -> {
                 viewModelScope.launch {
                     _navigationChannel.send(Unit)
@@ -126,7 +135,7 @@ class AddAppointmentViewModel : ViewModel() {
         return when (step) {
             0 -> state.selectedServices.isNotEmpty()
             1 -> state.selectedTimeSlots.isNotEmpty()
-            2 -> false // TODO: Добавить логику для шага 3 (выбран ли клиент)
+            2 -> state.selectedClient != null
             else -> false
         }
     }

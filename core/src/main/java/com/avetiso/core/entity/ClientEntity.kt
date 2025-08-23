@@ -12,6 +12,7 @@ data class ClientEntity(
     val id: Long = 0,
     val name: String,
     val phoneNumber: String,
+    val instagram: String,
     // Пока что реализуем простыми строками. В будущем можно усложнить.
     val countryCode: String = "+7",
     val socialLink: String = "",

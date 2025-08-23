@@ -104,8 +104,18 @@ class AddAppointmentViewModel : ViewModel() {
             is AddAppointmentEvent.ClientSelected -> {
                 _state.update {
                     it.copy(
-                        selectedClient = event.client,
-                        isNextButtonEnabled = true
+                        // Логика переключения: если кликнули по уже выбранному, снимаем выбор
+                        selectedClient = if (it.selectedClient == event.client) null else event.client,
+                        isNextButtonEnabled = it.selectedClient != event.client // Кнопка активна, если мы выбрали нового клиента
+                    )
+                }
+            }
+
+            is AddAppointmentEvent.ClearClientSelection -> { // <-- ДОБАВЛЕНО
+                _state.update {
+                    it.copy(
+                        selectedClient = null,
+                        isNextButtonEnabled = false
                     )
                 }
             }

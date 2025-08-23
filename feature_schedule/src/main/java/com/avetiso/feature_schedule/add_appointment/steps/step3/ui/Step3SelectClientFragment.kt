@@ -9,6 +9,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_clients.adapter.ClientAdapter
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
@@ -23,6 +25,7 @@ class Step3SelectClientFragment : Fragment(R.layout.fragment_step3_select_client
 
     private var binding: FragmentStep3SelectClientBinding? = null
     private var clientAdapter: ClientAdapter? = null
+    private var actions: RecyclerViewActions<ClientEntity>? = null
 
     private val viewModel: Step3SelectClientViewModel by viewModels()
     private val parentViewModel: AddAppointmentViewModel by viewModels({ requireParentFragment() })
@@ -37,40 +40,48 @@ class Step3SelectClientFragment : Fragment(R.layout.fragment_step3_select_client
     }
 
     private fun setupRecyclerView() {
-        clientAdapter = ClientAdapter().apply {
-            // В `common_ui` ItemActionTouchListener вызывает onItemClick.
-            // Здесь мы "перехватываем" этот клик для выбора клиента.
-            val listener = com.avetiso.common_ui.actions.ItemActionTouchListener(
-                context = requireContext(),
-                recyclerView = binding!!.recyclerViewClients,
-                onLongPress = { /* No-op on this screen */ },
-                onItemClick = { position ->
-                    val client = currentList.getOrNull(position) ?: return@ItemActionTouchListener
-                    parentViewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
-                },
-                onEmptySpaceClick = { /* No-op */ }
-            )
-            binding?.recyclerViewClients?.addOnItemTouchListener(listener)
-        }
-        binding?.recyclerViewClients?.adapter = clientAdapter
+        clientAdapter = ClientAdapter()
+        binding?.rvClients?.adapter = clientAdapter
+
+        actions = RecyclerViewActions(
+            fragment = this,
+            recyclerView = binding!!.rvClients,
+            adapter = clientAdapter!!,
+            getItemId = { client -> client.id },
+            getItemName = { client -> client.name },
+            onEdit = { client ->
+                // Навигация на экран редактирования
+                val direction = R.id.action_addAppointmentFragment_to_addEditClientFragment
+                val args = Bundle().apply { putParcelable("clientToEdit", client) }
+                findNavController().navigate(direction, args)
+            },
+            onDelete = { client ->
+                viewModel.deleteClient(client)
+            },
+            onItemClick = { client ->
+                parentViewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
+            },
+            onActionsShown = {
+                parentViewModel.handleEvent(AddAppointmentEvent.ClearClientSelection)
+            }
+        )
+        // Передаем actions в адаптер
+        clientAdapter?.actions = actions
     }
 
-
     private fun setupListeners() {
-        binding?.editTextSearch?.addTextChangedListener {
+        binding?.etSearch?.addTextChangedListener {
             viewModel.onSearchQueryChanged(it.toString())
         }
-        binding?.fabAddClient?.setOnClickListener {
-            // Навигация к общему экрану добавления клиента
+        binding?.btnAddClient?.setOnClickListener {
             findNavController().navigate(R.id.action_addAppointmentFragment_to_addEditClientFragment)
         }
     }
 
     private fun observeState() {
-        val navController = findNavController()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Подписка на список клиентов
+                // Подписка на список клиентов из локальной VM
                 launch {
                     viewModel.clients.collect { clients ->
                         clientAdapter?.submitList(clients)
@@ -79,17 +90,16 @@ class Step3SelectClientFragment : Fragment(R.layout.fragment_step3_select_client
                 // Подписка на родительский state для подсветки выбранного
                 launch {
                     parentViewModel.state.collect { parentState ->
-                        clientAdapter?.setSelectedClientId(parentState.selectedClient?.id)
+                        clientAdapter?.updateSelection(parentState.selectedClient)
                     }
                 }
-                // Слушаем результат с экрана добавления/редактирования клиента
+                // Слушаем результат с экрана добавления/редактирования
                 launch {
-                    navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("client_updated")
+                    findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("client_updated")
                         ?.observe(viewLifecycleOwner) { updated ->
                             if (updated) {
-                                // Принудительно обновляем поиск, чтобы перезапросить данные
-                                viewModel.onSearchQueryChanged(binding?.editTextSearch?.text.toString())
-                                navController.currentBackStackEntry?.savedStateHandle?.remove<Boolean>("client_updated")
+                                viewModel.onSearchQueryChanged(binding?.etSearch?.text.toString())
+                                findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>("client_updated")
                             }
                         }
                 }
@@ -101,5 +111,6 @@ class Step3SelectClientFragment : Fragment(R.layout.fragment_step3_select_client
         super.onDestroyView()
         binding = null
         clientAdapter = null
+        actions = null
     }
 }

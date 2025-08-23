@@ -1,46 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:layout_marginBottom="4dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:background="@drawable/item_selectable_bg"
-    android:clickable="true"
-    android:focusable="true">
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="6dp"
+    android:paddingVertical="12dp">
+
+    <View
+        android:id="@+id/view_selected_check"
+        android:layout_width="3dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/custom_main" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/ll_client_item_container"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/text_client_name"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_client_name"
+            style="@style/textSize_15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?android:attr/textColorPrimary"
             tools:text="Иванова Анастасия" />
 
-        <TextView
-            android:id="@+id/text_client_phone"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_client_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/custom_main"
+            android:textSize="12sp"
+            tools:text="+375 (29) 123-45-67" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_instagram"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="+375 (29) 123-45-67" />
+            android:textSize="10sp"
+            tools:text="\@instagram" />
     </LinearLayout>
 
     <include
         android:id="@+id/actions_container"
-        layout="@layout/view_action_icons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|center_vertical"
-        android:layout_marginEnd="16dp"
-        android:visibility="gone"
-        tools:visibility="visible" />
-</FrameLayout>
+        layout="@layout/view_action_icons" />
+</LinearLayout>

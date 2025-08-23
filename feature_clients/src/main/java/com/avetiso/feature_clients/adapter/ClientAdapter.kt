@@ -14,15 +14,22 @@ import com.avetiso.feature_clients.databinding.ItemClientBinding
 class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(DiffCallback) {
 
     var actions: RecyclerViewActions<ClientEntity>? = null
-    private var selectedClientId: Long? = null
+    private var selectedClient: ClientEntity? = null
 
-    // Эта функция будет вызываться из Step3 для подсветки
-    fun setSelectedClientId(id: Long?) {
-        val oldId = selectedClientId
-        selectedClientId = id
-        // Обновляем старый и новый элементы для перерисовки
-        oldId?.let { notifyItemChanged(currentList.indexOfFirst { c -> c.id == it }) }
-        id?.let { notifyItemChanged(currentList.indexOfFirst { c -> c.id == it }) }
+    // Метод для обновления выделения, как в первом шаге
+    fun updateSelection(client: ClientEntity?) {
+        val oldClient = selectedClient
+        selectedClient = client
+
+        // Обновляем старый и новый элементы, чтобы перерисовать их состояние
+        if (oldClient != null) {
+            val oldPosition = currentList.indexOf(oldClient)
+            if (oldPosition != -1) notifyItemChanged(oldPosition)
+        }
+        if (client != null) {
+            val newPosition = currentList.indexOf(client)
+            if (newPosition != -1) notifyItemChanged(newPosition)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClientViewHolder {
@@ -32,9 +39,7 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
 
     override fun onBindViewHolder(holder: ClientViewHolder, position: Int) {
         val client = getItem(position)
-        // Для подсветки в режиме выбора (step 3)
-        val isSelectedForAppointment = client.id == selectedClientId
-        holder.bind(client, isSelectedForAppointment)
+        holder.bind(client, client == selectedClient)
         actions?.bindViewHolderActions(holder, client)
     }
 
@@ -42,18 +47,28 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
         private val binding: ItemClientBinding,
     ) : ActionsViewHolder(binding) {
 
+        // Используем ID из <include>
         override val actionsContainer: View = binding.actionsContainer.root
         override val editButton: View = binding.actionsContainer.btnEdit
         override val deleteButton: View = binding.actionsContainer.btnDelete
 
         fun bind(client: ClientEntity, isSelected: Boolean) {
-            binding.textClientName.text = client.name
-            binding.textClientPhone.text = client.phoneNumber
-            binding.root.isSelected = isSelected // Используем isSelected для state в drawable
+            binding.tvClientName.text = client.name
+            binding.tvClientPhone.text = client.phoneNumber
+            binding.tvInstagram.text = client.instagram
+
+            // Управляем видимостью индикатора выделения
+            binding.viewSelectedCheck.isVisible = isSelected
         }
 
+        // Полностью повторяем логику из первого шага
         override fun toggleActions(show: Boolean) {
             actionsContainer.isVisible = show
+            binding.llClientItemContainer.alpha = if (show) 0.2f else 1.0f
+
+            if (show) {
+                binding.viewSelectedCheck.isVisible = false
+            }
         }
     }
 

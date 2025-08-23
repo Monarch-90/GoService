@@ -37,14 +37,14 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
                     // Если режим редактирования, заполняем поля
                     state.client?.let { client ->
                         populateFields(client)
-                        // Сбрасываем client в state, чтобы поля не перезаполнялись при повороте экрана
-                        // viewModel.handleEvent(AddEditClientEvent.ClearClientData)
                     }
 
-                    // Если пришел флаг navigateBack, возвращаемся назад
                     if (state.navigateBack) {
                         // Устанавливаем результат для предыдущего экрана
-                        findNavController().previousBackStackEntry?.savedStateHandle?.set("client_updated", true)
+                        findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                            "client_updated",
+                            true
+                        )
                         findNavController().navigateUp()
                     }
                 }
@@ -74,7 +74,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
             currentBinding.inputLayoutPhone.error = null
         }
 
-        currentBinding.fabSaveClient.setOnClickListener {
+        currentBinding.btnSave.setOnClickListener {
             saveClient()
         }
     }
@@ -82,14 +82,9 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
     private fun saveClient() {
         val currentBinding = binding ?: return
         val name = currentBinding.inputEditTextName.text.toString().trim()
-        val phone = currentBinding.inputEditTextPhone.text.toString().trim()
 
         if (name.isBlank()) {
             currentBinding.inputLayoutName.error = "Имя не может быть пустым"
-            return
-        }
-        if (phone.isBlank()) {
-            currentBinding.inputLayoutPhone.error = "Номер телефона не может быть пустым"
             return
         }
 
@@ -98,7 +93,8 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         val clientToSave = ClientEntity(
             id = viewModel.state.value.client?.id ?: 0L,
             name = name,
-            phoneNumber = phone,
+            phoneNumber = currentBinding.inputEditTextPhone.text.toString().trim(),
+            instagram = currentBinding.inputEditTextInstagram.text.toString().trim(),
             source = currentBinding.inputEditTextSource.text.toString().trim(),
             discount = discountStr.toIntOrNull() ?: 0,
             note = currentBinding.inputEditTextNote.text.toString().trim()

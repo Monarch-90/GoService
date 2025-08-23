@@ -63,10 +63,10 @@ class AvailableServiceAdapter :
         fun bind(service: ServiceEntity, isSelected: Boolean) {
 
             // Название услуги
-            binding.textServiceName.text = service.name
+            binding.tvServiceName.text = service.name
 
             // Название категории
-            binding.textServiceCategory.text = service.categoryName
+            binding.tvServiceCategory.text = service.categoryName
 
             // Цена
             val pricePrefix = if (service.isPriceFrom) "от " else ""
@@ -85,10 +85,10 @@ class AvailableServiceAdapter :
 //            binding.textServiceDetails.text =
 //                "$priceString • $durationString"
 
-            binding.textServiceDetails.text =
+            binding.tvServiceDetails.text =
                 "$priceString • ${service.durationMinutes} мин"
 
-            binding.ivSelectedCheck.isVisible = isSelected
+            binding.viewSelectedCheck.isVisible = isSelected
         }
 
         // Реализуем метод, который будет скрывать/показывать чекбокс или иконки
@@ -97,7 +97,7 @@ class AvailableServiceAdapter :
             binding.llItemContainer.alpha = if (show) 0.2f else 1.0f
 
             if (show) {
-                binding.ivSelectedCheck.visibility = View.GONE
+                binding.viewSelectedCheck.visibility = View.GONE
             }
         }
     }

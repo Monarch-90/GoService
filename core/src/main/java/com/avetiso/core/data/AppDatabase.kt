@@ -3,6 +3,7 @@ package com.avetiso.core.data
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.avetiso.core.data.dao.CategoryDao
+import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.CategoryEntity
@@ -14,4 +15,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun serviceDao(): ServiceDao
     abstract fun categoryDao(): CategoryDao
     abstract fun timeSlotDao(): TimeSlotDao
+    abstract fun clientDao(): ClientDao
 }

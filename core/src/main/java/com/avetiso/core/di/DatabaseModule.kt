@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.avetiso.core.data.AppDatabase
 import com.avetiso.core.data.dao.CategoryDao
+import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.dao.TimeSlotDao
 import dagger.Module
@@ -43,5 +44,11 @@ object DatabaseModule {
     @Singleton
     fun provideTimeSlotDao(appDatabase: AppDatabase): TimeSlotDao {
         return appDatabase.timeSlotDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideClientDao(appDatabase: AppDatabase): ClientDao {
+        return appDatabase.clientDao()
     }
 }

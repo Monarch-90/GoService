@@ -20,6 +20,10 @@
         android:label="fragment_add_appointment"
         tools:layout="@layout/fragment_add_appointment">
 
+        <argument
+            android:name="selectedDate"
+            app:argType="string" />
+
         <action
             android:id="@+id/action_addAppointmentFragment_to_addServiceFragment"
             app:destination="@id/addServiceFragment">

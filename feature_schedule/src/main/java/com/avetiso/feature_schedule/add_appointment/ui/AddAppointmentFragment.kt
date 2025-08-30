@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.add_appointment.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentState
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
+import com.avetiso.feature_schedule.add_appointment.mvi.NavigationEvent
 import com.avetiso.feature_schedule.databinding.FragmentAddAppointmentBinding
 import com.avetiso.feature_schedule.databinding.ViewStepperBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,11 +71,19 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                     }
                 }
 
-                // ПОДПИСКА: на события навигации
                 launch {
-                    viewModel.navigationEvents.collect {
-                        // Выполняем навигацию отсюда!
-                        findNavController().navigate(R.id.action_addAppointmentFragment_to_addServiceFragment)
+                    viewModel.navigationEvents.collect { event ->
+                        when (event) {
+                            is NavigationEvent.NavigateToAddService -> {
+                                findNavController().navigate(R.id.action_addAppointmentFragment_to_addServiceFragment)
+                            }
+
+                            is NavigationEvent.NavigateToSchedule -> {
+                                // Возвращаемся на экран расписания
+                                findNavController().navigateUp()
+                                Toast.makeText(requireContext(), "Запись успешно создана", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 }
             }

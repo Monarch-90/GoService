@@ -1,8 +1,13 @@
 package com.avetiso.feature_schedule.add_appointment.mvi
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.data.dao.AppointmentDao
+import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,13 +15,17 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AddAppointmentViewModel : ViewModel() {
+@HiltViewModel
+class AddAppointmentViewModel @Inject constructor(
+    private val appointmentDao: AppointmentDao,
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AddAppointmentState())
     val state = _state.asStateFlow()
 
     // канал для одноразовых событий навигации
-    private val _navigationChannel = Channel<Unit>()
+    private val _navigationChannel = Channel<NavigationEvent>()
     val navigationEvents = _navigationChannel.receiveAsFlow()
 
     fun handleEvent(event: AddAppointmentEvent) {
@@ -32,7 +41,7 @@ class AddAppointmentViewModel : ViewModel() {
                         )
                     }
                 } else {
-                    // TODO: Логика сохранения записи
+                    saveAppointment()
                 }
             }
 
@@ -122,7 +131,7 @@ class AddAppointmentViewModel : ViewModel() {
 
             is AddAppointmentEvent.NavigateToAddService -> {
                 viewModelScope.launch {
-                    _navigationChannel.send(Unit)
+                    _navigationChannel.send(NavigationEvent.NavigateToAddService)
                 }
             }
 
@@ -137,10 +146,35 @@ class AddAppointmentViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Проверяет, завершен ли шаг.
-     * Позже сюда нужно будет добавить проверки для шага 2 и 3.
-     */
+    private fun saveAppointment() {
+        viewModelScope.launch {
+            val currentState = _state.value
+            val selectedDate: String = savedStateHandle["selectedDate"] ?: return@launch
+
+            // Собираем все данные
+            val client = currentState.selectedClient ?: return@launch
+            val services = currentState.selectedServices
+            val timeSlot = currentState.selectedTimeSlots.firstOrNull() ?: return@launch
+
+            // Рассчитываем общую продолжительность
+            val totalDuration = services.sumOf { it.durationMinutes }
+
+            val appointment = AppointmentEntity(
+                clientId = client.id,
+                date = selectedDate,
+                startTimeMinutes = timeSlot.startTimeMinutes,
+                totalDurationMinutes = totalDuration,
+                serviceIds = services.map { it.id }
+            )
+
+            appointmentDao.insertAppointment(appointment)
+
+            // Отправляем событие об успешном сохранении для навигации
+            _navigationChannel.send(NavigationEvent.NavigateToSchedule)
+        }
+    }
+
+    // Проверяет, завершен ли шаг
     private fun isStepComplete(step: Int, state: AddAppointmentState): Boolean {
         return when (step) {
             0 -> state.selectedServices.isNotEmpty()

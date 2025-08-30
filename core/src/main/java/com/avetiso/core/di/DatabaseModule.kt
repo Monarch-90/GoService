@@ -3,6 +3,7 @@ package com.avetiso.core.di
 import android.content.Context
 import androidx.room.Room
 import com.avetiso.core.data.AppDatabase
+import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.data.dao.CategoryDao
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.data.dao.ServiceDao
@@ -50,5 +51,11 @@ object DatabaseModule {
     @Singleton
     fun provideClientDao(appDatabase: AppDatabase): ClientDao {
         return appDatabase.clientDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppointmentDao(appDatabase: AppDatabase): AppointmentDao {
+        return appDatabase.appointmentDao()
     }
 }

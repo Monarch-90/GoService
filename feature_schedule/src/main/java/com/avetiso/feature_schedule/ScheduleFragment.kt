@@ -9,10 +9,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
+import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
-import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
+import com.avetiso.feature_schedule.mvi.ScheduleViewModel
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,24 +29,13 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private var binding: FragmentScheduleBinding? = null
 
-    // Используем новую ViewModel
     private val calendarViewModel: CalendarViewModel by viewModels()
+    private val scheduleViewModel: ScheduleViewModel by viewModels()
 
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
 
     private val appointmentAdapter = AppointmentAdapter()
-
-    // Данные для примера
-    private val dummyAppointments = mapOf(
-        LocalDate.now() to listOf(
-            Appointment(LocalTime.of(10, 0), "Маникюр", "Анна", 90),
-            Appointment(LocalTime.of(12, 30), "Педикюр", "Мария", 120)
-        ),
-        LocalDate.now().plusDays(1) to listOf(
-            Appointment(LocalTime.of(11, 0), "Стрижка", "Ольга", 60)
-        )
-    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -64,9 +54,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
         setupClickListeners()
         observeViewModel()
-
-        // Первоначальное обновление списка записей
-        updateAppointments(calendarViewModel.state.value.selectedDate)
     }
 
     private fun setupClickListeners() {
@@ -82,20 +69,44 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             }
         }
         currentBinding.btnAddAppointment.setOnClickListener {
-            findNavController().navigate(R.id.action_scheduleFragment_to_addAppointmentFragment)
+            // Получаем выбранную дату из ViewModel календаря
+            val selectedDate = calendarViewModel.state.value.selectedDate.toString()
+
+            // Создаем action с передачей аргумента
+            val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(selectedDate)
+            findNavController().navigate(action)
         }
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                calendarViewModel.state.collect { state ->
-                    // Обновляем UI на основе нового состояния
-                    updateMonthTitle(state.visibleMonth)
-                    updateAppointments(state.selectedDate)
+                // Подписка на ViewModel календаря
+                launch {
+                    calendarViewModel.state.collect { state ->
+                        updateMonthTitle(state.visibleMonth)
+                        // Теперь мы просто сообщаем второй ViewModel, какая дата выбрана
+                        scheduleViewModel.loadAppointmentsForDate(state.selectedDate.toString())
+                        calendarManager?.observeState(state)
+                    }
+                }
 
-                    // Сообщаем менеджеру, что нужно обновить View календаря
-                    calendarManager?.observeState(state)
+                // Подписка на ViewModel записей (загруженных из БД)
+                launch {
+                    scheduleViewModel.appointmentsForDate.collect { realAppointments ->
+                        // Конвертируем AppointmentEntity в модель для адаптера (Appointment)
+                        val appointmentsForAdapter = realAppointments.map { entity ->
+                            // Вам нужно будет добавить логику получения имен услуг и клиента по ID,
+                            // но пока сделаем заглушки
+                            Appointment(
+                                time = LocalTime.ofSecondOfDay(entity.startTimeMinutes * 60L),
+                                serviceName = "Услуги (IDs: ${entity.serviceIds.joinToString()})",
+                                clientName = "Клиент (ID: ${entity.clientId})",
+                                durationMinutes = entity.totalDurationMinutes.toLong()
+                            )
+                        }
+                        appointmentAdapter.submitList(appointmentsForAdapter)
+                    }
                 }
             }
         }
@@ -106,11 +117,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             .replaceFirstChar { it.uppercase() }
         val yearTitle = yearMonth.year.toString()
         binding?.textMonthTitle?.text = "$monthTitle $yearTitle"
-    }
-
-    private fun updateAppointments(date: LocalDate) {
-        val appointments = dummyAppointments[date].orEmpty()
-        appointmentAdapter.submitList(appointments)
     }
 
     override fun onDestroyView() {

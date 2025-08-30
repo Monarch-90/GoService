@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.TimeSlotEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,12 +22,17 @@ class Step2SelectTimeViewModel @Inject constructor(
     val timeSlots: StateFlow<List<TimeSlotEntity>> = timeSlotDao.getAllTimeSlots()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private val _eventChannel = Channel<Step2Event>()
+    val events = _eventChannel.receiveAsFlow()
+
     fun addTimeSlot(hour: Int, minute: Int) {
         viewModelScope.launch {
             val totalMinutes = hour * 60 + minute
-            // Проверяем, существует ли уже такой слот
             val exists = timeSlots.value.any { it.startTimeMinutes == totalMinutes }
-            if (!exists) {
+            if (exists) {
+                // Отправляем событие, если слот существует
+                _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
+            } else {
                 timeSlotDao.insertTimeSlot(TimeSlotEntity(startTimeMinutes = totalMinutes))
             }
         }
@@ -35,7 +42,10 @@ class Step2SelectTimeViewModel @Inject constructor(
         viewModelScope.launch {
             val totalMinutes = hour * 60 + minute
             val exists = timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != id }
-            if (!exists) {
+            if (exists) {
+                // Отправляем событие и здесь
+                _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
+            } else {
                 val updatedSlot = TimeSlotEntity(id = id, startTimeMinutes = totalMinutes)
                 timeSlotDao.insertTimeSlot(updatedSlot)
             }

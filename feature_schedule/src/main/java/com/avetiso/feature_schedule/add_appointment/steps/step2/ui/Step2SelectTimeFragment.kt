@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step2.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -14,6 +15,7 @@ import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.steps.step2.adapter.TimeSlotAdapter
+import com.avetiso.feature_schedule.add_appointment.steps.step2.mvi.Step2Event
 import com.avetiso.feature_schedule.add_appointment.steps.step2.mvi.Step2SelectTimeViewModel
 import com.avetiso.feature_schedule.databinding.FragmentStep2SelectTimeBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,7 +44,6 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
         setupRecyclerView()
         setupClickListeners()
         observeViewModels()
-        setupFragmentResultListeners()
     }
 
     private fun setupRecyclerView() {
@@ -87,78 +88,77 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                // ПОДПИСКА №1: На список временных слотов
-                // Обновляем список через submitList
                 launch {
                     viewModel.timeSlots.collect { allSlots ->
                         timeSlotAdapter?.submitList(allSlots)
-
-                        // Логика закрытия экшенов, если элемент удален
                         if (actions?.activeItemId != null && allSlots.none { it.id == actions?.activeItemId }) {
                             actions?.dismissActions()
                         }
                     }
                 }
 
-                // ПОДПИСКА №2: На состояние родительской ViewModel (для выделения)
-                // Обновляем выделение через новый метод setSelectedItems
                 launch {
                     parentViewModel.state.collectLatest { parentState ->
                         val selectedIds = parentState.selectedTimeSlots.map { it.id }.toSet()
                         timeSlotAdapter?.setSelectedItems(selectedIds)
                     }
                 }
-            }
-        }
-    }
 
-    private fun setupFragmentResultListeners() {
-        childFragmentManager.setFragmentResultListener(
-            REQUEST_KEY_ADD,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val hour = bundle.getInt(ComposePickerDialogFragment.RESULT_HOUR)
-            val minute = bundle.getInt(ComposePickerDialogFragment.RESULT_MINUTE)
-            viewModel.addTimeSlot(hour, minute)
-        }
-        childFragmentManager.setFragmentResultListener(
-            REQUEST_KEY_EDIT,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val hour = bundle.getInt(ComposePickerDialogFragment.RESULT_HOUR)
-            val minute = bundle.getInt(ComposePickerDialogFragment.RESULT_MINUTE)
-            editingTimeSlotId?.let { id ->
-                viewModel.updateTimeSlot(id, hour, minute)
+                launch {
+                    viewModel.events.collect { event ->
+                        when(event) {
+                            is Step2Event.ShowToast -> {
+                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
             }
-            editingTimeSlotId = null
         }
     }
 
     private fun showTimePicker(timeSlotToEdit: TimeSlotEntity?) {
         val isEditing = timeSlotToEdit != null
         val title = if (isEditing) "Редактировать слот" else "Добавить слот времени"
-        val resultKey: String
-        val initialHour: Int
-        val initialMinute: Int
 
-        if (isEditing) {
-            editingTimeSlotId = timeSlotToEdit.id
-            resultKey = REQUEST_KEY_EDIT
-            initialHour = timeSlotToEdit.startTimeMinutes / 60
-            initialMinute = timeSlotToEdit.startTimeMinutes % 60
-        } else {
-            resultKey = REQUEST_KEY_ADD
-            initialHour = 0
-            initialMinute = 0
-        }
+        val initialHour = timeSlotToEdit?.let { it.startTimeMinutes / 60 } ?: 0
+        val initialMinute = timeSlotToEdit?.let { it.startTimeMinutes % 60 } ?: 0
 
-        ComposePickerDialogFragment.newInstance(
+        val dialog = ComposePickerDialogFragment.newInstance(
             title = title,
-            resultKey = resultKey,
             initialHour = initialHour,
             initialMinute = initialMinute
         )
-            .show(childFragmentManager, "ComposePickerDialogFragment")
+
+        dialog.onConfirm = { hour, minute ->
+            val totalMinutes = hour * 60 + minute
+
+            // Определяем, существует ли уже такой слот
+            val isDuplicate = if (isEditing) {
+                // При редактировании ищем дубликат, исключая сам редактируемый слот
+                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != timeSlotToEdit!!.id }
+            } else {
+                // При добавлении ищем любой слот с таким же временем
+                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes }
+            }
+
+            if (isDuplicate) {
+                // Если дубликат найден, показываем Toast и возвращаем false
+                Toast.makeText(requireContext(), "Такой слот уже существует", Toast.LENGTH_SHORT).show()
+                false // <-- Говорим пикеру не закрываться
+            } else {
+                // Если дубликата нет, вызываем метод ViewModel
+                if (isEditing) {
+                    viewModel.updateTimeSlot(timeSlotToEdit!!.id, hour, minute)
+                } else {
+                    viewModel.addTimeSlot(hour, minute)
+                }
+                // и возвращаем true
+                true // <-- Говорим пикеру, что можно закрыться
+            }
+        }
+
+        dialog.show(childFragmentManager, "ComposePickerDialogFragment")
     }
 
     override fun onDestroyView() {

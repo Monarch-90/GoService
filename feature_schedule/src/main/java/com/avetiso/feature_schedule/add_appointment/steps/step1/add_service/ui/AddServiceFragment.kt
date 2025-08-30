@@ -55,16 +55,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             binding?.textCategory?.text = selectedCategoryName
         }
 
-        childFragmentManager.setFragmentResultListener(
-            "duration_selection",
-            this // `this` - это ссылка на сам AddServiceFragment
-        ) { _, bundle ->
-            val hour = bundle.getInt(ComposePickerDialogFragment.RESULT_HOUR)
-            val minute = bundle.getInt(ComposePickerDialogFragment.RESULT_MINUTE)
-            viewModel.setDuration(hour, minute)
-            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
-        }
-
         binding?.btnSave?.setOnClickListener {
             saveService()
         }
@@ -216,10 +206,19 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
         val dialog = ComposePickerDialogFragment.newInstance(
             title = "Выберите продолжительность",
-            resultKey = "duration_selection",
             initialHour = hour,
             initialMinute = minute
         )
+
+        // Устанавливаем новый колбэк
+        dialog.onConfirm = { selectedHour, selectedMinute ->
+            viewModel.setDuration(selectedHour, selectedMinute)
+            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
+
+            // Валидация не нужна, всегда возвращаем true для закрытия диалога
+            true
+        }
+
         dialog.show(childFragmentManager, "HourMinutePickerDialogFragment")
     }
 

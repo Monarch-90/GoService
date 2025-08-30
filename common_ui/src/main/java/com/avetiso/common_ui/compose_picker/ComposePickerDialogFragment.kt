@@ -35,9 +35,8 @@ class ComposePickerDialogFragment : DialogFragment() {
     private val titleText: String by lazy {
         requireArguments().getString(ARG_TITLE, "")
     }
-    private val resultKey: String by lazy {
-        requireArguments().getString(ARG_RESULT_KEY, "result")
-    }
+
+    var onConfirm: ((hour: Int, minute: Int) -> Boolean)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,13 +56,13 @@ class ComposePickerDialogFragment : DialogFragment() {
                     onHourChange = { selectedHour = it },
                     onMinuteChange = { selectedMinute = it },
                     onConfirm = {
-                        // 1. Отправляем результат
-                        setFragmentResult(
-                            resultKey,
-                            bundleOf(RESULT_HOUR to selectedHour, RESULT_MINUTE to selectedMinute)
-                        )
-                        // 2. Закрываем диалог
-                        dismiss()
+                        // Вызываем внешний колбэк для валидации
+                        val isSuccess = onConfirm?.invoke(selectedHour, selectedMinute) ?: true
+
+                        // Закрываем диалог ТОЛЬКО в случае успеха
+                        if (isSuccess) {
+                            dismiss()
+                        }
                     },
                     onDismiss = { dismiss() }
                 )
@@ -78,23 +77,17 @@ class ComposePickerDialogFragment : DialogFragment() {
 
     companion object {
         private const val ARG_TITLE = "arg_title"
-        private const val ARG_RESULT_KEY = "arg_result_key"
         private const val ARG_INITIAL_HOUR = "arg_initial_hour"
         private const val ARG_INITIAL_MINUTE = "arg_initial_minute"
 
-        const val RESULT_HOUR = "result_hour"
-        const val RESULT_MINUTE = "result_minute"
-
         fun newInstance(
             title: String,
-            resultKey: String,
             initialHour: Int,
             initialMinute: Int,
         ): ComposePickerDialogFragment {
             return ComposePickerDialogFragment().apply {
                 arguments = bundleOf(
                     ARG_TITLE to title,
-                    ARG_RESULT_KEY to resultKey,
                     ARG_INITIAL_HOUR to initialHour,
                     ARG_INITIAL_MINUTE to initialMinute
                 )

@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 @HiltViewModel
 class AddServiceViewModel @Inject constructor(
@@ -21,6 +23,9 @@ class AddServiceViewModel @Inject constructor(
 
     // Публичный StateFlow только для чтения из UI
     val uiState = _uiState.asStateFlow()
+
+    private val _eventChannel = Channel<AddServiceEvent>()
+    val events = _eventChannel.receiveAsFlow()
 
     // Метод для обновления продолжительности
     fun setDuration(hour: Int, minute: Int) {
@@ -45,13 +50,30 @@ class AddServiceViewModel @Inject constructor(
 
     fun saveService(service: ServiceEntity) {
         viewModelScope.launch {
-            // Если id == 0, значит, это новая сущность.
-            // Если id != 0, значит, мы редактируем существующую.
+            // 1. Выполняем проверку на дубликат
+            val duplicate = serviceDao.findServiceByDetails(
+                name = service.name,
+                categoryName = service.categoryName,
+                isPriceFrom = service.isPriceFrom,
+                price = service.price,
+                currency = service.currency,
+                durationMinutes = service.durationMinutes,
+                idToExclude = service.id // Исключаем текущий ID
+            )
+
+            // 2. Если дубликат найден, отправляем событие с ошибкой
+            if (duplicate != null) {
+                _eventChannel.send(AddServiceEvent.ShowToast("Такая услуга уже существует"))
+                return@launch
+            }
+
+            // 3. Если дубликатов нет, сохраняем и отправляем событие навигации
             if (service.id == 0L) {
                 serviceDao.insertService(service)
             } else {
                 serviceDao.updateService(service)
             }
+            _eventChannel.send(AddServiceEvent.NavigateBackWithResult)
         }
     }
 }

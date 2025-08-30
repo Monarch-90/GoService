@@ -2,6 +2,7 @@ package com.avetiso.feature_clients.add_edit.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,6 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_clients.R
+import com.avetiso.feature_clients.add_edit.mvi.AddEditClientEvent
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientViewModel
 import com.avetiso.feature_clients.databinding.FragmentAddEditClientBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,25 +29,34 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         binding = FragmentAddEditClientBinding.bind(view)
 
         setupListeners()
-        observeState()
+        observeUi()
     }
 
-    private fun observeState() {
+    private fun observeUi() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    // Если режим редактирования, заполняем поля
-                    state.client?.let { client ->
-                        populateFields(client)
+                // Подписка на состояние (для заполнения полей в режиме редактирования)
+                launch {
+                    viewModel.state.collect { state ->
+                        state.client?.let { client ->
+                            populateFields(client)
+                        }
+                        // Логика навигации отсюда удалена
                     }
+                }
 
-                    if (state.navigateBack) {
-                        // Устанавливаем результат для предыдущего экрана
-                        findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                            "client_updated",
-                            true
-                        )
-                        findNavController().navigateUp()
+                // Подписка на события (Toast и навигация)
+                launch {
+                    viewModel.events.collect { event ->
+                        when (event) {
+                            is AddEditClientEvent.ShowToast -> {
+                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                            }
+                            is AddEditClientEvent.NavigateBackWithResult -> {
+                                findNavController().previousBackStackEntry?.savedStateHandle?.set("client_updated", true)
+                                findNavController().navigateUp()
+                            }
+                        }
                     }
                 }
             }

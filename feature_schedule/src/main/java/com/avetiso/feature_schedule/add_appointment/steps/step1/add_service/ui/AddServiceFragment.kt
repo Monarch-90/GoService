@@ -17,6 +17,7 @@ import androidx.navigation.fragment.navArgs
 import com.avetiso.common_ui.compose_picker.ComposePickerDialogFragment
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddServiceBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,38 +55,45 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             binding?.textCategory?.text = selectedCategoryName
         }
 
-        childFragmentManager.setFragmentResultListener(
-            "duration_selection",
-            this // `this` - это ссылка на сам AddServiceFragment
-        ) { _, bundle ->
-            val hour = bundle.getInt(ComposePickerDialogFragment.RESULT_HOUR)
-            val minute = bundle.getInt(ComposePickerDialogFragment.RESULT_MINUTE)
-            viewModel.setDuration(hour, minute)
-            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
-        }
-
         binding?.btnSave?.setOnClickListener {
             saveService()
         }
 
         setupFields()
-        observeState()
+        observeUi()
     }
 
-    private fun observeState() {
+    private fun observeUi() { // Можете оставить старое название, но новое лучше отражает суть
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    // Обновляем UI каждый раз, когда меняется состояние
-                    updateDurationText(state.selectedHour, state.selectedMinute)
-                    // Можно также обновлять и другие элементы, если они будут в ViewModel
-                    // binding?.toggleButtonPriceFrom?.isChecked = state.isPriceFrom
+                // Подписка на состояние (для обновления текста продолжительности и т.д.)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        updateDurationText(state.selectedHour, state.selectedMinute)
+                        if (state.isPriceFrom) {
+                            binding?.toggleBtnPriceFrom?.check(R.id.btn_price_from)
+                        } else {
+                            binding?.toggleBtnPriceFrom?.uncheck(R.id.btn_price_from)
+                        }
+                    }
+                }
 
-                    // Мы управляем состоянием группы кнопок
-                    if (state.isPriceFrom) {
-                        binding?.toggleBtnPriceFrom?.check(R.id.btn_price_from)
-                    } else {
-                        binding?.toggleBtnPriceFrom?.uncheck(R.id.btn_price_from)
+                // Новая подписка на события (Toast, навигация)
+                launch {
+                    viewModel.events.collect { event ->
+                        when (event) {
+                            is AddServiceEvent.ShowToast -> {
+                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                            }
+                            is AddServiceEvent.NavigateBackWithResult -> {
+                                // Этот код переехал сюда из saveService()
+                                findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                                    "service_updated",
+                                    true
+                                )
+                                findNavController().navigateUp()
+                            }
+                        }
                     }
                 }
             }
@@ -181,11 +189,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                 )
 
                 viewModel.saveService(serviceToSave)
-                findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                    "service_updated",
-                    true
-                )
-                findNavController().navigateUp()
             }
         }
     }
@@ -203,10 +206,19 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
         val dialog = ComposePickerDialogFragment.newInstance(
             title = "Выберите продолжительность",
-            resultKey = "duration_selection",
             initialHour = hour,
             initialMinute = minute
         )
+
+        // Устанавливаем новый колбэк
+        dialog.onConfirm = { selectedHour, selectedMinute ->
+            viewModel.setDuration(selectedHour, selectedMinute)
+            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
+
+            // Валидация не нужна, всегда возвращаем true для закрытия диалога
+            true
+        }
+
         dialog.show(childFragmentManager, "HourMinutePickerDialogFragment")
     }
 

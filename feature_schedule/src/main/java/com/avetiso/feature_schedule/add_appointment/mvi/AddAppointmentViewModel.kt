@@ -111,7 +111,7 @@ class AddAppointmentViewModel : ViewModel() {
                 }
             }
 
-            is AddAppointmentEvent.ClearClientSelection -> { // <-- ДОБАВЛЕНО
+            is AddAppointmentEvent.ClearClientSelection -> {
                 _state.update {
                     it.copy(
                         selectedClient = null,

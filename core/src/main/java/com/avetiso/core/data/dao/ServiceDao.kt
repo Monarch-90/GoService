@@ -25,4 +25,30 @@ interface ServiceDao {
 
     @Delete
     suspend fun deleteService(service: ServiceEntity)
+
+    /**
+     * Ищет услугу с точным совпадением всех полей.
+     * @param idToExclude ID услуги, которую нужно исключить из поиска (важно при редактировании).
+     * @return ServiceEntity, если найдена, иначе null.
+     */
+    @Query("""
+        SELECT * FROM services 
+        WHERE name = :name 
+        AND categoryName = :categoryName 
+        AND isPriceFrom = :isPriceFrom 
+        AND price = :price 
+        AND currency = :currency 
+        AND durationMinutes = :durationMinutes
+        AND id != :idToExclude
+        LIMIT 1
+    """)
+    suspend fun findServiceByDetails(
+        name: String,
+        categoryName: String,
+        isPriceFrom: Boolean,
+        price: Double,
+        currency: String,
+        durationMinutes: Int,
+        idToExclude: Long
+    ): ServiceEntity?
 }

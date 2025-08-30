@@ -25,4 +25,13 @@ interface ClientDao {
 
     @Query("SELECT * FROM clients WHERE name LIKE '%' || :query || '%' OR phoneNumber LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchClients(query: String): Flow<List<ClientEntity>>
+
+    @Query("SELECT * FROM clients WHERE name = :name AND phoneNumber = :phoneNumber AND id != :idToExclude LIMIT 1")
+    suspend fun findByNameAndPhone(name: String, phoneNumber: String, idToExclude: Long): ClientEntity?
+
+    @Query("SELECT * FROM clients WHERE name = :name AND instagram = :instagram AND id != :idToExclude LIMIT 1")
+    suspend fun findByNameAndInstagram(name: String, instagram: String, idToExclude: Long): ClientEntity?
+
+    @Query("SELECT * FROM clients WHERE phoneNumber = :phoneNumber AND instagram = :instagram AND id != :idToExclude LIMIT 1")
+    suspend fun findByPhoneAndInstagram(phoneNumber: String, instagram: String, idToExclude: Long): ClientEntity?
 }

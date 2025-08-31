@@ -16,7 +16,7 @@ import com.avetiso.core.entity.TimeSlotEntity
 
 @Database(
     entities = [ServiceEntity::class, CategoryEntity::class, TimeSlotEntity::class, ClientEntity::class, AppointmentEntity::class],
-    version = 1
+    version = 1, exportSchema = true
 )
 @TypeConverters(MyTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {

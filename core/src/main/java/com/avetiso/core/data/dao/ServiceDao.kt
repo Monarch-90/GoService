@@ -20,6 +20,9 @@ interface ServiceDao {
     @Query("SELECT * FROM services WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchServices(query: String): Flow<List<ServiceEntity>>
 
+    @Query("SELECT * FROM services WHERE id IN (:ids)")
+    suspend fun getServicesByIds(ids: List<Long>): List<ServiceEntity>
+
     @Update
     suspend fun updateService(service: ServiceEntity)
 

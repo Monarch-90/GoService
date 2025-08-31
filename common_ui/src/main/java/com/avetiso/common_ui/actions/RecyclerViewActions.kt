@@ -10,43 +10,45 @@ import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.CustomDialogBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-private const val TAG = "TouchDebug"
+enum class TriggerMode {
+    LONG_PRESS,
+    SWIPE
+}
 
 class RecyclerViewActions<T>(
     private val fragment: Fragment,
     private val recyclerView: RecyclerView,
     private val adapter: ListAdapter<T, out ActionsViewHolder>,
-    private val getItemId: (T) -> Any,
+    val getItemId: (T) -> Any,
     private val getItemName: (T) -> String,
     private val onEdit: (T) -> Unit,
     private val onDelete: (T) -> Unit,
     private val onItemClick: ((T) -> Unit)? = null,
     private val onActionsShown: () -> Unit,
+    triggerMode: TriggerMode = TriggerMode.LONG_PRESS,
 ) {
     var activeItemId: Any? = null
         private set
 
     init {
-        val touchListener = ItemActionTouchListener(
-            context = recyclerView.context,
-            recyclerView = recyclerView,
-            onLongPress = { position -> handleLongPress(position) },
-            onItemClick = { position ->
-                val clickedItem =
-                    adapter.currentList.getOrNull(position) ?: return@ItemActionTouchListener
-                val isActionMenuOpen = activeItemId != null
-
-                // Если меню действий открыто, любой клик его просто закрывает.
-                if (isActionMenuOpen) {
-                    dismissActions()
-                } else {
-                    // Если меню было закрыто, то это обычный клик для выбора.
-                    onItemClick?.invoke(clickedItem)
-                }
-            },
-            onEmptySpaceClick = { dismissActions() }
-        )
-        recyclerView.addOnItemTouchListener(touchListener)
+        // 3. Устанавливаем слушатель только для режима LONG_PRESS
+        if (triggerMode == TriggerMode.LONG_PRESS) {
+            val touchListener = ItemActionTouchListener(
+                context = recyclerView.context,
+                recyclerView = recyclerView,
+                onLongPress = { position -> showActionsForPosition(position) }, // Используем новый публичный метод
+                onItemClick = { position ->
+                    val clickedItem = adapter.currentList.getOrNull(position) ?: return@ItemActionTouchListener
+                    if (activeItemId != null) {
+                        dismissActions()
+                    } else {
+                        onItemClick?.invoke(clickedItem)
+                    }
+                },
+                onEmptySpaceClick = { dismissActions() }
+            )
+            recyclerView.addOnItemTouchListener(touchListener)
+        }
 
         fragment.viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onPause(owner: LifecycleOwner) {
@@ -55,13 +57,14 @@ class RecyclerViewActions<T>(
         })
     }
 
-    private fun handleLongPress(position: Int) {
-        // Это сбросит выделение во ViewModel ПЕРЕД тем, как мы покажем иконки.
+    fun showActionsForPosition(position: Int) {
+        // Если кликнули по уже активному элементу, ничего не делаем
+        val newActiveItem = adapter.currentList.getOrNull(position) ?: return
+        if (getItemId(newActiveItem) == activeItemId) return
+
         onActionsShown()
 
-        val newActiveItem = adapter.currentList.getOrNull(position) ?: return
         val newActiveId = getItemId(newActiveItem)
-
         val oldActiveId = activeItemId
         val oldPosition = if (oldActiveId != null) findIndexOfItem(oldActiveId) else null
 

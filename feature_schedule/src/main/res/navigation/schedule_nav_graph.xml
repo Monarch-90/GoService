@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/scheduleFragment"
-        android:name="com.avetiso.feature_schedule.ScheduleFragment"
+        android:name="com.avetiso.feature_schedule.ui.ScheduleFragment"
         android:label="fragment_schedule"
         tools:layout="@layout/fragment_schedule">
         <action

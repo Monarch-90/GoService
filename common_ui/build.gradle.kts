@@ -54,4 +54,7 @@ dependencies {
 
     // For time select
     implementation(libs.chargemap.numberpicker)
+
+    // RecyclerView
+    implementation(libs.androidx.recyclerview)
 }

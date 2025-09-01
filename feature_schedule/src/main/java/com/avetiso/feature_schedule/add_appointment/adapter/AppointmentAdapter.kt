@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.actions.ActionsViewHolder
+import com.avetiso.common_ui.actions.ISwipeableHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.databinding.ItemAppointmentBinding
 import java.time.format.DateTimeFormatter
@@ -24,36 +26,37 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
 
     override fun onBindViewHolder(holder: AppointmentViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item)
-        // Привязываем действия
+        // Передаем режим триггера в холдер для корректной отрисовки
+        holder.bind(item, actions?.triggerMode ?: TriggerMode.LONG_PRESS)
         actions?.bindViewHolderActions(holder, item)
     }
 
-    // ViewHolder теперь наследуется от ActionsViewHolder
-    class AppointmentViewHolder(private val binding: ItemAppointmentBinding) : ActionsViewHolder(binding) {
+    // ViewHolder теперь реализует ISwipeableHolder
+    class AppointmentViewHolder(private val binding: ItemAppointmentBinding) :
+        ActionsViewHolder(binding), ISwipeableHolder {
 
-        // Делаем ссылку на контейнер публичной, чтобы иметь к ней доступ извне
-        val contentContainer: View = binding.contentContainer
-
-        // Реализуем обязательные поля
+        // Реализуем контракты интерфейса
+        override val contentContainer: View = binding.contentContainer
         override val actionsContainer: View = binding.actionsContainer.root
         override val editButton: View = binding.actionsContainer.btnEdit
         override val deleteButton: View = binding.actionsContainer.btnDelete
 
-        fun bind(appointment: Appointment) {
-            contentContainer.translationX = 0f // Сбрасываем сдвиг при ре-биндинге
+        fun bind(appointment: Appointment, triggerMode: TriggerMode) {
+            // При биндинге сбрасываем все состояния, которые могли остаться от переиспользования
+            if (triggerMode == TriggerMode.SWIPE_REVEAL) {
+                binding.contentContainer.translationX = 0f
+            }
+            binding.contentContainer.alpha = 1.0f
+
             binding.textTime.text = appointment.time
             binding.textServiceName.text = appointment.serviceNames
             binding.textClientName.text = appointment.clientName
             binding.textPrice.text = appointment.price
         }
 
-        // Реализуем метод для показа/скрытия иконок
         override fun toggleActions(show: Boolean) {
-            // В режиме свайпа мы не будем скрывать/показывать иконки,
-            // этим будет управлять ItemTouchHelper. Но метод должен быть реализован.
-            // При желании здесь можно добавить анимацию появления.
-            actionsContainer.isVisible = show
+            // Эта логика затемнения идеальна для LONG_PRESS. Оставляем ее.
+            binding.contentContainer.alpha = if (show) 0.5f else 1.0f
         }
     }
 

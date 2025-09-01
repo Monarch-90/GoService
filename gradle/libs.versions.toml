@@ -18,6 +18,7 @@ kizitonwoseCalendar = "2.8.0"
 desugarJdkLibs = "2.1.5"
 lifecycle = "2.9.3"
 fragmentKtx = "1.8.9"
+recyclerview = "1.4.0"
 room = "2.7.2"
 gson = "2.13.1"
 
@@ -79,6 +80,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 
 # Gson
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+# RecyclerView
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

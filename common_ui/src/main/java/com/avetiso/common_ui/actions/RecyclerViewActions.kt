@@ -1,26 +1,23 @@
 package com.avetiso.common_ui.actions
 
 import android.animation.ObjectAnimator
-import android.graphics.Canvas
 import android.view.LayoutInflater
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.CustomDialogBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlin.math.abs
 
 enum class TriggerMode {
     LONG_PRESS,
     SWIPE_REVEAL
 }
 
-class RecyclerViewActions<T>(
+class RecyclerViewActions<T : Any>(
     private val fragment: Fragment,
     private val recyclerView: RecyclerView,
     private val adapter: ListAdapter<T, out ActionsViewHolder>,
@@ -32,10 +29,17 @@ class RecyclerViewActions<T>(
     private val onActionsShown: () -> Unit,
     val triggerMode: TriggerMode = TriggerMode.LONG_PRESS,
 ) {
-    var activeItemId: Any? = null
-        private set
+    var activeItemId: Any?
+        // Используем тег RecyclerView для хранения ID активного элемента.
+        // Это позволяет разным слушателям "общаться" друг с другом.
+        get() = recyclerView.tag as? Long
+        private set(value) {
+            recyclerView.tag = value
+        }
 
     init {
+        // Полностью переработанная логика.
+        // Вместо ItemTouchHelper мы добавляем наши кастомные слушатели.
         when (triggerMode) {
             TriggerMode.LONG_PRESS -> {
                 val touchListener = ItemActionTouchListener(
@@ -54,9 +58,23 @@ class RecyclerViewActions<T>(
                 )
                 recyclerView.addOnItemTouchListener(touchListener)
             }
+
             TriggerMode.SWIPE_REVEAL -> {
-                val swipeCallback = SwipeRevealCallback()
-                ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView)
+                val swipeListener = SwipeRevealTouchListener(recyclerView) { position ->
+                    showActionsForPosition(position)
+                }
+
+                // Передаем адаптер и лямбду getItemId в конструктор
+                val tapListener = TapOutsideTouchListener(
+                    context = recyclerView.context,
+                    recyclerView = recyclerView,
+                    adapter = adapter,
+                    getItemId = getItemId,
+                    onDismiss = { dismissActions() }
+                )
+
+                recyclerView.addOnItemTouchListener(swipeListener)
+                recyclerView.addOnItemTouchListener(tapListener)
             }
         }
 
@@ -69,34 +87,37 @@ class RecyclerViewActions<T>(
 
     fun showActionsForPosition(position: Int) {
         val newActiveItem = adapter.currentList.getOrNull(position) ?: return
-        if (getItemId(newActiveItem) == activeItemId) return
+        val newActiveId = getItemId(newActiveItem)
+        if (newActiveId == activeItemId) return
 
         dismissActions()
         onActionsShown()
-        activeItemId = getItemId(newActiveItem)
+        activeItemId = newActiveId
 
         val holder = recyclerView.findViewHolderForAdapterPosition(position) ?: return
 
         if (triggerMode == TriggerMode.LONG_PRESS) {
             adapter.notifyItemChanged(position)
         } else { // SWIPE_REVEAL
-            // Проверяем, что ViewHolder поддерживает оба нужных нам контракта
             if (holder is ActionsViewHolder && holder is ISwipeableHolder) {
-                // Теперь у holder есть доступ и к contentContainer, и к actionsContainer
+                // Анимация теперь вызывается прямо отсюда.
                 animateSwipe(holder.contentContainer, -holder.actionsContainer.width.toFloat())
             }
         }
     }
 
     fun dismissActions() {
-        val oldPosition = if (activeItemId != null) findIndexOfItem(activeItemId!!) else null
+        val oldActiveId = activeItemId ?: return
+        val oldPosition = findIndexOfItem(oldActiveId)
+
+        activeItemId = null // Сбрасываем ID
+
         if (oldPosition != null) {
-            val oldActiveId = activeItemId
-            activeItemId = null
             val holder = recyclerView.findViewHolderForAdapterPosition(oldPosition)
             if (triggerMode == TriggerMode.LONG_PRESS) {
                 adapter.notifyItemChanged(oldPosition)
             } else { // SWIPE_REVEAL
+                // Анимация закрытия тоже здесь.
                 (holder as? ISwipeableHolder)?.let {
                     animateSwipe(it.contentContainer, 0f)
                 }
@@ -113,8 +134,13 @@ class RecyclerViewActions<T>(
         val itemId = getItemId(item)
         val isActionsVisible = (itemId == activeItemId)
 
-        holder.toggleActions(isActionsVisible)
+        // Для LongPress мы по-прежнему используем этот метод, чтобы показать/скрыть view
+        if (triggerMode == TriggerMode.LONG_PRESS) {
+            holder.toggleActions(isActionsVisible)
+        }
 
+        // Для Swipe, если элемент неактивен, принудительно ставим его в начальное положение.
+        // Это важно при переиспользовании ViewHolder'ов.
         if (triggerMode == TriggerMode.SWIPE_REVEAL && !isActionsVisible) {
             (holder as? ISwipeableHolder)?.contentContainer?.translationX = 0f
         }
@@ -122,48 +148,16 @@ class RecyclerViewActions<T>(
         if (isActionsVisible) {
             holder.editButton.setOnClickListener { onEdit(item); dismissActions() }
             holder.deleteButton.setOnClickListener { showDeleteConfirmationDialog(item); dismissActions() }
+        } else {
+            // Очищаем слушатели, чтобы избежать утечек и ложных срабатываний
+            // на переиспользуемых ViewHolder'ах.
+            holder.editButton.setOnClickListener(null)
+            holder.deleteButton.setOnClickListener(null)
         }
     }
 
     private fun animateSwipe(view: View, targetX: Float) =
         ObjectAnimator.ofFloat(view, "translationX", targetX).setDuration(250).start()
-
-    private inner class SwipeRevealCallback : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-        override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder) = Float.MAX_VALUE
-
-        override fun onChildDraw(c: Canvas, r: RecyclerView, vh: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-            // ИСПРАВЛЕНИЕ ЗДЕСЬ:
-            // 1. Приводим тип к ActionsViewHolder, чтобы получить доступ к actionsContainer
-            val holder = vh as ActionsViewHolder
-            // 2. Проверяем, реализует ли он ISwipeableHolder, чтобы получить contentContainer
-            if (holder is ISwipeableHolder) {
-                val clampedDx = dX.coerceIn(-holder.actionsContainer.width.toFloat(), 0f)
-                holder.contentContainer.translationX = clampedDx
-            }
-        }
-
-        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-            // ИСПРАВЛЕНИЕ ЗДЕСЬ:
-            val position = viewHolder.bindingAdapterPosition // Используем оригинальный viewHolder
-            if (position == RecyclerView.NO_POSITION) return
-
-            // 1. Приводим тип к ActionsViewHolder, чтобы получить доступ к actionsContainer
-            val holder = viewHolder as ActionsViewHolder
-            // 2. Проверяем, реализует ли он ISwipeableHolder, чтобы получить contentContainer
-            if (holder is ISwipeableHolder) {
-                val actionsWidth = holder.actionsContainer.width.toFloat()
-                val swipedDistance = abs(holder.contentContainer.translationX)
-
-                if (swipedDistance > actionsWidth * 0.4) {
-                    showActionsForPosition(position)
-                } else {
-                    dismissActions()
-                }
-            }
-        }
-    }
 
     private fun showDeleteConfirmationDialog(item: T) {
         // "Надуваем" кастомный макет

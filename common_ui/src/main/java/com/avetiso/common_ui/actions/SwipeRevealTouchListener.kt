@@ -1,0 +1,96 @@
+package com.avetiso.common_ui.actions
+
+import android.animation.ObjectAnimator
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewConfiguration
+import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.abs
+
+class SwipeRevealTouchListener(
+    private val recyclerView: RecyclerView,
+    private val onActionsRevealed: (Int) -> Unit,
+) : RecyclerView.OnItemTouchListener {
+
+    private val touchSlop = ViewConfiguration.get(recyclerView.context).scaledTouchSlop
+
+    private var initialX = 0f
+    private var initialY = 0f
+    private var isSwiping = false
+    private var swipedViewHolder: RecyclerView.ViewHolder? = null
+
+    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+        if (rv.tag != null) {
+            return false
+        }
+
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                initialX = e.x
+                initialY = e.y
+                val child = rv.findChildViewUnder(e.x, e.y)
+                swipedViewHolder = child?.let { rv.getChildViewHolder(it) }
+                return false
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val dx = e.x - initialX
+                val dy = e.y - initialY
+
+                if (abs(dx) > touchSlop && abs(dx) > abs(dy)) {
+                    if (dx < 0) {
+                        if (swipedViewHolder is ISwipeableHolder) {
+                            isSwiping = true
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+        val holder = swipedViewHolder
+        if (holder !is ActionsViewHolder || holder !is ISwipeableHolder) {
+            // Если холдер не реализует нужные интерфейсы, ничего не делаем.
+            return
+        }
+        // Теперь компилятор "знает", что у holder есть все необходимые свойства.
+        // Все предупреждения и ошибки исчезнут.
+
+        when (e.actionMasked) {
+            MotionEvent.ACTION_MOVE -> {
+                val dx = e.x - initialX
+                val clampedDx = dx.coerceIn(-holder.actionsContainer.width.toFloat(), 0f)
+                holder.contentContainer.translationX = clampedDx
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                val swipedDistance = abs(holder.contentContainer.translationX)
+                val position = holder.bindingAdapterPosition
+
+                if (swipedDistance > 0 && position != RecyclerView.NO_POSITION) {
+                    onActionsRevealed(position)
+                } else {
+                    animateSwipe(holder.contentContainer, 0f)
+                }
+
+                resetState()
+            }
+        }
+    }
+
+    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+
+    private fun resetState() {
+        isSwiping = false
+        swipedViewHolder = null
+        initialX = 0f
+        initialY = 0f
+    }
+
+    private fun animateSwipe(view: View, targetX: Float) {
+        ObjectAnimator.ofFloat(view, "translationX", targetX).setDuration(250).start()
+    }
+}

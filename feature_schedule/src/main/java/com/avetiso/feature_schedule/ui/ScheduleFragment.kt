@@ -1,9 +1,6 @@
 package com.avetiso.feature_schedule.ui
 
-import android.graphics.Canvas
 import android.os.Bundle
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,8 +8,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.feature_schedule.R
@@ -56,13 +51,13 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             fragment = this,
             recyclerView = binding!!.rvAppointments,
             adapter = appointmentAdapter,
-            getItemId = { it.time + it.clientName }, // Убедитесь, что ID уникален
+            getItemId = { it.id },
             getItemName = { "${it.serviceNames} для ${it.clientName}" },
             onEdit = { /* TODO: Логика редактирования */ },
             onDelete = { /* TODO: Логика удаления */ },
             onItemClick = { /* TODO: Логика клика, если нужна */ },
             onActionsShown = {},
-            triggerMode = TriggerMode.SWIPE_REVEAL // <-- Главное: указываем режим
+            triggerMode = TriggerMode.SWIPE_REVEAL
         )
         appointmentAdapter.actions = actions
 
@@ -74,7 +69,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         ).also { it.setupCalendar() }
 
         setupClickListeners()
-//        setupSwipeToReveal()
         observeViewModel()
     }
 
@@ -99,100 +93,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             findNavController().navigate(action)
         }
     }
-
-//    private fun setupSwipeToReveal() {
-//        val currentBinding = binding ?: return
-//
-//        actions = RecyclerViewActions(
-//            fragment = this,
-//            recyclerView = currentBinding.rvAppointments,
-//            adapter = appointmentAdapter,
-//            getItemId = { it.time + it.clientName },
-//            getItemName = { "${it.serviceNames} для ${it.clientName}" },
-//            onEdit = { appointment ->
-//                // TODO: Логика перехода на экран редактирования записи
-//            },
-//            onDelete = { appointment ->
-//                // TODO: Логика удаления записи из ViewModel
-//            },
-//            onItemClick = { appointment ->
-//                // TODO: Логика клика по записи, если нужна
-//            },
-//            onActionsShown = {},
-//            triggerMode = TriggerMode.SWIPE_REVEAL
-//        )
-//        appointmentAdapter.actions = actions
-//
-//        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-//            override fun onMove(
-//                recyclerView: RecyclerView,
-//                viewHolder: RecyclerView.ViewHolder,
-//                target: RecyclerView.ViewHolder,
-//            ): Boolean {
-//                return false
-//            }
-//
-//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                val position = viewHolder.bindingAdapterPosition
-//                if (position != RecyclerView.NO_POSITION) {
-//                    actions?.showActionsForPosition(position)
-//                }
-//            }
-//
-//            override fun onChildDraw(
-//                c: Canvas,
-//                recyclerView: RecyclerView,
-//                viewHolder: RecyclerView.ViewHolder,
-//                dX: Float,
-//                dY: Float,
-//                actionState: Int,
-//                isCurrentlyActive: Boolean,
-//            ) {
-//                (viewHolder as? AppointmentAdapter.AppointmentViewHolder)?.let { holder ->
-//                    holder.contentContainer.translationX = dX
-//                }
-//            }
-//
-//            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-//                val position = viewHolder.bindingAdapterPosition
-//                val holder = (viewHolder as? AppointmentAdapter.AppointmentViewHolder) ?: return
-//
-//                if (position != RecyclerView.NO_POSITION) {
-//                    val currentItem = appointmentAdapter.currentList[position]
-//                    if (actions?.activeItemId != actions?.getItemId?.invoke(currentItem)) {
-//                        holder.contentContainer.animate().translationX(0f).setDuration(200).start()
-//                    }
-//                } else {
-//                    holder.contentContainer.animate().translationX(0f).setDuration(200).start()
-//                }
-//            }
-//        }
-//
-//        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(currentBinding.rvAppointments)
-//
-//        // Создаем детектор жестов, который будет реагировать только на одиночный тап
-//        val gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
-//            override fun onSingleTapUp(e: MotionEvent): Boolean {
-//                // Если произошел тап, скрываем любые открытые действия
-//                actions?.dismissActions()
-//                // Возвращаем false, чтобы не мешать другим обработчикам кликов
-//                return false
-//            }
-//        })
-//
-//        // Добавляем к RecyclerView специальный слушатель, который использует наш детектор
-//        currentBinding.rvAppointments.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-//            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-//                // Передаем событие в детектор, он сам решит, был ли это тап
-//                gestureDetector.onTouchEvent(e)
-//                // Никогда не перехватываем событие, чтобы скроллинг и клики работали как обычно
-//                return false
-//            }
-//
-//            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
-//            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-//        })
-//    }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -232,6 +132,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
                             // Создаем финальный объект для адаптера
                             Appointment(
+                                id = details.appointment.id,
                                 time = timeString,
                                 serviceNames = serviceNamesString,
                                 clientName = details.client.name,

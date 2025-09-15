@@ -3,17 +3,14 @@ package com.avetiso.feature_schedule.add_appointment.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.ISwipeableHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.databinding.ItemAppointmentBinding
-import java.time.format.DateTimeFormatter
 
 class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.AppointmentViewHolder>(DiffCallback) {
 
@@ -46,7 +43,6 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
             if (triggerMode == TriggerMode.SWIPE_REVEAL) {
                 binding.contentContainer.translationX = 0f
             }
-            binding.contentContainer.alpha = 1.0f
 
             binding.textTime.text = appointment.time
             binding.textServiceName.text = appointment.serviceNames
@@ -62,7 +58,7 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
 
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<Appointment>() {
-            override fun areItemsTheSame(a: Appointment, b: Appointment) = a == b
+            override fun areItemsTheSame(a: Appointment, b: Appointment) = a.id == b.id
             override fun areContentsTheSame(a: Appointment, b: Appointment) = a == b
         }
     }

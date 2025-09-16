@@ -1,6 +1,8 @@
 package com.avetiso.common_ui.actions
 
+import android.animation.ObjectAnimator
 import android.view.LayoutInflater
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -10,43 +12,83 @@ import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.CustomDialogBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-private const val TAG = "TouchDebug"
-
-class RecyclerViewActions<T>(
+class RecyclerViewActions<T : Any>(
     private val fragment: Fragment,
     private val recyclerView: RecyclerView,
     private val adapter: ListAdapter<T, out ActionsViewHolder>,
-    private val getItemId: (T) -> Any,
+    val getItemId: (T) -> Any,
     private val getItemName: (T) -> String,
     private val onEdit: (T) -> Unit,
     private val onDelete: (T) -> Unit,
     private val onItemClick: ((T) -> Unit)? = null,
     private val onActionsShown: () -> Unit,
+    val triggerMode: TriggerMode = TriggerMode.LONG_PRESS,
 ) {
-    var activeItemId: Any? = null
-        private set
+    var activeItemId: Any?
+        // Используем тег RecyclerView для хранения ID активного элемента.
+        // Это позволяет разным слушателям "общаться" друг с другом.
+        get() = recyclerView.tag as? Long
+        private set(value) {
+            recyclerView.tag = value
+        }
 
     init {
-        val touchListener = ItemActionTouchListener(
-            context = recyclerView.context,
-            recyclerView = recyclerView,
-            onLongPress = { position -> handleLongPress(position) },
-            onItemClick = { position ->
-                val clickedItem =
-                    adapter.currentList.getOrNull(position) ?: return@ItemActionTouchListener
-                val isActionMenuOpen = activeItemId != null
+        // Полностью переработанная логика.
+        // Вместо ItemTouchHelper мы добавляем наши кастомные слушатели.
+        when (triggerMode) {
+            TriggerMode.LONG_PRESS -> {
+                val touchListener = ItemActionTouchListener(
+                    context = recyclerView.context,
+                    recyclerView = recyclerView,
+                    onLongPress = { position -> showActionsForPosition(position) },
+                    onItemClick = { position ->
+                        val clickedItem = adapter.currentList.getOrNull(position) ?: return@ItemActionTouchListener
+                        if (activeItemId != null) {
+                            dismissActions()
+                        } else {
+                            onItemClick?.invoke(clickedItem)
+                        }
+                    },
+                    onEmptySpaceClick = { dismissActions() }
+                )
+                recyclerView.addOnItemTouchListener(touchListener)
+            }
 
-                // Если меню действий открыто, любой клик его просто закрывает.
-                if (isActionMenuOpen) {
-                    dismissActions()
-                } else {
-                    // Если меню было закрыто, то это обычный клик для выбора.
-                    onItemClick?.invoke(clickedItem)
-                }
-            },
-            onEmptySpaceClick = { dismissActions() }
-        )
-        recyclerView.addOnItemTouchListener(touchListener)
+            TriggerMode.SWIPE_REVEAL -> {
+                // ОБНОВЛЕННЫЙ ВЫЗОВ КОНСТРУКТОРА
+                val swipeListener = SwipeRevealTouchListener(
+                    recyclerView = recyclerView,
+                    adapter = adapter,
+                    getItemId = getItemId,
+                    onActionsRevealed = { position -> showActionsForPosition(position) },
+                    onDismiss = { dismissActions() }
+                )
+
+                val tapListener = TapOutsideTouchListener(
+                    recyclerView = recyclerView,
+                    adapter = adapter,
+                    getItemId = getItemId,
+                    onDismiss = { dismissActions() },
+                    // Эта лямбда вызывается при тапе на иконку "Редактировать"
+                    onEdit = { position ->
+                        adapter.currentList.getOrNull(position)?.let { item ->
+                            onEdit(item)       // 1. Выполняем действие (переход на экран)
+                            dismissActions()   // 2. Закрываем свайп
+                        }
+                    },
+                    // Эта лямбда теперь правильно вызывает диалог
+                    onDelete = { position ->
+                        adapter.currentList.getOrNull(position)?.let { item ->
+                            showDeleteConfirmationDialog(item) // 1. Показываем диалог
+                            dismissActions()                   // 2. Закрываем свайп
+                        }
+                    }
+                )
+
+                recyclerView.addOnItemTouchListener(swipeListener)
+                recyclerView.addOnItemTouchListener(tapListener)
+            }
+        }
 
         fragment.viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onPause(owner: LifecycleOwner) {
@@ -55,27 +97,43 @@ class RecyclerViewActions<T>(
         })
     }
 
-    private fun handleLongPress(position: Int) {
-        // Это сбросит выделение во ViewModel ПЕРЕД тем, как мы покажем иконки.
-        onActionsShown()
-
+    fun showActionsForPosition(position: Int) {
         val newActiveItem = adapter.currentList.getOrNull(position) ?: return
         val newActiveId = getItemId(newActiveItem)
+        if (newActiveId == activeItemId) return
 
-        val oldActiveId = activeItemId
-        val oldPosition = if (oldActiveId != null) findIndexOfItem(oldActiveId) else null
-
+        dismissActions()
+        onActionsShown()
         activeItemId = newActiveId
 
-        oldPosition?.let { adapter.notifyItemChanged(it) }
-        adapter.notifyItemChanged(position)
+        val holder = recyclerView.findViewHolderForAdapterPosition(position) ?: return
+
+        if (triggerMode == TriggerMode.LONG_PRESS) {
+            adapter.notifyItemChanged(position)
+        } else { // SWIPE_REVEAL
+            if (holder is ActionsViewHolder && holder is ISwipeableHolder) {
+                // Анимация теперь вызывается прямо отсюда.
+                animateSwipe(holder.contentContainer, -holder.actionsContainer.width.toFloat())
+            }
+        }
     }
 
     fun dismissActions() {
-        val position = if (activeItemId != null) findIndexOfItem(activeItemId!!) else null
-        if (position != null) {
-            activeItemId = null
-            adapter.notifyItemChanged(position)
+        val oldActiveId = activeItemId ?: return
+        val oldPosition = findIndexOfItem(oldActiveId)
+
+        activeItemId = null // Сбрасываем ID
+
+        if (oldPosition != null) {
+            val holder = recyclerView.findViewHolderForAdapterPosition(oldPosition)
+            if (triggerMode == TriggerMode.LONG_PRESS) {
+                adapter.notifyItemChanged(oldPosition)
+            } else { // SWIPE_REVEAL
+                // Анимация закрытия тоже здесь.
+                (holder as? ISwipeableHolder)?.let {
+                    animateSwipe(it.contentContainer, 0f)
+                }
+            }
         }
     }
 
@@ -88,18 +146,37 @@ class RecyclerViewActions<T>(
         val itemId = getItemId(item)
         val isActionsVisible = (itemId == activeItemId)
 
-        holder.toggleActions(isActionsVisible)
+        // Для LongPress мы по-прежнему используем этот метод, чтобы показать/скрыть view
+        if (triggerMode == TriggerMode.LONG_PRESS) {
+            holder.toggleActions(isActionsVisible)
+        }
 
-        if (isActionsVisible) {
-            holder.editButton.setOnClickListener {
-                onEdit(item)
-                dismissActions()
-            }
-            holder.deleteButton.setOnClickListener {
-                showDeleteConfirmationDialog(item)
-                dismissActions()
+        // Для Swipe, если элемент неактивен, принудительно ставим его в начальное положение.
+        // Это важно при переиспользовании ViewHolder'ов.
+        if (triggerMode == TriggerMode.SWIPE_REVEAL && !isActionsVisible) {
+            (holder as? ISwipeableHolder)?.contentContainer?.translationX = 0f
+        }
+
+        if (triggerMode == TriggerMode.LONG_PRESS) {
+            if (isActionsVisible) {
+                holder.editButton.setOnClickListener {
+                    onEdit(item)
+                    dismissActions()
+                }
+                holder.deleteButton.setOnClickListener {
+                    showDeleteConfirmationDialog(item)
+                    dismissActions()
+                }
+            } else {
+                // Обязательно очищаем слушатели для переиспользуемых ViewHolder'ов
+                holder.editButton.setOnClickListener(null)
+                holder.deleteButton.setOnClickListener(null)
             }
         }
+    }
+
+    private fun animateSwipe(view: View, targetX: Float) {
+        ObjectAnimator.ofFloat(view, "translationX", targetX).setDuration(250).start()
     }
 
     private fun showDeleteConfirmationDialog(item: T) {

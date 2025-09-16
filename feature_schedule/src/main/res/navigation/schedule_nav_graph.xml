@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/scheduleFragment"
-        android:name="com.avetiso.feature_schedule.ScheduleFragment"
+        android:name="com.avetiso.feature_schedule.ui.ScheduleFragment"
         android:label="fragment_schedule"
         tools:layout="@layout/fragment_schedule">
         <action
@@ -19,6 +19,15 @@
         android:name="com.avetiso.feature_schedule.add_appointment.ui.AddAppointmentFragment"
         android:label="fragment_add_appointment"
         tools:layout="@layout/fragment_add_appointment">
+
+        <argument
+            android:name="appointmentId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+
+        <argument
+            android:name="selectedDate"
+            app:argType="string" />
 
         <action
             android:id="@+id/action_addAppointmentFragment_to_addServiceFragment"

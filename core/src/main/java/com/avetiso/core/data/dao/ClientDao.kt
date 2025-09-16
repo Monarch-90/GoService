@@ -34,4 +34,7 @@ interface ClientDao {
 
     @Query("SELECT * FROM clients WHERE phoneNumber = :phoneNumber AND instagram = :instagram AND id != :idToExclude LIMIT 1")
     suspend fun findByPhoneAndInstagram(phoneNumber: String, instagram: String, idToExclude: Long): ClientEntity?
+
+    @Query("SELECT * FROM clients WHERE id IN (:ids)")
+    suspend fun getClientsByIds(ids: List<Long>): List<ClientEntity>
 }

@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.data.dao.ServiceDao
+import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.model.AppointmentWithDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,6 +17,7 @@ class ScheduleViewModel @Inject constructor(
     private val appointmentDao: AppointmentDao,
     private val clientDao: ClientDao,
     private val serviceDao: ServiceDao,
+    private val timeSlotDao: TimeSlotDao,
 ) : ViewModel() {
 
     private val _selectedDate = MutableStateFlow("")
@@ -30,24 +33,28 @@ class ScheduleViewModel @Inject constructor(
                     return@map emptyList()
                 }
 
-                // 2. Собираем все уникальные ID клиентов и услуг
+                // 2. Собираем все уникальные ID клиентов, услуг и слотов
                 val clientIds = appointments.map { it.clientId }.distinct()
                 val serviceIds = appointments.flatMap { it.serviceIds }.distinct()
+                val timeSlotIds = appointments.map { it.timeSlotId }.distinct()
 
-                // 3. Одним запросом получаем всех нужных клиентов и все нужные услуги
+                // 3. Одним запросом получаем всех нужных клиентов, услуги и слоты
                 val clients = clientDao.getClientsByIds(clientIds).associateBy { it.id }
                 val services = serviceDao.getServicesByIds(serviceIds).associateBy { it.id }
+                val timeSlots = timeSlotDao.getTimeSlotsByIds(timeSlotIds).associateBy { it.id }
 
                 // 4. "Склеиваем" все данные в объекты AppointmentWithDetails
                 appointments.mapNotNull { appointment ->
                     val client = clients[appointment.clientId]
                     val appointmentServices = appointment.serviceIds.mapNotNull { services[it] }
+                    val timeSlot = timeSlots[appointment.timeSlotId]
 
-                    if (client != null) {
+                    if (client != null && timeSlot != null) {
                         AppointmentWithDetails(
                             appointment = appointment,
                             client = client,
-                            services = appointmentServices
+                            services = appointmentServices,
+                            timeSlot = timeSlot
                         )
                     } else {
                         null // Если клиент не найден, пропускаем запись
@@ -59,5 +66,16 @@ class ScheduleViewModel @Inject constructor(
 
     fun loadAppointmentsForDate(date: String) {
         _selectedDate.value = date
+    }
+
+    fun deleteAppointment(appointmentId: Long) {
+        viewModelScope.launch {
+            // Сначала находим запись в БД по ID
+            val appointmentToDelete = appointmentDao.getAppointmentById(appointmentId)
+            // Если нашли - удаляем
+            appointmentToDelete?.let {
+                appointmentDao.deleteAppointment(it)
+            }
+        }
     }
 }

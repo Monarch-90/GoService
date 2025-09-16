@@ -1,6 +1,7 @@
 package com.avetiso.common_ui.actions
 
 import android.animation.ObjectAnimator
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -59,7 +60,7 @@ class RecyclerViewActions<T : Any>(
                 recyclerView.addOnItemTouchListener(touchListener)
             }
             TriggerMode.SWIPE_REVEAL -> {
-                // 🎯 ОБНОВЛЕННЫЙ ВЫЗОВ КОНСТРУКТОРА
+                // ОБНОВЛЕННЫЙ ВЫЗОВ КОНСТРУКТОРА
                 val swipeListener = SwipeRevealTouchListener(
                     recyclerView = recyclerView,
                     adapter = adapter,
@@ -72,7 +73,21 @@ class RecyclerViewActions<T : Any>(
                     recyclerView = recyclerView,
                     adapter = adapter,
                     getItemId = getItemId,
-                    onDismiss = { dismissActions() }
+                    onDismiss = { dismissActions() },
+                    // Эта лямбда вызывается при тапе на иконку "Редактировать"
+                    onEdit = { position ->
+                        adapter.currentList.getOrNull(position)?.let { item ->
+                            onEdit(item)       // 1. Выполняем действие (переход на экран)
+                            dismissActions()   // 2. Закрываем свайп
+                        }
+                    },
+                    // Эта лямбда теперь правильно вызывает диалог
+                    onDelete = { position ->
+                        adapter.currentList.getOrNull(position)?.let { item ->
+                            showDeleteConfirmationDialog(item) // 1. Показываем диалог
+                            dismissActions()                   // 2. Закрываем свайп
+                        }
+                    }
                 )
 
                 recyclerView.addOnItemTouchListener(swipeListener)
@@ -147,14 +162,21 @@ class RecyclerViewActions<T : Any>(
             (holder as? ISwipeableHolder)?.contentContainer?.translationX = 0f
         }
 
-        if (isActionsVisible) {
-            holder.editButton.setOnClickListener { onEdit(item); dismissActions() }
-            holder.deleteButton.setOnClickListener { showDeleteConfirmationDialog(item); dismissActions() }
-        } else {
-            // Очищаем слушатели, чтобы избежать утечек и ложных срабатываний
-            // на переиспользуемых ViewHolder'ах.
-            holder.editButton.setOnClickListener(null)
-            holder.deleteButton.setOnClickListener(null)
+        if (triggerMode == TriggerMode.LONG_PRESS) {
+            if (isActionsVisible) {
+                holder.editButton.setOnClickListener {
+                    onEdit(item)
+                    dismissActions()
+                }
+                holder.deleteButton.setOnClickListener {
+                    showDeleteConfirmationDialog(item)
+                    dismissActions()
+                }
+            } else {
+                // Обязательно очищаем слушатели для переиспользуемых ViewHolder'ов
+                holder.editButton.setOnClickListener(null)
+                holder.deleteButton.setOnClickListener(null)
+            }
         }
     }
 

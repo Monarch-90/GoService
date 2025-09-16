@@ -21,6 +21,11 @@
         tools:layout="@layout/fragment_add_appointment">
 
         <argument
+            android:name="appointmentId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+
+        <argument
             android:name="selectedDate"
             app:argType="string" />
 

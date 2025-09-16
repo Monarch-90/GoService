@@ -52,9 +52,18 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             recyclerView = binding!!.rvAppointments,
             adapter = appointmentAdapter,
             getItemId = { it.id },
-            getItemName = { "${it.serviceNames} для ${it.clientName}" },
-            onEdit = { /* TODO: Логика редактирования */ },
-            onDelete = { /* TODO: Логика удаления */ },
+            getItemName = { "Удалить запись?" },
+            onEdit = { appointment ->
+                val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
+                    selectedDate = calendarViewModel.state.value.selectedDate.toString(),
+                    appointmentId = appointment.id // Передаем ID для режима редактирования
+                )
+                findNavController().navigate(action)
+            },
+            onDelete = { appointment ->
+                // Просто вызываем метод из ViewModel
+                scheduleViewModel.deleteAppointment(appointment.id)
+            },
             onItemClick = { /* TODO: Логика клика, если нужна */ },
             onActionsShown = {},
             triggerMode = TriggerMode.SWIPE_REVEAL
@@ -89,7 +98,10 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             val selectedDate = calendarViewModel.state.value.selectedDate.toString()
 
             // Создаем action с передачей аргумента
-            val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(selectedDate)
+            val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
+                selectedDate = selectedDate, // Передаем дату для новой записи
+                appointmentId = -1L // Передаем ID по умолчанию, означающий "создать новую"
+            )
             findNavController().navigate(action)
         }
     }
@@ -109,8 +121,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                     scheduleViewModel.appointmentsForDate.collect { detailsList ->
                         val appointmentsForAdapter = detailsList.map { details ->
                             // Форматируем время
-                            val hours = details.appointment.startTimeMinutes / 60
-                            val minutes = details.appointment.startTimeMinutes % 60
+                            val hours = details.timeSlot.startTimeMinutes / 60
+                            val minutes = details.timeSlot.startTimeMinutes % 60
                             val timeString = String.format("%02d:%02d", hours, minutes)
 
                             // Объединяем названия услуг

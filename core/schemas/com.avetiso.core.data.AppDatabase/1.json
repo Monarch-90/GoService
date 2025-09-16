@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "10c4d27226b19a02ff6bb846dff5ac55",
+    "identityHash": "0d1dc1e24e8cacb9d5ecb6367e40d2d8",
     "entities": [
       {
         "tableName": "services",
@@ -174,7 +174,7 @@
       },
       {
         "tableName": "appointments",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` INTEGER NOT NULL, `date` TEXT NOT NULL, `startTimeMinutes` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `serviceIds` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` INTEGER NOT NULL, `date` TEXT NOT NULL, `timeSlotId` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `serviceIds` TEXT NOT NULL, `note` TEXT NOT NULL, FOREIGN KEY(`clientId`) REFERENCES `clients`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`timeSlotId`) REFERENCES `time_slots`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -195,8 +195,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "startTimeMinutes",
-            "columnName": "startTimeMinutes",
+            "fieldPath": "timeSlotId",
+            "columnName": "timeSlotId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -211,6 +211,12 @@
             "columnName": "serviceIds",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -218,12 +224,36 @@
           "columnNames": [
             "id"
           ]
-        }
+        },
+        "foreignKeys": [
+          {
+            "table": "clients",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "clientId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "time_slots",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "timeSlotId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '10c4d27226b19a02ff6bb846dff5ac55')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d1dc1e24e8cacb9d5ecb6367e40d2d8')"
     ]
   }
 }

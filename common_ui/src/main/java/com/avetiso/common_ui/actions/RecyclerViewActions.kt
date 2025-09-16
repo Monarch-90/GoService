@@ -58,15 +58,17 @@ class RecyclerViewActions<T : Any>(
                 )
                 recyclerView.addOnItemTouchListener(touchListener)
             }
-
             TriggerMode.SWIPE_REVEAL -> {
-                val swipeListener = SwipeRevealTouchListener(recyclerView) { position ->
-                    showActionsForPosition(position)
-                }
+                // 🎯 ОБНОВЛЕННЫЙ ВЫЗОВ КОНСТРУКТОРА
+                val swipeListener = SwipeRevealTouchListener(
+                    recyclerView = recyclerView,
+                    adapter = adapter,
+                    getItemId = getItemId,
+                    onActionsRevealed = { position -> showActionsForPosition(position) },
+                    onDismiss = { dismissActions() }
+                )
 
-                // Передаем адаптер и лямбду getItemId в конструктор
                 val tapListener = TapOutsideTouchListener(
-                    context = recyclerView.context,
                     recyclerView = recyclerView,
                     adapter = adapter,
                     getItemId = getItemId,
@@ -156,8 +158,9 @@ class RecyclerViewActions<T : Any>(
         }
     }
 
-    private fun animateSwipe(view: View, targetX: Float) =
+    private fun animateSwipe(view: View, targetX: Float) {
         ObjectAnimator.ofFloat(view, "translationX", targetX).setDuration(250).start()
+    }
 
     private fun showDeleteConfirmationDialog(item: T) {
         // "Надуваем" кастомный макет

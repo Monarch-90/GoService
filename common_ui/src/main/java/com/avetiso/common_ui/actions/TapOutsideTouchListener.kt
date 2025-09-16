@@ -1,44 +1,52 @@
+// common_ui/src/main/java/com/avetiso/common_ui/actions/TapOutsideTouchListener.kt
 package com.avetiso.common_ui.actions
 
 import android.content.Context
 import android.graphics.Rect
-import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * Умный слушатель, который реагирует на любое новое касание RecyclerView
+ * для закрытия ранее открытого элемента.
+ */
 class TapOutsideTouchListener<T>(
-    context: Context,
     private val recyclerView: RecyclerView,
     private val adapter: ListAdapter<T, *>,
     private val getItemId: (T) -> Any,
-    private val onDismiss: () -> Unit,
+    private val onDismiss: () -> Unit
 ) : RecyclerView.SimpleOnItemTouchListener() {
 
-    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            val activeItemId = recyclerView.tag ?: return false
+    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+        // Нас интересует только ACTION_DOWN — самое начало любого нового жеста (тап, скролл и т.д.)
+        if (e.action == MotionEvent.ACTION_DOWN) {
+
+            // Проверяем, есть ли сейчас открытый элемент (его ID хранится в теге)
+            val activeItemId = rv.tag ?: return false // Если ничего не открыто, ничего не делаем
+
+            // Если какой-то элемент открыт, любое новое касание должно его закрыть,
+            // ЕСЛИ только это касание не происходит по кнопкам "Редактировать" или "Удалить".
+
             val activeViewHolder = findViewHolderById(activeItemId) as? ActionsViewHolder
 
-            if (activeViewHolder != null) {
-                val wasActionClicked = isTouchInView(activeViewHolder.editButton, e) ||
-                        isTouchInView(activeViewHolder.deleteButton, e)
-                if (!wasActionClicked) {
-                    onDismiss()
-                }
+            val touchIsInActions = if (activeViewHolder != null) {
+                isTouchInView(activeViewHolder.editButton, e) || isTouchInView(activeViewHolder.deleteButton, e)
             } else {
+                false
+            }
+
+            // Если тап был НЕ по кнопкам действий, даем команду на закрытие
+            if (!touchIsInActions) {
                 onDismiss()
             }
-            return false
         }
-    })
 
-    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-        if (rv.tag != null) {
-            gestureDetector.onTouchEvent(e)
-        }
+        // ВАЖНО: всегда возвращаем false. Мы не "потребляем" событие касания,
+        // а только реагируем на него. Это позволяет касанию "пройти" дальше и,
+        // например, сработать клику по кнопке или начать скролл.
         return false
     }
 
@@ -48,9 +56,7 @@ class TapOutsideTouchListener<T>(
             val holder = recyclerView.getChildViewHolder(child)
             val position = holder.bindingAdapterPosition
             if (position != RecyclerView.NO_POSITION) {
-                // Получаем элемент из адаптера по позиции
-                val item = adapter.currentList[position]
-                // Используем переданную лямбду, чтобы получить ID элемента
+                val item = adapter.currentList.getOrNull(position) ?: continue
                 if (getItemId(item) == id) {
                     return holder
                 }

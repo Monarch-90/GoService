@@ -4,12 +4,16 @@ import android.animation.ObjectAnimator
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
 
-class SwipeRevealTouchListener(
+class SwipeRevealTouchListener<T>(
     private val recyclerView: RecyclerView,
+    private val adapter: ListAdapter<T, *>,      // <- Принимаем универсальный ListAdapter
+    private val getItemId: (T) -> Any,           // <- Принимаем лямбду для получения ID
     private val onActionsRevealed: (Int) -> Unit,
+    private val onDismiss: () -> Unit
 ) : RecyclerView.OnItemTouchListener {
 
     private val touchSlop = ViewConfiguration.get(recyclerView.context).scaledTouchSlop
@@ -20,10 +24,6 @@ class SwipeRevealTouchListener(
     private var swipedViewHolder: RecyclerView.ViewHolder? = null
 
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-        if (rv.tag != null) {
-            return false
-        }
-
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 initialX = e.x
@@ -38,17 +38,33 @@ class SwipeRevealTouchListener(
                 val dy = e.y - initialY
 
                 if (abs(dx) > touchSlop && abs(dx) > abs(dy)) {
-                    if (dx < 0) {
-                        if (swipedViewHolder is ISwipeableHolder) {
-                            isSwiping = true
-                            return true
+                    if (dx < 0 && swipedViewHolder is ISwipeableHolder) {
+
+                        // 🎯 ВОТ ИСПРАВЛЕННАЯ, УНИВЕРСАЛЬНАЯ ЛОГИКА
+                        val activeItemId = rv.tag
+                        var currentItemId: Any? = null
+
+                        val position = swipedViewHolder!!.bindingAdapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            val item = adapter.currentList.getOrNull(position)
+                            if (item != null) {
+                                currentItemId = getItemId(item)
+                            }
                         }
+
+                        if (activeItemId != null && activeItemId != currentItemId) {
+                            onDismiss()
+                        }
+
+                        isSwiping = true
+                        return true
                     }
                 }
             }
         }
         return false
     }
+
 
     override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
         val holder = swipedViewHolder

@@ -1,7 +1,6 @@
 package com.avetiso.common_ui.actions
 
 import android.animation.ObjectAnimator
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -12,11 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.CustomDialogBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
-enum class TriggerMode {
-    LONG_PRESS,
-    SWIPE_REVEAL
-}
 
 class RecyclerViewActions<T : Any>(
     private val fragment: Fragment,
@@ -59,6 +53,7 @@ class RecyclerViewActions<T : Any>(
                 )
                 recyclerView.addOnItemTouchListener(touchListener)
             }
+
             TriggerMode.SWIPE_REVEAL -> {
                 // ОБНОВЛЕННЫЙ ВЫЗОВ КОНСТРУКТОРА
                 val swipeListener = SwipeRevealTouchListener(

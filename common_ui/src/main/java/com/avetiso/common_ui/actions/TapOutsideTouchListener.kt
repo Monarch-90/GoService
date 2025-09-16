@@ -1,7 +1,5 @@
-// common_ui/src/main/java/com/avetiso/common_ui/actions/TapOutsideTouchListener.kt
 package com.avetiso.common_ui.actions
 
-import android.content.Context
 import android.graphics.Rect
 import android.util.Log
 import android.view.GestureDetector

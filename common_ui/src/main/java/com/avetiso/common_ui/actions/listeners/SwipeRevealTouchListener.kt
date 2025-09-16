@@ -1,4 +1,4 @@
-package com.avetiso.common_ui.actions
+package com.avetiso.common_ui.actions.listeners
 
 import android.animation.ObjectAnimator
 import android.view.MotionEvent
@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewConfiguration
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.avetiso.common_ui.actions.ActionsViewHolder
+import com.avetiso.common_ui.actions.ISwipeableHolder
 import kotlin.math.abs
 
 class SwipeRevealTouchListener<T>(

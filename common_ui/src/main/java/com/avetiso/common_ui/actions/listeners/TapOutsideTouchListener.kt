@@ -1,4 +1,4 @@
-package com.avetiso.common_ui.actions
+package com.avetiso.common_ui.actions.listeners
 
 import android.graphics.Rect
 import android.util.Log
@@ -8,6 +8,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.avetiso.common_ui.actions.ActionsViewHolder
 
 /**
  * Умный слушатель, который реагирует на любое новое касание RecyclerView

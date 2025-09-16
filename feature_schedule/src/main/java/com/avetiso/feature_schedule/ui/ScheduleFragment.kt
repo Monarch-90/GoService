@@ -10,6 +10,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
+import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
@@ -17,6 +18,8 @@ import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
@@ -118,36 +121,35 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 }
 
                 launch {
-                    scheduleViewModel.appointmentsForDate.collect { detailsList ->
-                        val appointmentsForAdapter = detailsList.map { details ->
-                            // Форматируем время
-                            val hours = details.timeSlot.startTimeMinutes / 60
-                            val minutes = details.timeSlot.startTimeMinutes % 60
+                    scheduleViewModel.appointmentsForDate.collect { appointmentsList ->
+                        val gson = Gson()
+                        val listType = object : TypeToken<List<ServiceSnapshot>>() {}.type
+
+                        val appointmentsForAdapter = appointmentsList.map { appointmentEntity ->
+                            // ПАРСИМ ДАННЫЕ ИЗ СНИМКА (JSON)
+                            val services: List<ServiceSnapshot> = gson.fromJson(appointmentEntity.servicesJson, listType) ?: emptyList()
+
+                            val hours = appointmentEntity.startTimeMinutes / 60
+                            val minutes = appointmentEntity.startTimeMinutes % 60
                             val timeString = String.format("%02d:%02d", hours, minutes)
 
-                            // Объединяем названия услуг
-                            val serviceNamesString = details.services.joinToString(separator = ", ") { it.name }
+                            val serviceNamesString = services.joinToString(", ") { it.name }
 
-                            // ЛОГИКА ПОДСЧЕТА ЦЕНЫ
-                            val priceString = details.services
-                                .groupBy { it.currency } // Группируем услуги по валюте
+                            val priceString = services
+                                .groupBy { it.currency }
                                 .map { (currency, servicesInCurrency) ->
-                                    // Для каждой группы считаем сумму и проверяем флаг "от"
                                     val total = servicesInCurrency.sumOf { it.price }
                                     val isPriceFrom = servicesInCurrency.any { it.isPriceFrom }
                                     val prefix = if (isPriceFrom) "от " else ""
-
-                                    // Форматируем строку для одной валюты
                                     "$prefix${"%.2f".format(total)} $currency"
                                 }
-                                .joinToString(separator = "\n") // Объединяем строки для разных валют
+                                .joinToString("\n")
 
-                            // Создаем финальный объект для адаптера
                             Appointment(
-                                id = details.appointment.id,
+                                id = appointmentEntity.id,
                                 time = timeString,
                                 serviceNames = serviceNamesString,
-                                clientName = details.client.name,
+                                clientName = appointmentEntity.clientName,
                                 price = priceString
                             )
                         }

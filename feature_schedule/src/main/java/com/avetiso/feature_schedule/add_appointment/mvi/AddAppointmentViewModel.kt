@@ -9,7 +9,9 @@ import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.entity.TimeSlotEntity
+import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +26,6 @@ class AddAppointmentViewModel @Inject constructor(
     private val appointmentDao: AppointmentDao,
     private val clientDao: ClientDao,
     private val serviceDao: ServiceDao,
-    private val timeSlotDao: TimeSlotDao,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -38,12 +39,7 @@ class AddAppointmentViewModel @Inject constructor(
     val navigationEvents = _navigationChannel.receiveAsFlow()
 
     init {
-        // ЛОГИКА РЕДАКТИРОВАНИЯ
-        // Проверяем, был ли передан ID для редактирования
         appointmentToEditId = savedStateHandle.get<Long>("appointmentId") ?: -1L
-        if (appointmentToEditId != -1L) {
-            loadAppointmentForEdit()
-        }
     }
 
     fun handleEvent(event: AddAppointmentEvent) {
@@ -180,13 +176,26 @@ class AddAppointmentViewModel @Inject constructor(
             val timeSlot = currentState.selectedTimeSlots.firstOrNull() ?: return@launch
             val totalDuration = services.sumOf { it.durationMinutes }
 
+            val serviceSnapshots = services.map { service ->
+                ServiceSnapshot(
+                    id = service.id,
+                    name = service.name,
+                    categoryName = service.categoryName,
+                    isPriceFrom = service.isPriceFrom,
+                    price = service.price,
+                    currency = service.currency,
+                    durationMinutes = service.durationMinutes
+                )
+            }
+            val servicesJson = Gson().toJson(serviceSnapshots)
+
             val appointment = AppointmentEntity(
                 id = if (appointmentToEditId != -1L) appointmentToEditId else 0,
-                clientId = client.id,
                 date = selectedDate,
-                timeSlotId = timeSlot.id,
+                startTimeMinutes = timeSlot.startTimeMinutes,
                 totalDurationMinutes = totalDuration,
-                serviceIds = services.map { it.id }
+                clientName = client.name,
+                servicesJson = servicesJson
             )
 
             // ВЫБИРАЕМ, ОБНОВИТЬ ИЛИ СОЗДАТЬ
@@ -197,25 +206,6 @@ class AddAppointmentViewModel @Inject constructor(
             }
 
             _navigationChannel.send(NavigationEvent.NavigateToSchedule)
-        }
-    }
-
-    private fun loadAppointmentForEdit() {
-        viewModelScope.launch {
-            val appointment = appointmentDao.getAppointmentById(appointmentToEditId) ?: return@launch
-            val client = clientDao.getClientsByIds(listOf(appointment.clientId)).firstOrNull() ?: return@launch
-            val services = serviceDao.getServicesByIds(appointment.serviceIds)
-            val timeSlot = timeSlotDao.getTimeSlotsByIds(listOf(appointment.timeSlotId)).firstOrNull() ?: return@launch
-
-            _state.update {
-                it.copy(
-                    selectedServices = services.toSet(),
-                    selectedClient = client,
-                    selectedTimeSlots = setOf(timeSlot),
-                    // Сразу делаем кнопку "Далее" активной на всех шагах
-                    isNextButtonEnabled = true
-                )
-            }
         }
     }
 

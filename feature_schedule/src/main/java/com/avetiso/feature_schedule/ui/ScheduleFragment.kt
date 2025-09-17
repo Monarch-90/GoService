@@ -127,7 +127,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
                         val appointmentsForAdapter = appointmentsList.map { appointmentEntity ->
                             // ПАРСИМ ДАННЫЕ ИЗ СНИМКА (JSON)
-                            val services: List<ServiceSnapshot> = gson.fromJson(appointmentEntity.servicesJson, listType) ?: emptyList()
+                            val services: List<ServiceSnapshot> =
+                                gson.fromJson(appointmentEntity.servicesJson, listType) ?: emptyList()
 
                             val hours = appointmentEntity.startTimeMinutes / 60
                             val minutes = appointmentEntity.startTimeMinutes % 60
@@ -161,8 +162,10 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     private fun updateMonthTitle(yearMonth: YearMonth) {
-        val monthTitle = yearMonth.month.getDisplayName(TextStyle.FULL_STANDALONE, Locale("ru"))
-            .replaceFirstChar { it.uppercase() }
+        val monthTitle = yearMonth.month.getDisplayName(
+            TextStyle.FULL_STANDALONE,
+            Locale.forLanguageTag("ru")
+        ).replaceFirstChar { it.uppercase() }
         val yearTitle = yearMonth.year.toString()
         binding?.textMonthTitle?.text = "$monthTitle $yearTitle"
     }

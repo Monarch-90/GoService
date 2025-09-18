@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.setFragmentResult
 import com.chargemap.compose.numberpicker.NumberPicker
 
 class ComposePickerDialogFragment : DialogFragment() {
@@ -37,11 +36,18 @@ class ComposePickerDialogFragment : DialogFragment() {
     }
 
     var onConfirm: ((hour: Int, minute: Int) -> Boolean)? = null
+    var onDismissListener: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         selectedHour = requireArguments().getInt(ARG_INITIAL_HOUR)
         selectedMinute = requireArguments().getInt(ARG_INITIAL_MINUTE)
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        // Вызываем наш слушатель, если он был установлен
+        onDismissListener?.invoke()
     }
 
     override fun onCreateView(

@@ -83,6 +83,10 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                                 findNavController().navigateUp()
                                 Toast.makeText(requireContext(), "Запись успешно создана", Toast.LENGTH_SHORT).show()
                             }
+
+                            is NavigationEvent.ShowToast -> {
+                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 }

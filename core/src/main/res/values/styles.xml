@@ -37,7 +37,7 @@
         <item name="android:textSize">15sp</item>
     </style>
 
-    <style name="textSize_15" parent="Widget.AppCompat.TextView">
-        <item name="android:textSize">17sp</item>
+    <style name="textSize_16" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">16sp</item>
     </style>
 </resources>

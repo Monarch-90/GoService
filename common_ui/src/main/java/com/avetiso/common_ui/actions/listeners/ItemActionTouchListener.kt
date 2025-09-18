@@ -1,4 +1,4 @@
-package com.avetiso.common_ui.actions
+package com.avetiso.common_ui.actions.listeners
 
 import android.content.Context
 import android.graphics.Rect
@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.avetiso.common_ui.actions.ActionsViewHolder
 
 class ItemActionTouchListener(
     context: Context,

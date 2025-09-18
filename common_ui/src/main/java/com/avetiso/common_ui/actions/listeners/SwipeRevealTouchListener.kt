@@ -1,4 +1,4 @@
-package com.avetiso.common_ui.actions
+package com.avetiso.common_ui.actions.listeners
 
 import android.animation.ObjectAnimator
 import android.view.MotionEvent
@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewConfiguration
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.avetiso.common_ui.actions.ActionsViewHolder
+import com.avetiso.common_ui.actions.ISwipeableHolder
 import kotlin.math.abs
 
 class SwipeRevealTouchListener<T>(
@@ -40,7 +42,6 @@ class SwipeRevealTouchListener<T>(
                 if (abs(dx) > touchSlop && abs(dx) > abs(dy)) {
                     if (dx < 0 && swipedViewHolder is ISwipeableHolder) {
 
-                        // 🎯 ВОТ ИСПРАВЛЕННАЯ, УНИВЕРСАЛЬНАЯ ЛОГИКА
                         val activeItemId = rv.tag
                         var currentItemId: Any? = null
 
@@ -80,6 +81,22 @@ class SwipeRevealTouchListener<T>(
                 val dx = e.x - initialX
                 val clampedDx = dx.coerceIn(-holder.actionsContainer.width.toFloat(), 0f)
                 holder.contentContainer.translationX = clampedDx
+
+                // Рассчитываем и применяем прозрачность в реальном времени
+                val actionsWidth = holder.actionsContainer.width.toFloat()
+                if (actionsWidth > 0) {
+                    // Вычисляем прогресс свайпа (от 0.0 до 1.0)
+                    val swipeProgress = abs(clampedDx) / actionsWidth
+
+                    // Целевая прозрачность - 0.5f. Диапазон изменения - 0.8f (от 1.0 до 0.5)
+                    val alphaRange = 1.0f - 0.5f
+
+                    // Вычисляем новую прозрачность
+                    val newAlpha = 1.0f - (swipeProgress * alphaRange)
+
+                    // Применяем ее к контейнеру
+                    holder.contentContainer.alpha = newAlpha
+                }
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {

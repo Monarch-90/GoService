@@ -14,16 +14,14 @@ interface AppointmentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAppointment(appointment: AppointmentEntity)
 
-    @Query("""
-        SELECT appointments.* FROM appointments
-        INNER JOIN time_slots ON appointments.timeSlotId = time_slots.id
-        WHERE appointments.date = :date
-        ORDER BY time_slots.startTimeMinutes ASC
-    """)
+    @Query("SELECT * FROM appointments WHERE date = :date ORDER BY startTimeMinutes ASC")
     fun getAppointmentsForDate(date: String): Flow<List<AppointmentEntity>>
 
     @Query("SELECT * FROM appointments WHERE id = :id")
     suspend fun getAppointmentById(id: Long): AppointmentEntity?
+
+    @Query("SELECT * FROM appointments WHERE date = :date")
+    suspend fun getAppointmentsForDateSync(date: String): List<AppointmentEntity>
 
     @Update
     suspend fun updateAppointment(appointment: AppointmentEntity)

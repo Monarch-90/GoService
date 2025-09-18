@@ -25,7 +25,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_client_name"
-            style="@style/textSize_15"
+            style="@style/textSize_16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBodyLarge"

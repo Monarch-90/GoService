@@ -47,7 +47,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Наименование услуги">
+                android:hint="Наименование услуги"
+                app:cursorErrorColor="@color/error_ping">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/iet_name"
@@ -102,7 +103,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:hint="Сумма">
+                    android:hint="Сумма"
+                    app:cursorErrorColor="@color/error_ping">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/iet_price"

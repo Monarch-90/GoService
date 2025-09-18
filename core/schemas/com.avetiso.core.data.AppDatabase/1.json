@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0d1dc1e24e8cacb9d5ecb6367e40d2d8",
+    "identityHash": "4c056e304b62f52861cc83ad74350fae",
     "entities": [
       {
         "tableName": "services",
@@ -174,17 +174,11 @@
       },
       {
         "tableName": "appointments",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` INTEGER NOT NULL, `date` TEXT NOT NULL, `timeSlotId` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `serviceIds` TEXT NOT NULL, `note` TEXT NOT NULL, FOREIGN KEY(`clientId`) REFERENCES `clients`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`timeSlotId`) REFERENCES `time_slots`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `startTimeMinutes` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `clientName` TEXT NOT NULL, `clientPhoneNumber` TEXT NOT NULL, `clientInstagram` TEXT NOT NULL, `servicesJson` TEXT NOT NULL, `note` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -195,8 +189,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "timeSlotId",
-            "columnName": "timeSlotId",
+            "fieldPath": "startTimeMinutes",
+            "columnName": "startTimeMinutes",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -207,8 +201,26 @@
             "notNull": true
           },
           {
-            "fieldPath": "serviceIds",
-            "columnName": "serviceIds",
+            "fieldPath": "clientName",
+            "columnName": "clientName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientPhoneNumber",
+            "columnName": "clientPhoneNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientInstagram",
+            "columnName": "clientInstagram",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "servicesJson",
+            "columnName": "servicesJson",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -224,36 +236,12 @@
           "columnNames": [
             "id"
           ]
-        },
-        "foreignKeys": [
-          {
-            "table": "clients",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "clientId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "time_slots",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "timeSlotId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d1dc1e24e8cacb9d5ecb6367e40d2d8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c056e304b62f52861cc83ad74350fae')"
     ]
   }
 }

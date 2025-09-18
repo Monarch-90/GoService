@@ -1,15 +1,16 @@
 package com.avetiso.common_ui.actions
 
-import android.animation.ObjectAnimator
 import android.view.LayoutInflater
-import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.R
-import com.avetiso.common_ui.databinding.CustomDialogBinding
+import com.avetiso.common_ui.actions.listeners.ItemActionTouchListener
+import com.avetiso.common_ui.actions.listeners.SwipeRevealTouchListener
+import com.avetiso.common_ui.actions.listeners.TapOutsideTouchListener
+import com.avetiso.common_ui.databinding.DeleteDialogBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class RecyclerViewActions<T : Any>(
@@ -22,6 +23,7 @@ class RecyclerViewActions<T : Any>(
     private val onDelete: (T) -> Unit,
     private val onItemClick: ((T) -> Unit)? = null,
     private val onActionsShown: () -> Unit,
+    private val onActionsDismissed: () -> Unit = {},
     val triggerMode: TriggerMode = TriggerMode.LONG_PRESS,
 ) {
     var activeItemId: Any?
@@ -113,12 +115,17 @@ class RecyclerViewActions<T : Any>(
         } else { // SWIPE_REVEAL
             if (holder is ActionsViewHolder && holder is ISwipeableHolder) {
                 // Анимация теперь вызывается прямо отсюда.
-                animateSwipe(holder.contentContainer, -holder.actionsContainer.width.toFloat())
+                holder.contentContainer.animate()
+                    .translationX(-holder.actionsContainer.width.toFloat())
+                    .setDuration(250)
+                    .start()
             }
         }
     }
 
     fun dismissActions() {
+        onActionsDismissed()
+
         val oldActiveId = activeItemId ?: return
         val oldPosition = findIndexOfItem(oldActiveId)
 
@@ -130,9 +137,8 @@ class RecyclerViewActions<T : Any>(
                 adapter.notifyItemChanged(oldPosition)
             } else { // SWIPE_REVEAL
                 // Анимация закрытия тоже здесь.
-                (holder as? ISwipeableHolder)?.let {
-                    animateSwipe(it.contentContainer, 0f)
-                }
+                (holder as? ISwipeableHolder)?.contentContainer?.animate()?.translationX(0f)?.alpha(1.0f)?.setDuration(250)
+                    ?.start()
             }
         }
     }
@@ -175,13 +181,9 @@ class RecyclerViewActions<T : Any>(
         }
     }
 
-    private fun animateSwipe(view: View, targetX: Float) {
-        ObjectAnimator.ofFloat(view, "translationX", targetX).setDuration(250).start()
-    }
-
     private fun showDeleteConfirmationDialog(item: T) {
         // "Надуваем" кастомный макет
-        val binding = CustomDialogBinding.inflate(LayoutInflater.from(fragment.requireContext()))
+        val binding = DeleteDialogBinding.inflate(LayoutInflater.from(fragment.requireContext()))
 
         // Текст из string
         binding.tvMessage.text =
@@ -205,6 +207,6 @@ class RecyclerViewActions<T : Any>(
         dialog.show()
 
         // Скругление фона
-        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.corners_window)
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
     }
 }

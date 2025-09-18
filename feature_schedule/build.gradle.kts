@@ -75,4 +75,7 @@ dependencies {
 
     // For time select
     implementation(libs.chargemap.numberpicker)
+
+    // Gson
+    implementation(libs.gson)
 }

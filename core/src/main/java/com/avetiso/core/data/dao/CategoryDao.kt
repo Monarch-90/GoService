@@ -16,6 +16,9 @@ interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY name ASC")
     fun getAllCategories(): Flow<List<CategoryEntity>>
 
+    @Query("SELECT * FROM categories WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    fun searchCategories(query: String): Flow<List<CategoryEntity>>
+
     @Delete
     suspend fun deleteCategory(category: CategoryEntity)
 

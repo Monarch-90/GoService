@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.core.widget.addTextChangedListener
 
 private const val TAG = "TouchDebug"
 
@@ -37,6 +38,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
         setupRecyclerView()
         setupClickListeners()
+        setupSearch()
         observeViewModel()
     }
 
@@ -106,6 +108,12 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
                     categories
                 )
             }
+        }
+    }
+
+    private fun setupSearch() {
+        binding?.etSearch?.addTextChangedListener { editable ->
+            viewModel.onSearchQueryChanged(editable.toString())
         }
     }
 

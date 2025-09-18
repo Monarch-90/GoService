@@ -207,6 +207,6 @@ class RecyclerViewActions<T : Any>(
         dialog.show()
 
         // Скругление фона
-        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_box_corners)
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
     }
 }

@@ -163,6 +163,13 @@ class AddAppointmentViewModel @Inject constructor(
     private fun saveAppointment() {
         viewModelScope.launch {
             val currentState = _state.value
+            val gson = Gson() // Понадобится для сравнения услуг
+
+            // --- 1. Собираем данные для НОВОЙ записи ---
+            val client = currentState.selectedClient ?: return@launch
+            val services = currentState.selectedServices
+            val timeSlot = currentState.selectedTimeSlots.firstOrNull() ?: return@launch
+
             val selectedDate: String = if (appointmentToEditId != -1L) {
                 // В режиме редактирования БЕРЕМ ДАТУ ИЗ СУЩЕСТВУЮЩЕЙ ЗАПИСИ
                 appointmentDao.getAppointmentById(appointmentToEditId)?.date ?: return@launch
@@ -171,38 +178,64 @@ class AddAppointmentViewModel @Inject constructor(
                 savedStateHandle["selectedDate"] ?: return@launch
             }
 
-            val client = currentState.selectedClient ?: return@launch
-            val services = currentState.selectedServices
-            val timeSlot = currentState.selectedTimeSlots.firstOrNull() ?: return@launch
-            val totalDuration = services.sumOf { it.durationMinutes }
+            // --- 2. Получаем ВСЕ существующие записи на эту дату для проверки ---
+            val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
 
-            val serviceSnapshots = services.map { service ->
+            // --- 3. Создаем "снимок" услуг для НОВОЙ записи ---
+            val newServiceSnapshots = services.map { service ->
                 ServiceSnapshot(
-                    id = service.id,
-                    name = service.name,
-                    categoryName = service.categoryName,
-                    isPriceFrom = service.isPriceFrom,
-                    price = service.price,
-                    currency = service.currency,
-                    durationMinutes = service.durationMinutes
+                    id = service.id, name = service.name, categoryName = service.categoryName,
+                    isPriceFrom = service.isPriceFrom, price = service.price,
+                    currency = service.currency, durationMinutes = service.durationMinutes
                 )
-            }
-            val servicesJson = Gson().toJson(serviceSnapshots)
+            }.toSet() // Превращаем в Set для сравнения без учета порядка
 
-            val appointment = AppointmentEntity(
+            // --- 4. Запускаем цикл проверки на дубликаты ---
+            for (existingAppointment in existingAppointments) {
+                // Пропускаем проверку с самой собой в режиме редактирования
+                if (appointmentToEditId != -1L && existingAppointment.id == appointmentToEditId) {
+                    continue
+                }
+
+                // Сравниваем слот времени
+                val isTimeSlotSame = existingAppointment.startTimeMinutes == timeSlot.startTimeMinutes
+
+                // Сравниваем клиента по всем полям
+                val isClientSame = existingAppointment.clientName == client.name &&
+                        existingAppointment.clientPhoneNumber == client.phoneNumber &&
+                        existingAppointment.clientInstagram == client.instagram
+
+                // Сравниваем набор услуг
+                val existingServicesJson = existingAppointment.servicesJson
+                val existingServiceSnapshots = gson.fromJson(existingServicesJson, Array<ServiceSnapshot>::class.java).toSet()
+                val areServicesSame = existingServiceSnapshots == newServiceSnapshots
+
+                // Если ВСЕ совпало - это дубликат
+                if (isTimeSlotSame && isClientSame && areServicesSame) {
+                    _navigationChannel.send(NavigationEvent.ShowToast("Такая запись уже существует на эту дату"))
+                    return@launch // Прерываем сохранение
+                }
+            }
+
+            // --- 5. Если дубликатов не найдено - СОХРАНЯЕМ ЗАПИСЬ ---
+            val totalDuration = services.sumOf { it.durationMinutes }
+            val servicesJson = gson.toJson(newServiceSnapshots) // Используем уже созданный JSON
+
+            val appointmentToSave = AppointmentEntity(
                 id = if (appointmentToEditId != -1L) appointmentToEditId else 0,
                 date = selectedDate,
                 startTimeMinutes = timeSlot.startTimeMinutes,
                 totalDurationMinutes = totalDuration,
                 clientName = client.name,
+                clientPhoneNumber = client.phoneNumber, // Сохраняем доп. поля
+                clientInstagram = client.instagram,   // Сохраняем доп. поля
                 servicesJson = servicesJson
             )
 
-            // ВЫБИРАЕМ, ОБНОВИТЬ ИЛИ СОЗДАТЬ
             if (appointmentToEditId != -1L) {
-                appointmentDao.updateAppointment(appointment)
+                appointmentDao.updateAppointment(appointmentToSave)
             } else {
-                appointmentDao.insertAppointment(appointment)
+                appointmentDao.insertAppointment(appointmentToSave)
             }
 
             _navigationChannel.send(NavigationEvent.NavigateToSchedule)

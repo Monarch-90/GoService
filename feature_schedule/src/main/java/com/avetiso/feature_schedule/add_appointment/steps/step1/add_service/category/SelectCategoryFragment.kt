@@ -124,7 +124,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             .setPositiveButton(if (isEditMode) "Сохранить" else "Добавить", null)
             .create()
 
-        dialog.window?.setBackgroundDrawableResource(com.avetiso.common_ui.R.drawable.dialog_box_corners)
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
 
         dialog.setOnShowListener {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)

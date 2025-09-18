@@ -20,6 +20,9 @@ interface AppointmentDao {
     @Query("SELECT * FROM appointments WHERE id = :id")
     suspend fun getAppointmentById(id: Long): AppointmentEntity?
 
+    @Query("SELECT * FROM appointments WHERE date = :date")
+    suspend fun getAppointmentsForDateSync(date: String): List<AppointmentEntity>
+
     @Update
     suspend fun updateAppointment(appointment: AppointmentEntity)
 

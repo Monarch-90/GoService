@@ -8,6 +8,8 @@ import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
+import com.avetiso.core.entity.ClientEntity
+import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
 import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
@@ -163,75 +165,18 @@ class AddAppointmentViewModel @Inject constructor(
     private fun saveAppointment() {
         viewModelScope.launch {
             val currentState = _state.value
-            val gson = Gson() // Понадобится для сравнения услуг
-
-            // --- 1. Собираем данные для НОВОЙ записи ---
             val client = currentState.selectedClient ?: return@launch
             val services = currentState.selectedServices
             val timeSlot = currentState.selectedTimeSlots.firstOrNull() ?: return@launch
 
-            val selectedDate: String = if (appointmentToEditId != -1L) {
-                // В режиме редактирования БЕРЕМ ДАТУ ИЗ СУЩЕСТВУЮЩЕЙ ЗАПИСИ
-                appointmentDao.getAppointmentById(appointmentToEditId)?.date ?: return@launch
-            } else {
-                // В режиме создания берем дату из аргументов навигации
-                savedStateHandle["selectedDate"] ?: return@launch
+            // 1. Проверяем на дубликат с помощью новой чистой функции
+            if (isDuplicate(client, services, timeSlot)) {
+                _navigationChannel.send(NavigationEvent.ShowToast("Такая запись уже существует на эту дату"))
+                return@launch
             }
 
-            // --- 2. Получаем ВСЕ существующие записи на эту дату для проверки ---
-            val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
-
-            // --- 3. Создаем "снимок" услуг для НОВОЙ записи ---
-            val newServiceSnapshots = services.map { service ->
-                ServiceSnapshot(
-                    id = service.id, name = service.name, categoryName = service.categoryName,
-                    isPriceFrom = service.isPriceFrom, price = service.price,
-                    currency = service.currency, durationMinutes = service.durationMinutes
-                )
-            }.toSet() // Превращаем в Set для сравнения без учета порядка
-
-            // --- 4. Запускаем цикл проверки на дубликаты ---
-            for (existingAppointment in existingAppointments) {
-                // Пропускаем проверку с самой собой в режиме редактирования
-                if (appointmentToEditId != -1L && existingAppointment.id == appointmentToEditId) {
-                    continue
-                }
-
-                // Сравниваем слот времени
-                val isTimeSlotSame = existingAppointment.startTimeMinutes == timeSlot.startTimeMinutes
-
-                // Сравниваем клиента по всем полям
-                val isClientSame = existingAppointment.clientName == client.name &&
-                        existingAppointment.clientPhoneNumber == client.phoneNumber &&
-                        existingAppointment.clientInstagram == client.instagram
-
-                // Сравниваем набор услуг
-                val existingServicesJson = existingAppointment.servicesJson
-                val existingServiceSnapshots = gson.fromJson(existingServicesJson, Array<ServiceSnapshot>::class.java).toSet()
-                val areServicesSame = existingServiceSnapshots == newServiceSnapshots
-
-                // Если ВСЕ совпало - это дубликат
-                if (isTimeSlotSame && isClientSame && areServicesSame) {
-                    _navigationChannel.send(NavigationEvent.ShowToast("Такая запись уже существует на эту дату"))
-                    return@launch // Прерываем сохранение
-                }
-            }
-
-            // --- 5. Если дубликатов не найдено - СОХРАНЯЕМ ЗАПИСЬ ---
-            val totalDuration = services.sumOf { it.durationMinutes }
-            val servicesJson = gson.toJson(newServiceSnapshots) // Используем уже созданный JSON
-
-            val appointmentToSave = AppointmentEntity(
-                id = if (appointmentToEditId != -1L) appointmentToEditId else 0,
-                date = selectedDate,
-                startTimeMinutes = timeSlot.startTimeMinutes,
-                totalDurationMinutes = totalDuration,
-                clientName = client.name,
-                clientPhoneNumber = client.phoneNumber, // Сохраняем доп. поля
-                clientInstagram = client.instagram,   // Сохраняем доп. поля
-                servicesJson = servicesJson
-            )
-
+            // 2. Если все в порядке, создаем и сохраняем сущность
+            val appointmentToSave = createAppointmentEntity(client, services, timeSlot)
             if (appointmentToEditId != -1L) {
                 appointmentDao.updateAppointment(appointmentToSave)
             } else {
@@ -240,6 +185,71 @@ class AddAppointmentViewModel @Inject constructor(
 
             _navigationChannel.send(NavigationEvent.NavigateToSchedule)
         }
+    }
+
+    // Проверяет, существует ли уже аналогичная запись на эту дату.
+    private suspend fun isDuplicate(
+        client: ClientEntity,
+        services: Set<ServiceEntity>,
+        timeSlot: TimeSlotEntity
+    ): Boolean {
+        val selectedDate: String = savedStateHandle["selectedDate"]
+            ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
+            ?: return true // Если дата неизвестна, считаем дубликатом для безопасности
+
+        val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
+        val newServiceSnapshots = services.map { ServiceSnapshot(
+            id = it.id, name = it.name, categoryName = it.categoryName,
+            isPriceFrom = it.isPriceFrom, price = it.price,
+            currency = it.currency, durationMinutes = it.durationMinutes
+        )}.toSet()
+
+        for (existing in existingAppointments) {
+            if (appointmentToEditId != -1L && existing.id == appointmentToEditId) continue
+
+            val isTimeSlotSame = existing.startTimeMinutes == timeSlot.startTimeMinutes
+            val isClientSame = existing.clientName == client.name &&
+                    existing.clientPhoneNumber == client.phoneNumber &&
+                    existing.clientInstagram == client.instagram
+
+            val existingServices = Gson().fromJson(existing.servicesJson, Array<ServiceSnapshot>::class.java).toSet()
+            val areServicesSame = existingServices == newServiceSnapshots
+
+            if (isTimeSlotSame && isClientSame && areServicesSame) {
+                return true // Найден дубликат
+            }
+        }
+        return false // Дубликатов нет
+    }
+
+    // Создает и возвращает готовую к сохранению сущность AppointmentEntity.
+    private suspend fun createAppointmentEntity(
+        client: ClientEntity,
+        services: Set<ServiceEntity>,
+        timeSlot: TimeSlotEntity
+    ): AppointmentEntity {
+        val selectedDate: String = savedStateHandle["selectedDate"]
+            ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
+            ?: "" // Если дата пустая, это будет обработано дальше
+
+        val totalDuration = services.sumOf { it.durationMinutes }
+        val serviceSnapshots = services.map { ServiceSnapshot(
+            id = it.id, name = it.name, categoryName = it.categoryName,
+            isPriceFrom = it.isPriceFrom, price = it.price,
+            currency = it.currency, durationMinutes = it.durationMinutes
+        )}
+        val servicesJson = Gson().toJson(serviceSnapshots)
+
+        return AppointmentEntity(
+            id = if (appointmentToEditId != -1L) appointmentToEditId else 0,
+            date = selectedDate,
+            startTimeMinutes = timeSlot.startTimeMinutes,
+            totalDurationMinutes = totalDuration,
+            clientName = client.name,
+            clientPhoneNumber = client.phoneNumber,
+            clientInstagram = client.instagram,
+            servicesJson = servicesJson
+        )
     }
 
     // Проверяет, завершен ли шаг

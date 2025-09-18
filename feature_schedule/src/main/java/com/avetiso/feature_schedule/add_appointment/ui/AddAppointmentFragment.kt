@@ -84,7 +84,9 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                                 Toast.makeText(requireContext(), "Запись успешно создана", Toast.LENGTH_SHORT).show()
                             }
 
-                            is NavigationEvent.ShowToast -> TODO()
+                            is NavigationEvent.ShowToast -> {
+                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 }

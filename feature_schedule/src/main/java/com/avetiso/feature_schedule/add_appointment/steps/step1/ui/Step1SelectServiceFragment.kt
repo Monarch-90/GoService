@@ -83,6 +83,9 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
         serviceAdapter = AvailableServiceAdapter()
         binding?.rvSelectedServices?.adapter = serviceAdapter
 
+        // Отключает анимацию на андроид 15
+        binding?.rvSelectedServices?.itemAnimator = null
+
         // Инициализируем наш механизм действий
         actions = RecyclerViewActions(
             fragment = this,

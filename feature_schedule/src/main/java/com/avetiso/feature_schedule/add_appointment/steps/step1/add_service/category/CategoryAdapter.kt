@@ -41,7 +41,8 @@ class CategoryAdapter :
         }
 
         override fun toggleActions(show: Boolean) {
-            actionsContainer.isVisible = show
+            actionsContainer.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            binding.textCategoryName.alpha = if (show) 0.5f else 1.0f
         }
     }
 

@@ -24,6 +24,7 @@ import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
@@ -68,7 +69,26 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 scheduleViewModel.deleteAppointment(appointment.id)
             },
             onItemClick = { /* TODO: Логика клика, если нужна */ },
-            onActionsShown = {},
+            onActionsShown = {
+                // Когда действия показаны - плавно прячем кнопку "+"
+                binding?.btnAddAppointment?.animate()
+                    ?.scaleX(0f)
+                    ?.scaleY(0f)
+                    ?.setDuration(200)
+                    ?.withEndAction {
+                        binding?.btnAddAppointment?.visibility = View.INVISIBLE
+                    }
+                    ?.start()
+            },
+            onActionsDismissed = {
+                // Когда действия закрыты - плавно показываем кнопку "+"
+                binding?.btnAddAppointment?.visibility = View.VISIBLE
+                binding?.btnAddAppointment?.animate()
+                    ?.scaleX(1f)
+                    ?.scaleY(1f)
+                    ?.setDuration(200)
+                    ?.start()
+            },
             triggerMode = TriggerMode.SWIPE_REVEAL
         )
         appointmentAdapter.actions = actions
@@ -113,8 +133,17 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    var previousSelectedDate: LocalDate? = null
                     calendarViewModel.state.collect { state ->
+                        if (previousSelectedDate != null && previousSelectedDate != state.selectedDate) {
+                            // 1. СНАЧАЛА закрываем открытую запись.
+                            //    В этот момент RecyclerView еще показывает старый список.
+                            actions?.dismissActions()
+                        }
+                        previousSelectedDate = state.selectedDate
                         updateMonthTitle(state.visibleMonth)
+
+                        // 2. И ТОЛЬКО ПОТОМ загружаем данные для новой даты.
                         scheduleViewModel.loadAppointmentsForDate(state.selectedDate.toString())
                         calendarManager?.observeState(state)
                     }

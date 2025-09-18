@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="custom_main">#435E6F</color>
+    <color name="black_white_invert">#000000</color>
     <color name="background_color">#FF0F0F0F</color>
     <color name="custom_dialog_background">#2C2C2C</color>
     <color name="surface_color">#454545</color>
+    <color name="surface_lighter">#ABABAB</color>
+    <color name="surface_half_lighter">#DBDBDB</color>
     <color name="custom_black_white">#FFFFFFFF</color>
-    <color name="black_white_invert">#000000</color>
 </resources>

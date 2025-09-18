@@ -1,5 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -63,7 +64,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         observeUi()
     }
 
-    private fun observeUi() { // Можете оставить старое название, но новое лучше отражает суть
+    private fun observeUi() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Подписка на состояние (для обновления текста продолжительности и т.д.)
@@ -213,10 +214,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         // Устанавливаем новый колбэк
         dialog.onConfirm = { selectedHour, selectedMinute ->
             viewModel.setDuration(selectedHour, selectedMinute)
-            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
-
-            // Валидация не нужна, всегда возвращаем true для закрытия диалога
             true
+        }
+
+        dialog.onDismissListener = {
+            // Этот код вернет item_appointment_bg всегда, при закрытии диалога
+            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
         }
 
         dialog.show(childFragmentManager, "HourMinutePickerDialogFragment")

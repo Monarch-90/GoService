@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -123,8 +124,15 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             .setPositiveButton(if (isEditMode) "Сохранить" else "Добавить", null)
             .create()
 
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.common_ui.R.drawable.dialog_box_corners)
+
         dialog.setOnShowListener {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+            positiveButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.surface_half_lighter))
+            negativeButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.surface_lighter))
+
             positiveButton.setOnClickListener {
                 val name = dialogBinding.ietCategoryName.text.toString().trim()
                 dialogBinding.ilCategoryName.error = null

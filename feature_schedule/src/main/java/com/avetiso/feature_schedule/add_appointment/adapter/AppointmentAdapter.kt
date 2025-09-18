@@ -50,10 +50,7 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
             binding.textPrice.text = appointment.price
         }
 
-        override fun toggleActions(show: Boolean) {
-            // Эта логика затемнения идеальна для LONG_PRESS. Оставляем ее.
-            binding.contentContainer.alpha = if (show) 0.5f else 1.0f
-        }
+        override fun toggleActions(show: Boolean) {}
     }
 
     companion object {

@@ -132,7 +132,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="20dp"
-            android:alpha="0"
+            android:alpha="0.2"
             android:background="@color/custom_black_white"
             android:forceDarkAllowed="false" />
 
@@ -151,6 +151,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_days_of_week" />
 
+    <View
+        android:id="@+id/horizontal_line"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:alpha="0.2"
+        android:background="@color/custom_black_white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar_view" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_appointments"
         android:layout_width="0dp"
@@ -161,7 +171,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/calendar_view"
+        app:layout_constraintTop_toBottomOf="@id/horizontal_line"
         tools:listitem="@layout/item_appointment" />
 
     <androidx.appcompat.widget.AppCompatImageView

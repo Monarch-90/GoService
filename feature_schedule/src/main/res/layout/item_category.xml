@@ -5,22 +5,22 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="8dp">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_category_name"
-        style="@style/textSize_15"
+        style="@style/textSize_16"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="20dp"
         android:layout_weight="1"
-        android:textColor="?attr/colorOnSurface"
+        android:textColor="@color/custom_black_white"
         tools:text="Ресницы" />
 
     <include
         android:id="@+id/actions_container"
         layout="@layout/view_action_icons"
-        android:visibility="gone"
+        android:visibility="invisible"
         tools:visibility="visible" />
 
 </LinearLayout>

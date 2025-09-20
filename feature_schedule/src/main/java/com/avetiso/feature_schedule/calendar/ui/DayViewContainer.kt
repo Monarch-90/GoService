@@ -13,6 +13,9 @@ class DayViewContainer private constructor(
     val binding: CalendarDayLayoutBinding,
 ) : ViewContainer(binding.root) {
 
+    // Ссылка на индикатор дня с записью (ями)
+    val dotIndicator: View = binding.dotIndicator
+
     companion object {
         /**
          * Фабричный метод для создания экземпляра DayViewContainer из View.

@@ -7,17 +7,33 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/day_text"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:alpha="0.6"
         android:forceDarkAllowed="false"
         android:gravity="center"
+        android:minWidth="25dp"
+        android:minHeight="25dp"
+        android:padding="1dp"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="24" />
+
+    <View
+        android:id="@+id/dot_indicator"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/calendar_dot_indicator"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/day_text"
+        app:layout_constraintStart_toStartOf="@+id/day_text"
+        app:layout_constraintTop_toTopOf="@+id/day_text"
+        tools:visibility="visible" />
 
     <View
         android:layout_width="0dp"

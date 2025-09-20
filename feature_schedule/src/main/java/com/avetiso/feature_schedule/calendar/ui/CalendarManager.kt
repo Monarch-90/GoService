@@ -5,6 +5,8 @@ import android.graphics.Typeface.BOLD
 import android.util.TypedValue
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.calendar.mvi.CalendarEvent
 import com.avetiso.feature_schedule.calendar.mvi.CalendarState
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
@@ -24,6 +26,7 @@ class CalendarManager(
 ) {
     private val today = LocalDate.now()
     private var previousSelectedDate: LocalDate? = viewModel.state.value.selectedDate
+    private var previousEventDates: Set<LocalDate> = emptySet()
 
     fun setupCalendar() {
         val currentMonth = YearMonth.now()
@@ -48,15 +51,16 @@ class CalendarManager(
 
     fun observeState(newState: CalendarState) {
         val newSelectedDate = newState.selectedDate
+        val newEventDates = newState.eventDates
 
-        // Если дата действительно изменилась...
-        if (previousSelectedDate != newSelectedDate) {
-            // ...обновляем и старую, и новую дату в UI календаря
-            previousSelectedDate?.let { calendarView.notifyDateChanged(it) }
-            calendarView.notifyDateChanged(newSelectedDate)
+        if (previousSelectedDate != newSelectedDate || previousEventDates != newEventDates) {
+            // Если что-то изменилось, даем календарю простую команду
+            // полностью перерисовать видимые ячейки. Это эффективно и надежно.
+            calendarView.notifyCalendarChanged()
 
-            // ...и запоминаем новую дату как предыдущую для следующего раза
+            // Обновляем наши "трекеры" для следующей проверки
             previousSelectedDate = newSelectedDate
+            previousEventDates = newEventDates
         }
 
     }
@@ -80,6 +84,7 @@ class CalendarManager(
                 com.avetiso.core.R.color.custom_black_white
             )
         )
+        container.binding.root.background = null
 
         container.binding.root.setOnClickListener {
             if (data.position == DayPosition.MonthDate) {
@@ -87,33 +92,35 @@ class CalendarManager(
             }
         }
 
+        container.binding.root.background = null
+
         if (data.position == DayPosition.MonthDate) {
             textView.visibility = View.VISIBLE
+            container.dotIndicator.isVisible = data.date in viewModel.state.value.eventDates
 
-            // 2. ПРИМЕНЯЕМ СТИЛИ ДЛЯ "СЕГОДНЯ"
-            // Эта проверка выполняется всегда.
-            if (data.date == today) {
-                textView.setBackgroundResource(com.avetiso.core.R.color.surface_color)
-                textView.setTypeface(textView.typeface, BOLD)
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+            when {
+                // Случай 1: Дата является и сегодняшней, и выделенной
+                data.date == today && data.date == selectedDate -> {
+                    textView.setTextColor(ContextCompat.getColor(context, com.avetiso.core.R.color.white))
+                    container.binding.root.setBackgroundResource(com.avetiso.core.R.color.custom_main) // Фон на всю ячейку
+                    textView.setTypeface(textView.typeface, BOLD)
+                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                }
+                // Случай 2: Дата просто сегодняшняя (но не выделенная)
+                data.date == today -> {
+                    container.binding.root.setBackgroundResource(com.avetiso.core.R.color.surface_color) // Фон на всю ячейку
+                    textView.setTypeface(textView.typeface, BOLD)
+                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                }
+                // Случай 3: Дата просто выделенная (но не сегодняшняя)
+                data.date == selectedDate -> {
+                    textView.setTextColor(ContextCompat.getColor(context, com.avetiso.core.R.color.white))
+                    textView.setBackgroundResource(R.drawable.calendar_day_selected_bg) // Фон-кружок
+                }
             }
-
-            // 3. ПОВЕРХ ПРИМЕНЯЕМ СТИЛИ ДЛЯ "ВЫБРАННОГО ДНЯ"
-            // Эта проверка тоже выполняется всегда.
-            if (data.date == selectedDate) {
-                textView.setTextColor(
-                    ContextCompat.getColor(
-                        context,
-                        com.avetiso.core.R.color.white
-                    )
-                )
-                textView.setBackgroundResource(com.avetiso.core.R.color.custom_main)
-                // Обратите внимание: размер и жирность, установленные выше, сохранятся.
-                // Мы перекрашиваем только фон и цвет текста.
-            }
-
         } else {
             textView.visibility = View.INVISIBLE
+            container.dotIndicator.isVisible = false
         }
     }
 }

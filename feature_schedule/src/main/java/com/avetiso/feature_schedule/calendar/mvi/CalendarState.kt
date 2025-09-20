@@ -5,5 +5,6 @@ import java.time.YearMonth
 
 data class CalendarState(
     val selectedDate: LocalDate = LocalDate.now(),
-    val visibleMonth: YearMonth = YearMonth.now()
+    val visibleMonth: YearMonth = YearMonth.now(),
+    val eventDates: Set<LocalDate> = emptySet()
 )

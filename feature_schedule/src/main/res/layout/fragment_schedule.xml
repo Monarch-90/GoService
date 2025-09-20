@@ -55,8 +55,8 @@
         android:id="@+id/layout_days_of_week"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginTop="16dp"
+        android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -179,10 +179,11 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_margin="16dp"
-        app:tint="@color/custom_main"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Add Appointment"
         android:src="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/custom_main" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

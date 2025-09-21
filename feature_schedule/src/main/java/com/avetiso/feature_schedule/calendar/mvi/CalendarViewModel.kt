@@ -3,6 +3,7 @@ package com.avetiso.feature_schedule.calendar.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.AppointmentDao
+import com.kizitonwose.calendar.core.yearMonth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +53,16 @@ class CalendarViewModel @Inject constructor(
             }
 
             is CalendarEvent.MonthScrolled -> {
-                _state.update { it.copy(visibleMonth = event.month) }
+                val currentSelectedDate = _state.value.selectedDate
+
+                // Проверяем, есть ли выделенная дата И отличается ли ее месяц от нового видимого месяца
+                if (currentSelectedDate != null && currentSelectedDate.yearMonth != event.month) {
+                    // Если да - сбрасываем выделение (selectedDate = null)
+                    _state.update { it.copy(selectedDate = null, visibleMonth = event.month) }
+                } else {
+                    // Если нет (например, даты не было или месяц тот же) - просто обновляем месяц
+                    _state.update { it.copy(visibleMonth = event.month) }
+                }
             }
         }
     }

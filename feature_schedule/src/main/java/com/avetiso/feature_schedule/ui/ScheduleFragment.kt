@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -118,14 +119,20 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         }
         currentBinding.btnAddAppointment.setOnClickListener {
             // Получаем выбранную дату из ViewModel календаря
-            val selectedDate = calendarViewModel.state.value.selectedDate.toString()
+            val selectedDate = calendarViewModel.state.value.selectedDate
 
             // Создаем action с передачей аргумента
-            val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
-                selectedDate = selectedDate, // Передаем дату для новой записи
-                appointmentId = -1L // Передаем ID по умолчанию, означающий "создать новую"
-            )
-            findNavController().navigate(action)
+            if (selectedDate != null) {
+                // Если дата выбрана, переходим на экран добавления
+                val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
+                    selectedDate = selectedDate.toString(),
+                    appointmentId = -1L
+                )
+                findNavController().navigate(action)
+            } else {
+                // Если дата не выбрана, показываем подсказку
+                Toast.makeText(requireContext(), "Пожалуйста, выберите день", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -144,45 +151,14 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                         updateMonthTitle(state.visibleMonth)
 
                         // 2. И ТОЛЬКО ПОТОМ загружаем данные для новой даты.
-                        scheduleViewModel.loadAppointmentsForDate(state.selectedDate.toString())
+                        scheduleViewModel.loadAppointmentsForDate(state.selectedDate?.toString() ?: "")
                         calendarManager?.observeState(state)
                     }
                 }
 
                 launch {
-                    scheduleViewModel.appointmentsForDate.collect { appointmentsList ->
-                        val gson = Gson()
-                        val listType = object : TypeToken<List<ServiceSnapshot>>() {}.type
-
-                        val appointmentsForAdapter = appointmentsList.map { appointmentEntity ->
-                            // ПАРСИМ ДАННЫЕ ИЗ СНИМКА (JSON)
-                            val services: List<ServiceSnapshot> =
-                                gson.fromJson(appointmentEntity.servicesJson, listType) ?: emptyList()
-
-                            val hours = appointmentEntity.startTimeMinutes / 60
-                            val minutes = appointmentEntity.startTimeMinutes % 60
-                            val timeString = String.format("%02d:%02d", hours, minutes)
-
-                            val serviceNamesString = services.joinToString(", ") { it.name }
-
-                            val priceString = services
-                                .groupBy { it.currency }
-                                .map { (currency, servicesInCurrency) ->
-                                    val total = servicesInCurrency.sumOf { it.price }
-                                    val isPriceFrom = servicesInCurrency.any { it.isPriceFrom }
-                                    val prefix = if (isPriceFrom) "от " else ""
-                                    "$prefix${"%.2f".format(total)} $currency"
-                                }
-                                .joinToString("\n")
-
-                            Appointment(
-                                id = appointmentEntity.id,
-                                time = timeString,
-                                serviceNames = serviceNamesString,
-                                clientName = appointmentEntity.clientName,
-                                price = priceString
-                            )
-                        }
+                    scheduleViewModel.appointmentsForDate.collect { appointmentsForAdapter ->
+                        // Просто передаем готовый список в адаптер
                         appointmentAdapter.submitList(appointmentsForAdapter)
                     }
                 }

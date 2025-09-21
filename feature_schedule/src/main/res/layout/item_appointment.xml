@@ -41,17 +41,34 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_client_name"
-                style="@style/textSize_16"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:drawablePadding="4dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textStyle="bold"
-                app:drawableStartCompat="@drawable/ic_person"
-                tools:text="Анна" />
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_client_name"
+                    style="@style/textSize_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:drawablePadding="4dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_person"
+                    tools:text="Анна" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/icon_discount"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="end|bottom"
+                    android:layout_marginStart="5dp"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_percent"
+                    app:tint="@color/violet"
+                    tools:visibility="visible" />
+            </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_service_name"
@@ -59,31 +76,14 @@
                 android:layout_height="wrap_content"
                 tools:text="Маникюр с покрытием" />
 
-            <LinearLayout
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:drawablePadding="4dp"
-                    app:drawableStartCompat="@drawable/ic_price"
-                    tools:text="от 150.0 USD\n1.0 BTC" />
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/icon_discount"
-                    android:layout_width="15dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="end|center"
-                    android:layout_marginStart="5dp"
-                    android:visibility="gone"
-                    app:srcCompat="@drawable/ic_percent"
-                    app:tint="@color/violet"
-                    tools:visibility="visible" />
-            </LinearLayout>
+                android:layout_marginTop="4dp"
+                android:drawablePadding="4dp"
+                app:drawableStartCompat="@drawable/ic_price"
+                tools:text="от 150.0 USD\n1.0 BTC" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

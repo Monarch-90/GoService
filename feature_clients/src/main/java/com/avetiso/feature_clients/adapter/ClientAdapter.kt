@@ -59,6 +59,8 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
 
             // Управляем видимостью индикатора выделения
             binding.viewSelectedCheck.isVisible = isSelected
+
+            binding.iconDiscount.isVisible = client.discount > 0
         }
 
         // Полностью повторяем логику из первого шага

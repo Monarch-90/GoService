@@ -5,6 +5,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="error_ping">#F07373</color>
     <color name="red">#EB2F31</color>
+    <color name="orange_coral">#FF9500</color>
 
     <color name="custom_main">#5A7E94</color>
     <color name="black_white_invert">#FFFFFF</color>

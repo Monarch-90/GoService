@@ -104,13 +104,11 @@ class CalendarManager(
                     textView.setTextColor(ContextCompat.getColor(context, com.avetiso.core.R.color.white))
                     container.binding.root.setBackgroundResource(com.avetiso.core.R.color.custom_main) // Фон на всю ячейку
                     textView.setTypeface(textView.typeface, BOLD)
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
                 }
                 // Случай 2: Дата просто сегодняшняя (но не выделенная)
                 data.date == today -> {
                     container.binding.root.setBackgroundResource(com.avetiso.core.R.color.surface_color) // Фон на всю ячейку
                     textView.setTypeface(textView.typeface, BOLD)
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
                 }
                 // Случай 3: Дата просто выделенная (но не сегодняшняя)
                 data.date == selectedDate -> {

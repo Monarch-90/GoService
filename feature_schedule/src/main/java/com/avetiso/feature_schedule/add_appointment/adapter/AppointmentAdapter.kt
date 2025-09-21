@@ -3,6 +3,7 @@ package com.avetiso.feature_schedule.add_appointment.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.avetiso.common_ui.actions.ActionsViewHolder
@@ -48,6 +49,7 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
             binding.textServiceName.text = appointment.serviceNames
             binding.textClientName.text = appointment.clientName
             binding.textPrice.text = appointment.price
+            binding.iconDiscount.isVisible = appointment.hasDiscount
         }
 
         override fun toggleActions(show: Boolean) {}

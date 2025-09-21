@@ -14,6 +14,7 @@ data class AppointmentEntity(
     val clientName: String,
     val clientPhoneNumber: String,
     val clientInstagram: String,
+    val discountPercent: Int,
 
     val servicesJson: String,
     val note: String = "", // Заметка к записи

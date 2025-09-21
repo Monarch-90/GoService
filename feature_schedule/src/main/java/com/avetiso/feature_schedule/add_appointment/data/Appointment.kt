@@ -8,4 +8,5 @@ data class Appointment(
     val serviceNames: String,
     val clientName: String,
     val price: String,
+    val hasDiscount: Boolean,
 )

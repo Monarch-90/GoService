@@ -191,18 +191,20 @@ class AddAppointmentViewModel @Inject constructor(
     private suspend fun isDuplicate(
         client: ClientEntity,
         services: Set<ServiceEntity>,
-        timeSlot: TimeSlotEntity
+        timeSlot: TimeSlotEntity,
     ): Boolean {
         val selectedDate: String = savedStateHandle["selectedDate"]
             ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
             ?: return true // Если дата неизвестна, считаем дубликатом для безопасности
 
         val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
-        val newServiceSnapshots = services.map { ServiceSnapshot(
-            id = it.id, name = it.name, categoryName = it.categoryName,
-            isPriceFrom = it.isPriceFrom, price = it.price,
-            currency = it.currency, durationMinutes = it.durationMinutes
-        )}.toSet()
+        val newServiceSnapshots = services.map {
+            ServiceSnapshot(
+                id = it.id, name = it.name, categoryName = it.categoryName,
+                isPriceFrom = it.isPriceFrom, price = it.price,
+                currency = it.currency, durationMinutes = it.durationMinutes
+            )
+        }.toSet()
 
         for (existing in existingAppointments) {
             if (appointmentToEditId != -1L && existing.id == appointmentToEditId) continue
@@ -226,18 +228,20 @@ class AddAppointmentViewModel @Inject constructor(
     private suspend fun createAppointmentEntity(
         client: ClientEntity,
         services: Set<ServiceEntity>,
-        timeSlot: TimeSlotEntity
+        timeSlot: TimeSlotEntity,
     ): AppointmentEntity {
         val selectedDate: String = savedStateHandle["selectedDate"]
             ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
             ?: "" // Если дата пустая, это будет обработано дальше
 
         val totalDuration = services.sumOf { it.durationMinutes }
-        val serviceSnapshots = services.map { ServiceSnapshot(
-            id = it.id, name = it.name, categoryName = it.categoryName,
-            isPriceFrom = it.isPriceFrom, price = it.price,
-            currency = it.currency, durationMinutes = it.durationMinutes
-        )}
+        val serviceSnapshots = services.map {
+            ServiceSnapshot(
+                id = it.id, name = it.name, categoryName = it.categoryName,
+                isPriceFrom = it.isPriceFrom, price = it.price,
+                currency = it.currency, durationMinutes = it.durationMinutes
+            )
+        }
         val servicesJson = Gson().toJson(serviceSnapshots)
 
         return AppointmentEntity(
@@ -248,6 +252,7 @@ class AddAppointmentViewModel @Inject constructor(
             clientName = client.name,
             clientPhoneNumber = client.phoneNumber,
             clientInstagram = client.instagram,
+            discountPercent = client.discount,
             servicesJson = servicesJson
         )
     }

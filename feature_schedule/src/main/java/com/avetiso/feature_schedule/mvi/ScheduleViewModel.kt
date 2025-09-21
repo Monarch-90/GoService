@@ -53,6 +53,7 @@ class ScheduleViewModel @Inject constructor(
         val timeString = String.format("%02d:%02d", hours, minutes)
 
         val serviceNamesString = services.joinToString(", ") { it.name }
+        val discountPercent = appointmentEntity.discountPercent
 
         val priceString = services
             .groupBy { it.currency }
@@ -60,7 +61,14 @@ class ScheduleViewModel @Inject constructor(
                 val total = servicesInCurrency.sumOf { it.price }
                 val isPriceFrom = servicesInCurrency.any { it.isPriceFrom }
                 val prefix = if (isPriceFrom) "от " else ""
-                "$prefix${"%.2f".format(total)} $currency"
+
+                val finalTotal = if (discountPercent > 0) {
+                    total * (1 - discountPercent / 100.0)
+                } else {
+                    total
+                }
+
+                "$prefix${"%.2f".format(finalTotal)} $currency"
             }
             .joinToString("\n")
 
@@ -69,7 +77,8 @@ class ScheduleViewModel @Inject constructor(
             time = timeString,
             serviceNames = serviceNamesString,
             clientName = appointmentEntity.clientName,
-            price = priceString
+            price = priceString,
+            hasDiscount = discountPercent > 0
         )
     }
 

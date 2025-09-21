@@ -92,8 +92,6 @@ class CalendarManager(
             }
         }
 
-        container.binding.root.background = null
-
         if (data.position == DayPosition.MonthDate) {
             textView.visibility = View.VISIBLE
             container.dotIndicator.isVisible = data.date in viewModel.state.value.eventDates
@@ -101,19 +99,18 @@ class CalendarManager(
             when {
                 // Случай 1: Дата является и сегодняшней, и выделенной
                 data.date == today && data.date == selectedDate -> {
+                    // Текст белый, как выделенный
                     textView.setTextColor(ContextCompat.getColor(context, com.avetiso.core.R.color.white))
-                    container.binding.root.setBackgroundResource(com.avetiso.core.R.color.custom_main) // Фон на всю ячейку
-                    textView.setTypeface(textView.typeface, BOLD)
+                    textView.setBackgroundResource(R.drawable.calendar_today_selected_bg)
                 }
                 // Случай 2: Дата просто сегодняшняя (но не выделенная)
                 data.date == today -> {
-                    container.binding.root.setBackgroundResource(com.avetiso.core.R.color.surface_color) // Фон на всю ячейку
-                    textView.setTypeface(textView.typeface, BOLD)
+                    textView.setBackgroundResource(R.drawable.calendar_today_bg)
                 }
                 // Случай 3: Дата просто выделенная (но не сегодняшняя)
                 data.date == selectedDate -> {
                     textView.setTextColor(ContextCompat.getColor(context, com.avetiso.core.R.color.white))
-                    textView.setBackgroundResource(R.drawable.calendar_day_selected_bg) // Фон-кружок
+                    textView.setBackgroundResource(R.drawable.calendar_day_selected_bg)
                 }
             }
         } else {

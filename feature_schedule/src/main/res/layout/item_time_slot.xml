@@ -18,7 +18,7 @@
         app:strokeWidth="1dp">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_time"
+            android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"

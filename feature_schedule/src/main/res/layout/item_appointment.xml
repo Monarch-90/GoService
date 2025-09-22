@@ -25,7 +25,7 @@
         android:padding="16dp">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_time"
+            android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceTitleMedium"
@@ -41,57 +41,66 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_client_name"
+                    android:id="@+id/tv_client_name"
                     style="@style/textSize_16"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:drawablePadding="4dp"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     app:drawableStartCompat="@drawable/ic_person"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/iv_icon_discount"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="Анна" />
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/icon_discount"
+                    android:id="@+id/iv_icon_discount"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:layout_alignBottom="@id/text_client_name"
                     android:layout_gravity="bottom"
                     android:layout_marginStart="5dp"
-                    android:layout_toEndOf="@id/text_client_name"
+                    android:layout_marginEnd="5dp"
                     android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_date"
+                    app:layout_constraintStart_toEndOf="@id/tv_client_name"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_percent"
-                    app:tint="@color/violet"
+                    app:tint="@color/blue_grey"
                     tools:visibility="visible" />
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_date"
+                    android:id="@+id/tv_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentEnd="true"
                     android:layout_gravity="end"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="18.09.2025" />
-            </RelativeLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_service_name"
+                android:id="@+id/tv_service_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="2dp"
                 tools:text="Маникюр с покрытием" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_price"
+                android:id="@+id/tv_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"

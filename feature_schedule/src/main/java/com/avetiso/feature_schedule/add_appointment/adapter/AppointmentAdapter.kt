@@ -45,12 +45,12 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
                 binding.contentContainer.translationX = 0f
             }
 
-            binding.textTime.text = appointment.time
-            binding.textServiceName.text = appointment.serviceNames
-            binding.textClientName.text = appointment.clientName
-            binding.textPrice.text = appointment.price
-            binding.iconDiscount.isVisible = appointment.hasDiscount
-            binding.textDate.text = appointment.date
+            binding.tvTime.text = appointment.time
+            binding.tvClientName.text = appointment.clientName
+            binding.tvServiceName.text = appointment.serviceNames
+            binding.tvPrice.text = appointment.price
+            binding.ivIconDiscount.isVisible = appointment.hasDiscount
+            binding.tvDate.text = appointment.date
         }
 
         override fun toggleActions(show: Boolean) {}

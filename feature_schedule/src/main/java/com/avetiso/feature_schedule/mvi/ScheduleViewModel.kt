@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,6 +58,10 @@ class ScheduleViewModel @Inject constructor(
         val serviceNamesString = services.joinToString(", ") { it.name }
         val discountPercent = appointmentEntity.discountPercent
 
+        val rawDate = LocalDate.parse(appointmentEntity.date)
+        val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+        val formattedDate = rawDate.format(formatter)
+
         val priceString = services
             .groupBy { it.currency }
             .map { (currency, servicesInCurrency) ->
@@ -78,7 +85,8 @@ class ScheduleViewModel @Inject constructor(
             serviceNames = serviceNamesString,
             clientName = appointmentEntity.clientName,
             price = priceString,
-            hasDiscount = discountPercent > 0
+            hasDiscount = discountPercent > 0,
+            date = formattedDate,
         )
     }
 

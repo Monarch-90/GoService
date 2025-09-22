@@ -50,6 +50,7 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
             binding.textClientName.text = appointment.clientName
             binding.textPrice.text = appointment.price
             binding.iconDiscount.isVisible = appointment.hasDiscount
+            binding.textDate.text = appointment.date
         }
 
         override fun toggleActions(show: Boolean) {}

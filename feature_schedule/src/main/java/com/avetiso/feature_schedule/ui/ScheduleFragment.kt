@@ -1,9 +1,12 @@
 package com.avetiso.feature_schedule.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +22,7 @@ import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
+import com.avetiso.feature_schedule.databinding.DialogAddNoteBinding
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleEvent
 import com.avetiso.feature_schedule.mvi.ScheduleState
@@ -49,9 +53,11 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
 
-    private var appointmentAdapter = AppointmentAdapter { appointment ->
-        showStatusSelectionDialog(appointment)
-    }
+    private var appointmentAdapter = AppointmentAdapter(
+        onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
+        onNoteClicked = { appointment -> showNoteDialog(appointment) }
+    )
+
     private var actions: RecyclerViewActions<Appointment>? = null
     private var scheduleDatePicker: ComposeDatePickerDialogFragment? = null
 
@@ -181,6 +187,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                                 scheduleDatePicker?.dismiss()
                                 scheduleViewModel.resetScheduleState()
                             }
+
                             is ScheduleState.Error -> {
                                 // Если ошибка - показываем Toast и сбрасываем состояние
                                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
@@ -244,6 +251,33 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
         scheduleDatePicker = dialog
         scheduleDatePicker?.show(childFragmentManager, "DATE_PICKER")
+    }
+
+    private fun showNoteDialog(appointment: Appointment) {
+        // "Надуваем" разметку и получаем binding
+        val dialogBinding = DialogAddNoteBinding.inflate(layoutInflater)
+
+        // Создаем диалог через MaterialAlertDialogBuilder, но без кнопок
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners) // Фон
+
+        // Устанавливаем текущий текст заметки
+        dialogBinding.etNote.setText(appointment.note)
+
+        // Назначаем слушатели на наши кастомные кнопки
+        dialogBinding.btnNegative.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialogBinding.btnPositive.setOnClickListener {
+            val newNote = dialogBinding.etNote.text.toString()
+            scheduleViewModel.updateAppointmentNote(appointment.id, newNote)
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     override fun onDestroyView() {

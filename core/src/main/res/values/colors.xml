@@ -4,6 +4,7 @@
     <color name="active_item_bg_color">#1F808080</color>
     <color name="dark_grey">#6A6A6A</color>
     <color name="grey">#9E9E9E</color>
+    <color name="silver_dark">#AEBCC5</color>
     <color name="white">#FFFFFFFF</color>
     <color name="error_ping">#F07373</color>
     <color name="red">#EB2F31</color>

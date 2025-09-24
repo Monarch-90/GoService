@@ -30,6 +30,7 @@
                 android:backgroundTint="@color/surface_color"
                 android:hint="Поиск категории"
                 android:paddingStart="36dp"
+                android:textCursorDrawable="@null"
                 tools:ignore="RtlSymmetry" />
 
             <androidx.appcompat.widget.AppCompatImageView

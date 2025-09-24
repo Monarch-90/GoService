@@ -15,9 +15,9 @@
         android:layout_gravity="end" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/contentContainer"
         android:background="@drawable/item_appointment_bg"
         android:paddingBottom="8dp">
 
@@ -25,8 +25,8 @@
             android:id="@+id/tv_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -38,8 +38,8 @@
             style="@style/Widget.MaterialComponents.Chip.Action"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            app:chipIcon="@drawable/status_dot"
             android:layout_marginEnd="8dp"
+            app:chipIcon="@drawable/status_dot"
             app:chipIconSize="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -50,11 +50,11 @@
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="2dp"
+            android:lineSpacingExtra="4dp"
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="@color/custom_main"
-            android:layout_marginStart="10dp"
-            android:lineSpacingExtra="4dp"
             android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,9 +66,9 @@
             style="@style/textSize_16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"
             android:drawablePadding="4dp"
-            android:layout_marginStart="5dp"
             android:textColor="?attr/colorOnSurface"
             android:textStyle="bold"
             app:drawableStartCompat="@drawable/ic_person"
@@ -86,8 +86,8 @@
             android:layout_height="15dp"
             android:layout_gravity="bottom"
             android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
             android:layout_marginTop="2dp"
+            android:layout_marginEnd="5dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tv_client_name"
             app:layout_constraintEnd_toStartOf="@id/chip_status"
@@ -103,9 +103,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
             android:layout_marginTop="1dp"
+            app:layout_constraintEnd_toStartOf="@+id/chip_status"
             app:layout_constraintStart_toEndOf="@+id/tv_date"
             app:layout_constraintTop_toBottomOf="@+id/tv_client_name"
-            app:layout_constraintEnd_toStartOf="@+id/chip_status"
             tools:text="Маникюр с покрытием" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -117,5 +117,40 @@
             app:layout_constraintStart_toEndOf="@+id/tv_date"
             app:layout_constraintTop_toBottomOf="@+id/tv_service_name"
             tools:text="от 150.0 USD\n1.0 BTC" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/note_icon_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/chip_status"
+            app:layout_constraintTop_toBottomOf="@+id/chip_status">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_empty_note"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="40dp"
+                android:src="@drawable/ic_empty_note_with_bg"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/silver_dark" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_filled_note"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="40dp"
+                android:src="@drawable/ic_filled_note"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/silver_dark"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

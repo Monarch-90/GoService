@@ -18,7 +18,8 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/surface_color"
             android:hint="Поиск клиента"
-            android:paddingStart="30dp" />
+            android:paddingStart="30dp"
+            android:textCursorDrawable="@null" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="wrap_content"

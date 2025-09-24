@@ -105,6 +105,7 @@ class ScheduleViewModel @Inject constructor(
             price = priceString,
             hasDiscount = discountPercent > 0,
             status = appointmentEntity.status,
+            note = appointmentEntity.note,
             date = formattedDate,
         )
     }
@@ -151,6 +152,14 @@ class ScheduleViewModel @Inject constructor(
 
     fun resetScheduleState() {
         _scheduleState.value = ScheduleState.Idle
+    }
+
+    fun updateAppointmentNote(appointmentId: Long, newNote: String) {
+        viewModelScope.launch {
+            val appointment = appointmentDao.getAppointmentById(appointmentId) ?: return@launch
+            val updatedAppointment = appointment.copy(note = newNote)
+            appointmentDao.updateAppointment(updatedAppointment)
+        }
     }
 
     fun deleteAppointment(appointmentId: Long) {

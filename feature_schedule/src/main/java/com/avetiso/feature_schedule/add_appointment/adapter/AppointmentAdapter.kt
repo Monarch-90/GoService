@@ -15,8 +15,10 @@ import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.databinding.ItemAppointmentBinding
 
-class AppointmentAdapter(private val onStatusClicked: (Appointment) -> Unit) :
-    ListAdapter<Appointment, AppointmentAdapter.AppointmentViewHolder>(DiffCallback) {
+class AppointmentAdapter(
+    private val onStatusClicked: (Appointment) -> Unit,
+    private val onNoteClicked: (Appointment) -> Unit,
+) : ListAdapter<Appointment, AppointmentAdapter.AppointmentViewHolder>(DiffCallback) {
 
     var actions: RecyclerViewActions<Appointment>? = null
 
@@ -28,7 +30,7 @@ class AppointmentAdapter(private val onStatusClicked: (Appointment) -> Unit) :
     override fun onBindViewHolder(holder: AppointmentViewHolder, position: Int) {
         val item = getItem(position)
         // Передаем режим триггера в холдер для корректной отрисовки
-        holder.bind(item, actions?.triggerMode ?: TriggerMode.LONG_PRESS, onStatusClicked)
+        holder.bind(item, actions?.triggerMode ?: TriggerMode.LONG_PRESS, onStatusClicked, onNoteClicked)
         actions?.bindViewHolderActions(holder, item)
     }
 
@@ -42,7 +44,12 @@ class AppointmentAdapter(private val onStatusClicked: (Appointment) -> Unit) :
         override val editButton: View = binding.actionsContainer.btnEdit
         override val deleteButton: View = binding.actionsContainer.btnDelete
 
-        fun bind(appointment: Appointment, triggerMode: TriggerMode, onStatusClicked: (Appointment) -> Unit) {
+        fun bind(
+            appointment: Appointment,
+            triggerMode: TriggerMode,
+            onStatusClicked: (Appointment) -> Unit,
+            onNoteClicked: (Appointment) -> Unit,
+        ) {
             // При биндинге сбрасываем все состояния, которые могли остаться от переиспользования
             if (triggerMode == TriggerMode.SWIPE_REVEAL) {
                 binding.contentContainer.translationX = 0f
@@ -76,6 +83,19 @@ class AppointmentAdapter(private val onStatusClicked: (Appointment) -> Unit) :
 
             binding.chipStatus.setOnClickListener {
                 onStatusClicked(appointment)
+            }
+
+            if (appointment.note.isNotBlank()) {
+                binding.ivEmptyNote.visibility = View.GONE
+                binding.ivFilledNote.visibility = View.VISIBLE
+            } else {
+                binding.ivEmptyNote.visibility = View.VISIBLE
+                binding.ivFilledNote.visibility = View.GONE
+            }
+
+            // СЛУШАТЕЛЬ НА КОНТЕЙНЕР ИКОНОК ЗАМЕТОК
+            binding.noteIconContainer.setOnClickListener {
+                onNoteClicked(appointment)
             }
         }
 

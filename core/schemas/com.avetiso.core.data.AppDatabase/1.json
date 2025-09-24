@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3e9e595b66c52b4578fb6cdb3acc7458",
+    "identityHash": "e2bbdd4fa62f86815b1ded7a3c435ac7",
     "entities": [
       {
         "tableName": "services",
@@ -174,7 +174,7 @@
       },
       {
         "tableName": "appointments",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `startTimeMinutes` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `clientName` TEXT NOT NULL, `clientPhoneNumber` TEXT NOT NULL, `clientInstagram` TEXT NOT NULL, `discountPercent` INTEGER NOT NULL, `status` TEXT NOT NULL, `servicesJson` TEXT NOT NULL, `note` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `startTimeMinutes` INTEGER NOT NULL, `timeSlotIds` TEXT NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `clientName` TEXT NOT NULL, `clientPhoneNumber` TEXT NOT NULL, `clientInstagram` TEXT NOT NULL, `discountPercent` INTEGER NOT NULL, `status` TEXT NOT NULL, `servicesJson` TEXT NOT NULL, `note` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -192,6 +192,12 @@
             "fieldPath": "startTimeMinutes",
             "columnName": "startTimeMinutes",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeSlotIds",
+            "columnName": "timeSlotIds",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -253,7 +259,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e9e595b66c52b4578fb6cdb3acc7458')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e2bbdd4fa62f86815b1ded7a3c435ac7')"
     ]
   }
 }

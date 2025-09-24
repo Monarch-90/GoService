@@ -54,16 +54,17 @@
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="@color/custom_main"
             android:layout_marginStart="10dp"
+            android:lineSpacingExtra="4dp"
             android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_date"
-            tools:text="10:00" />
+            tools:text="10:00\n10:30" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_client_name"
             style="@style/textSize_16"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:drawablePadding="4dp"

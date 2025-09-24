@@ -20,6 +20,8 @@ import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
+import com.avetiso.feature_schedule.mvi.ScheduleEvent
+import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -51,6 +53,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         showStatusSelectionDialog(appointment)
     }
     private var actions: RecyclerViewActions<Appointment>? = null
+    private var scheduleDatePicker: ComposeDatePickerDialogFragment? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -169,6 +172,25 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                         appointmentAdapter.submitList(appointmentsForAdapter)
                     }
                 }
+
+                launch {
+                    scheduleViewModel.scheduleState.collect { state ->
+                        when (state) {
+                            is ScheduleState.Success -> {
+                                // Если успешно - закрываем диалог и сбрасываем состояние
+                                scheduleDatePicker?.dismiss()
+                                scheduleViewModel.resetScheduleState()
+                            }
+                            is ScheduleState.Error -> {
+                                // Если ошибка - показываем Toast и сбрасываем состояние
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                scheduleViewModel.resetScheduleState()
+                            }
+                            // В остальных случаях ничего не делаем
+                            else -> {}
+                        }
+                    }
+                }
             }
         }
     }
@@ -212,7 +234,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         )
 
         // Устанавливаем слушатель, который сработает при нажатии "ОК"
-        dialog.onDateSelected = { selectedMillis ->
+        dialog.onConfirmClicked = { selectedMillis ->
             // Конвертируем timestamp в нужный нам формат YYYY-MM-DD
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val newDate = sdf.format(Date(selectedMillis))
@@ -220,7 +242,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             scheduleViewModel.updateAppointmentStatus(appointment.id, "Перенос", newDate)
         }
 
-        dialog.show(childFragmentManager, "ComposeDatePickerDialogFragment")
+        scheduleDatePicker = dialog
+        scheduleDatePicker?.show(childFragmentManager, "DATE_PICKER")
     }
 
     override fun onDestroyView() {

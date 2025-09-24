@@ -17,13 +17,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import java.time.DayOfWeek
-import java.util.Locale
 
 class ComposeDatePickerDialogFragment : DialogFragment() {
 
     // Колбэк, который вернет выбранную дату в миллисекундах
     var onDateSelected: ((Long) -> Unit)? = null
+    var onConfirmClicked: ((Long) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -35,8 +34,7 @@ class ComposeDatePickerDialogFragment : DialogFragment() {
                     title = requireArguments().getString(ARG_TITLE, ""),
                     initialDateMillis = requireArguments().getLong(ARG_INITIAL_DATE, System.currentTimeMillis()),
                     onConfirm = { selectedMillis ->
-                        onDateSelected?.invoke(selectedMillis)
-                        dismiss()
+                        onConfirmClicked?.invoke(selectedMillis)
                     },
                     onDismiss = { dismiss() }
                 )

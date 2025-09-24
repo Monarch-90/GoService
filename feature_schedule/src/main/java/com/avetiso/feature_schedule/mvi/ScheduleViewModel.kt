@@ -117,7 +117,10 @@ class ScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             val appointmentToUpdate = appointmentDao.getAppointmentById(appointmentId) ?: return@launch
 
-            if (newDate != null) {
+            // 🎯 1. ПРОВЕРЯЕМ, НЕ ЯВЛЯЕТСЯ ЛИ ПЕРЕНОС "ФИКТИВНЫМ" (НА ТУ ЖЕ ДАТУ)
+            val isReschedulingToSameDate = newDate != null && newDate == appointmentToUpdate.date
+
+            if (newDate != null && !isReschedulingToSameDate) {
                 val existingAppointmentsOnNewDate = appointmentDao.getAppointmentsForDateSync(newDate)
 
                 for (existing in existingAppointmentsOnNewDate) {

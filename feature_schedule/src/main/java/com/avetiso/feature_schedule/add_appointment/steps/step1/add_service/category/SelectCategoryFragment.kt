@@ -138,8 +138,8 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
-            positiveButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.surface_half_lighter))
-            negativeButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.surface_lighter))
+            positiveButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.dark_grey))
+            negativeButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.grey))
 
             positiveButton.setOnClickListener {
                 val name = dialogBinding.ietCategoryName.text.toString().trim()

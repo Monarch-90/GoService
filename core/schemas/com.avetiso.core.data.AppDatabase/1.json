@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3103d6af7294bc5f7b512955c711309e",
+    "identityHash": "3e9e595b66c52b4578fb6cdb3acc7458",
     "entities": [
       {
         "tableName": "services",
@@ -174,7 +174,7 @@
       },
       {
         "tableName": "appointments",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `startTimeMinutes` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `clientName` TEXT NOT NULL, `clientPhoneNumber` TEXT NOT NULL, `clientInstagram` TEXT NOT NULL, `discountPercent` INTEGER NOT NULL, `servicesJson` TEXT NOT NULL, `note` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `startTimeMinutes` INTEGER NOT NULL, `totalDurationMinutes` INTEGER NOT NULL, `clientName` TEXT NOT NULL, `clientPhoneNumber` TEXT NOT NULL, `clientInstagram` TEXT NOT NULL, `discountPercent` INTEGER NOT NULL, `status` TEXT NOT NULL, `servicesJson` TEXT NOT NULL, `note` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -225,6 +225,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "servicesJson",
             "columnName": "servicesJson",
             "affinity": "TEXT",
@@ -247,7 +253,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3103d6af7294bc5f7b512955c711309e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e9e595b66c52b4578fb6cdb3acc7458')"
     ]
   }
 }

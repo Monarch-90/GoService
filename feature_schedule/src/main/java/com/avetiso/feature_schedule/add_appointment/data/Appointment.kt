@@ -10,4 +10,5 @@ data class Appointment(
     val clientName: String,
     val price: String,
     val hasDiscount: Boolean,
+    val status: String,
 )

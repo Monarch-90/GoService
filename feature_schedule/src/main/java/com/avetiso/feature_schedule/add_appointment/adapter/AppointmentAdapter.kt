@@ -1,8 +1,10 @@
 package com.avetiso.feature_schedule.add_appointment.adapter
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -13,7 +15,8 @@ import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.databinding.ItemAppointmentBinding
 
-class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.AppointmentViewHolder>(DiffCallback) {
+class AppointmentAdapter(private val onStatusClicked: (Appointment) -> Unit) :
+    ListAdapter<Appointment, AppointmentAdapter.AppointmentViewHolder>(DiffCallback) {
 
     var actions: RecyclerViewActions<Appointment>? = null
 
@@ -25,7 +28,7 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
     override fun onBindViewHolder(holder: AppointmentViewHolder, position: Int) {
         val item = getItem(position)
         // Передаем режим триггера в холдер для корректной отрисовки
-        holder.bind(item, actions?.triggerMode ?: TriggerMode.LONG_PRESS)
+        holder.bind(item, actions?.triggerMode ?: TriggerMode.LONG_PRESS, onStatusClicked)
         actions?.bindViewHolderActions(holder, item)
     }
 
@@ -39,7 +42,7 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
         override val editButton: View = binding.actionsContainer.btnEdit
         override val deleteButton: View = binding.actionsContainer.btnDelete
 
-        fun bind(appointment: Appointment, triggerMode: TriggerMode) {
+        fun bind(appointment: Appointment, triggerMode: TriggerMode, onStatusClicked: (Appointment) -> Unit) {
             // При биндинге сбрасываем все состояния, которые могли остаться от переиспользования
             if (triggerMode == TriggerMode.SWIPE_REVEAL) {
                 binding.contentContainer.translationX = 0f
@@ -51,6 +54,29 @@ class AppointmentAdapter : ListAdapter<Appointment, AppointmentAdapter.Appointme
             binding.tvPrice.text = appointment.price
             binding.ivIconDiscount.isVisible = appointment.hasDiscount
             binding.tvDate.text = appointment.date
+
+            binding.chipStatus.text = appointment.status
+            val context = binding.root.context
+
+            val statusColorId = when (appointment.status) {
+                "Активна" -> com.avetiso.core.R.color.green
+                "Исполнена" -> com.avetiso.core.R.color.main_dark
+                "Отмена" -> com.avetiso.core.R.color.grey
+                "Перенос" -> com.avetiso.core.R.color.orange_coral
+                "Неявка" -> com.avetiso.core.R.color.red
+                else -> 0
+            }
+
+            val statusColor = if (statusColorId != 0) {
+                ContextCompat.getColor(context, statusColorId)
+            } else {
+                ContextCompat.getColor(context, com.avetiso.core.R.color.black)
+            }
+            binding.chipStatus.chipIconTint = ColorStateList.valueOf(statusColor)
+
+            binding.chipStatus.setOnClickListener {
+                onStatusClicked(appointment)
+            }
         }
 
         override fun toggleActions(show: Boolean) {}

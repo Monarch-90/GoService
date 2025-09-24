@@ -175,8 +175,16 @@ class AddAppointmentViewModel @Inject constructor(
                 return@launch
             }
 
+            // Получаем старый статус перед созданием новой сущности
+            val originalStatus = if (appointmentToEditId != -1L) {
+                appointmentDao.getAppointmentById(appointmentToEditId)?.status ?: "Активно"
+            } else {
+                "Активно"
+            }
+
             // 2. Если все в порядке, создаем и сохраняем сущность
-            val appointmentToSave = createAppointmentEntity(client, services, timeSlot)
+            // Передаем старый статус в функцию создания
+            val appointmentToSave = createAppointmentEntity(client, services, originalStatus, timeSlot)
             if (appointmentToEditId != -1L) {
                 appointmentDao.updateAppointment(appointmentToSave)
             } else {
@@ -228,6 +236,7 @@ class AddAppointmentViewModel @Inject constructor(
     private suspend fun createAppointmentEntity(
         client: ClientEntity,
         services: Set<ServiceEntity>,
+        status: String,
         timeSlot: TimeSlotEntity,
     ): AppointmentEntity {
         val selectedDate: String = savedStateHandle["selectedDate"]
@@ -253,7 +262,8 @@ class AddAppointmentViewModel @Inject constructor(
             clientPhoneNumber = client.phoneNumber,
             clientInstagram = client.instagram,
             discountPercent = client.discount,
-            servicesJson = servicesJson
+            status = status,
+            servicesJson = servicesJson,
         )
     }
 

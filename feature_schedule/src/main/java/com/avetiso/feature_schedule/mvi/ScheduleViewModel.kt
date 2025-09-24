@@ -86,12 +86,26 @@ class ScheduleViewModel @Inject constructor(
             clientName = appointmentEntity.clientName,
             price = priceString,
             hasDiscount = discountPercent > 0,
+            status = appointmentEntity.status,
             date = formattedDate,
         )
     }
 
     fun loadAppointmentsForDate(date: String) {
         _selectedDate.value = date
+    }
+
+    fun updateAppointmentStatus(appointmentId: Long, newStatus: String, newDate: String? = null) {
+        viewModelScope.launch {
+            val appointment = appointmentDao.getAppointmentById(appointmentId) ?: return@launch
+            val updatedAppointment = if (newDate != null) {
+                // Если передана новая дата (при переносе)
+                appointment.copy(status = newStatus, date = newDate)
+            } else {
+                appointment.copy(status = newStatus)
+            }
+            appointmentDao.updateAppointment(updatedAppointment)
+        }
     }
 
     fun deleteAppointment(appointmentId: Long) {

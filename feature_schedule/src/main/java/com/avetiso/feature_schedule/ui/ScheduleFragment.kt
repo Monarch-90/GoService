@@ -1,6 +1,7 @@
 package com.avetiso.feature_schedule.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -11,6 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
+import com.avetiso.common_ui.compose_picker.ComposeDatePickerDialogFragment
 import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
@@ -19,15 +21,19 @@ import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -41,7 +47,9 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
 
-    private var appointmentAdapter = AppointmentAdapter()
+    private var appointmentAdapter = AppointmentAdapter { appointment ->
+        showStatusSelectionDialog(appointment)
+    }
     private var actions: RecyclerViewActions<Appointment>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -49,7 +57,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         val currentBinding = FragmentScheduleBinding.bind(view)
         binding = currentBinding
 
-        appointmentAdapter = AppointmentAdapter()
         currentBinding.rvAppointments.adapter = appointmentAdapter
 
         actions = RecyclerViewActions(
@@ -173,6 +180,47 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         ).replaceFirstChar { it.uppercase() }
         val yearTitle = yearMonth.year.toString()
         binding?.textMonthTitle?.text = "$monthTitle $yearTitle"
+    }
+
+    private fun showStatusSelectionDialog(appointment: Appointment) {
+        val statuses = arrayOf("Активна", "Исполнена", "Отмена", "Перенос", "Неявка")
+
+        val customTitleView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.status_dialog_title, null)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setCustomTitle(customTitleView)
+            .setItems(statuses) { dialog, which ->
+                val selectedStatus = statuses[which]
+                if (selectedStatus == "Перенос") {
+                    showRescheduleDatePicker(appointment)
+                } else {
+                    scheduleViewModel.updateAppointmentStatus(appointment.id, selectedStatus)
+                }
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
+        }
+        dialog.show()
+    }
+
+    private fun showRescheduleDatePicker(appointment: Appointment) {
+        val dialog = ComposeDatePickerDialogFragment.newInstance(
+            title = "Выберите дату"
+        )
+
+        // Устанавливаем слушатель, который сработает при нажатии "ОК"
+        dialog.onDateSelected = { selectedMillis ->
+            // Конвертируем timestamp в нужный нам формат YYYY-MM-DD
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val newDate = sdf.format(Date(selectedMillis))
+
+            scheduleViewModel.updateAppointmentStatus(appointment.id, "Перенос", newDate)
+        }
+
+        dialog.show(childFragmentManager, "ComposeDatePickerDialogFragment")
     }
 
     override fun onDestroyView() {

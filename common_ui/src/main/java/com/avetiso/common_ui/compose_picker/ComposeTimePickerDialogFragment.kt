@@ -26,7 +26,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.chargemap.compose.numberpicker.NumberPicker
 
-class ComposePickerDialogFragment : DialogFragment() {
+class ComposeTimePickerDialogFragment : DialogFragment() {
 
     private var selectedHour by mutableIntStateOf(0)
     private var selectedMinute by mutableIntStateOf(0)
@@ -90,8 +90,8 @@ class ComposePickerDialogFragment : DialogFragment() {
             title: String,
             initialHour: Int,
             initialMinute: Int,
-        ): ComposePickerDialogFragment {
-            return ComposePickerDialogFragment().apply {
+        ): ComposeTimePickerDialogFragment {
+            return ComposeTimePickerDialogFragment().apply {
                 arguments = bundleOf(
                     ARG_TITLE to title,
                     ARG_INITIAL_HOUR to initialHour,

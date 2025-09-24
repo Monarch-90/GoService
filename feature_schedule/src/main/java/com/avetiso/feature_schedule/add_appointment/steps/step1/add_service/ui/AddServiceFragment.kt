@@ -1,6 +1,5 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -15,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.avetiso.common_ui.compose_picker.ComposePickerDialogFragment
+import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
@@ -205,7 +204,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
-        val dialog = ComposePickerDialogFragment.newInstance(
+        val dialog = ComposeTimePickerDialogFragment.newInstance(
             title = "Выберите продолжительность",
             initialHour = hour,
             initialMinute = minute

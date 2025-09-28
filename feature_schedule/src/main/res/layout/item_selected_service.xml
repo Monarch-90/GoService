@@ -17,7 +17,7 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_service_name"
+            android:id="@+id/tv_service_name"
             style="@style/textSize_16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

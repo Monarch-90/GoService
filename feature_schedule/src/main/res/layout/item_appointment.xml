@@ -14,59 +14,143 @@
         android:layout_height="match_parent"
         android:layout_gravity="end" />
 
-    <LinearLayout
-        android:id="@+id/content_container"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/item_appointment_bg"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:paddingBottom="8dp">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_time"
+            android:id="@+id/tv_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="18.09.2025" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_status"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginEnd="8dp"
+            app:chipIcon="@drawable/status_dot"
+            app:chipIconSize="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:chipIconTint="@color/green"
+            tools:text="Активно" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="2dp"
+            android:lineSpacingExtra="4dp"
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="@color/custom_main"
             android:textSize="15sp"
             android:textStyle="bold"
-            tools:text="10:00" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_date"
+            tools:text="10:00\n10:30" />
 
-        <LinearLayout
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_client_name"
+            style="@style/textSize_16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:drawablePadding="4dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold"
+            app:drawableStartCompat="@drawable/ic_person"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@id/iv_icon_discount"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/tv_date"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Анна" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_icon_discount"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="5dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tv_client_name"
+            app:layout_constraintEnd_toStartOf="@id/chip_status"
+            app:layout_constraintStart_toEndOf="@id/tv_client_name"
+            app:layout_constraintTop_toTopOf="@id/tv_client_name"
+            app:srcCompat="@drawable/ic_percent"
+            app:tint="@color/blue_grey"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_service_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="1dp"
+            app:layout_constraintEnd_toStartOf="@+id/chip_status"
+            app:layout_constraintStart_toEndOf="@+id/tv_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_client_name"
+            tools:text="Маникюр с покрытием" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_client_name"
-                style="@style/textSize_16"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_price"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="3dp"
+            app:layout_constraintStart_toEndOf="@+id/tv_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_service_name"
+            tools:text="от 150.0 USD\n1.0 BTC" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/note_icon_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/chip_status"
+            app:layout_constraintTop_toBottomOf="@+id/chip_status">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_empty_note"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:drawablePadding="4dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textStyle="bold"
-                app:drawableStartCompat="@drawable/ic_person"
-                tools:text="Анна" />
+                android:layout_marginEnd="40dp"
+                android:src="@drawable/ic_empty_note_with_bg"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/silver_dark" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_service_name"
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_filled_note"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="Маникюр с покрытием" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:drawablePadding="4dp"
-                app:drawableStartCompat="@drawable/ic_price"
-                tools:text="от 150.0 USD\n1.0 BTC" />
-        </LinearLayout>
-    </LinearLayout>
+                android:layout_marginEnd="40dp"
+                android:src="@drawable/ic_filled_note"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/silver_dark"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

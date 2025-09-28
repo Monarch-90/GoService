@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.core.widget.addTextChangedListener
 
 private const val TAG = "TouchDebug"
 
@@ -37,6 +38,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
         setupRecyclerView()
         setupClickListeners()
+        setupSearch()
         observeViewModel()
     }
 
@@ -109,6 +111,12 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         }
     }
 
+    private fun setupSearch() {
+        binding?.etSearch?.addTextChangedListener { editable ->
+            viewModel.onSearchQueryChanged(editable.toString())
+        }
+    }
+
     private fun showCategoryInputDialog(category: CategoryEntity? = null) {
         val isEditMode = category != null
         val dialogBinding = DialogAddCategoryBinding.inflate(layoutInflater)
@@ -130,8 +138,8 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
-            positiveButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.surface_half_lighter))
-            negativeButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.surface_lighter))
+            positiveButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.dark_grey))
+            negativeButton.setTextColor(ContextCompat.getColor(requireContext(), com.avetiso.core.R.color.grey))
 
             positiveButton.setOnClickListener {
                 val name = dialogBinding.ietCategoryName.text.toString().trim()

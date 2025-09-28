@@ -43,6 +43,9 @@ class Step3SelectClientFragment : Fragment(R.layout.fragment_step3_select_client
         clientAdapter = ClientAdapter()
         binding?.rvClients?.adapter = clientAdapter
 
+        // Отключает анимацию на андроид 15
+        binding?.rvClients?.itemAnimator = null
+
         actions = RecyclerViewActions(
             fragment = this,
             recyclerView = binding!!.rvClients,

@@ -21,18 +21,4 @@ class MyTypeConverters {
         val listType = object : TypeToken<List<Long>>() {}.type
         return gson.fromJson(value, listType)
     }
-
-    @TypeConverter
-    fun fromServiceSnapshotList(value: List<ServiceSnapshot>?): String? {
-        return gson.toJson(value)
-    }
-
-    @TypeConverter
-    fun toServiceSnapshotList(value: String?): List<ServiceSnapshot>? {
-        if (value == null) {
-            return null
-        }
-        val listType = object : TypeToken<List<ServiceSnapshot>>() {}.type
-        return gson.fromJson(value, listType)
-    }
 }

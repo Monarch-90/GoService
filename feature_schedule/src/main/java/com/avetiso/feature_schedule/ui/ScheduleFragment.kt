@@ -1,7 +1,12 @@
 package com.avetiso.feature_schedule.ui
 
+import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -10,23 +15,31 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
+import com.avetiso.common_ui.compose_picker.ComposeDatePickerDialogFragment
 import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
+import com.avetiso.feature_schedule.databinding.DialogAddNoteBinding
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
+import com.avetiso.feature_schedule.mvi.ScheduleEvent
+import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -40,15 +53,19 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
 
-    private var appointmentAdapter = AppointmentAdapter()
+    private var appointmentAdapter = AppointmentAdapter(
+        onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
+        onNoteClicked = { appointment -> showNoteDialog(appointment) }
+    )
+
     private var actions: RecyclerViewActions<Appointment>? = null
+    private var scheduleDatePicker: ComposeDatePickerDialogFragment? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val currentBinding = FragmentScheduleBinding.bind(view)
         binding = currentBinding
 
-        appointmentAdapter = AppointmentAdapter()
         currentBinding.rvAppointments.adapter = appointmentAdapter
 
         actions = RecyclerViewActions(
@@ -118,14 +135,20 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         }
         currentBinding.btnAddAppointment.setOnClickListener {
             // Получаем выбранную дату из ViewModel календаря
-            val selectedDate = calendarViewModel.state.value.selectedDate.toString()
+            val selectedDate = calendarViewModel.state.value.selectedDate
 
             // Создаем action с передачей аргумента
-            val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
-                selectedDate = selectedDate, // Передаем дату для новой записи
-                appointmentId = -1L // Передаем ID по умолчанию, означающий "создать новую"
-            )
-            findNavController().navigate(action)
+            if (selectedDate != null) {
+                // Если дата выбрана, переходим на экран добавления
+                val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
+                    selectedDate = selectedDate.toString(),
+                    appointmentId = -1L
+                )
+                findNavController().navigate(action)
+            } else {
+                // Если дата не выбрана, показываем подсказку
+                Toast.makeText(requireContext(), "Пожалуйста, выберите день", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -144,46 +167,35 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                         updateMonthTitle(state.visibleMonth)
 
                         // 2. И ТОЛЬКО ПОТОМ загружаем данные для новой даты.
-                        scheduleViewModel.loadAppointmentsForDate(state.selectedDate.toString())
+                        scheduleViewModel.loadAppointmentsForDate(state.selectedDate?.toString() ?: "")
                         calendarManager?.observeState(state)
                     }
                 }
 
                 launch {
-                    scheduleViewModel.appointmentsForDate.collect { appointmentsList ->
-                        val gson = Gson()
-                        val listType = object : TypeToken<List<ServiceSnapshot>>() {}.type
-
-                        val appointmentsForAdapter = appointmentsList.map { appointmentEntity ->
-                            // ПАРСИМ ДАННЫЕ ИЗ СНИМКА (JSON)
-                            val services: List<ServiceSnapshot> =
-                                gson.fromJson(appointmentEntity.servicesJson, listType) ?: emptyList()
-
-                            val hours = appointmentEntity.startTimeMinutes / 60
-                            val minutes = appointmentEntity.startTimeMinutes % 60
-                            val timeString = String.format("%02d:%02d", hours, minutes)
-
-                            val serviceNamesString = services.joinToString(", ") { it.name }
-
-                            val priceString = services
-                                .groupBy { it.currency }
-                                .map { (currency, servicesInCurrency) ->
-                                    val total = servicesInCurrency.sumOf { it.price }
-                                    val isPriceFrom = servicesInCurrency.any { it.isPriceFrom }
-                                    val prefix = if (isPriceFrom) "от " else ""
-                                    "$prefix${"%.2f".format(total)} $currency"
-                                }
-                                .joinToString("\n")
-
-                            Appointment(
-                                id = appointmentEntity.id,
-                                time = timeString,
-                                serviceNames = serviceNamesString,
-                                clientName = appointmentEntity.clientName,
-                                price = priceString
-                            )
-                        }
+                    scheduleViewModel.appointmentsForDate.collect { appointmentsForAdapter ->
+                        // Просто передаем готовый список в адаптер
                         appointmentAdapter.submitList(appointmentsForAdapter)
+                    }
+                }
+
+                launch {
+                    scheduleViewModel.scheduleState.collect { state ->
+                        when (state) {
+                            is ScheduleState.Success -> {
+                                // Если успешно - закрываем диалог и сбрасываем состояние
+                                scheduleDatePicker?.dismiss()
+                                scheduleViewModel.resetScheduleState()
+                            }
+
+                            is ScheduleState.Error -> {
+                                // Если ошибка - показываем Toast и сбрасываем состояние
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                scheduleViewModel.resetScheduleState()
+                            }
+                            // В остальных случаях ничего не делаем
+                            else -> {}
+                        }
                     }
                 }
             }
@@ -197,6 +209,75 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         ).replaceFirstChar { it.uppercase() }
         val yearTitle = yearMonth.year.toString()
         binding?.textMonthTitle?.text = "$monthTitle $yearTitle"
+    }
+
+    private fun showStatusSelectionDialog(appointment: Appointment) {
+        val statuses = arrayOf("Активна", "Исполнена", "Отмена", "Перенос", "Неявка")
+
+        val customTitleView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.status_dialog_title, null)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setCustomTitle(customTitleView)
+            .setItems(statuses) { dialog, which ->
+                val selectedStatus = statuses[which]
+                if (selectedStatus == "Перенос") {
+                    showRescheduleDatePicker(appointment)
+                } else {
+                    scheduleViewModel.updateAppointmentStatus(appointment.id, selectedStatus)
+                }
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
+        }
+        dialog.show()
+    }
+
+    private fun showRescheduleDatePicker(appointment: Appointment) {
+        val dialog = ComposeDatePickerDialogFragment.newInstance(
+            title = "Выберите дату"
+        )
+
+        // Устанавливаем слушатель, который сработает при нажатии "ОК"
+        dialog.onConfirmClicked = { selectedMillis ->
+            // Конвертируем timestamp в нужный нам формат YYYY-MM-DD
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val newDate = sdf.format(Date(selectedMillis))
+
+            scheduleViewModel.updateAppointmentStatus(appointment.id, "Перенос", newDate)
+        }
+
+        scheduleDatePicker = dialog
+        scheduleDatePicker?.show(childFragmentManager, "DATE_PICKER")
+    }
+
+    private fun showNoteDialog(appointment: Appointment) {
+        // "Надуваем" разметку и получаем binding
+        val dialogBinding = DialogAddNoteBinding.inflate(layoutInflater)
+
+        // Создаем диалог через MaterialAlertDialogBuilder, но без кнопок
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners) // Фон
+
+        // Устанавливаем текущий текст заметки
+        dialogBinding.etNote.setText(appointment.note)
+
+        // Назначаем слушатели на наши кастомные кнопки
+        dialogBinding.btnNegative.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialogBinding.btnPositive.setOnClickListener {
+            val newNote = dialogBinding.etNote.text.toString()
+            scheduleViewModel.updateAppointmentNote(appointment.id, newNote)
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     override fun onDestroyView() {

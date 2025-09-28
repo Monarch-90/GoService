@@ -65,13 +65,13 @@ class TimeSlotAdapter :
 
         override fun toggleActions(show: Boolean) {
             binding.actionsLayout.root.isVisible = show
-            binding.textTime.alpha = if (show) 0.2f else 1.0f
+            binding.tvTime.alpha = if (show) 0.2f else 1.0f
         }
 
         fun bind(timeSlot: TimeSlotEntity, isSelected: Boolean) {
             val hours = timeSlot.startTimeMinutes / 60
             val minutes = timeSlot.startTimeMinutes % 60
-            binding.textTime.text = String.format("%02d:%02d", hours, minutes)
+            binding.tvTime.text = String.format("%02d:%02d", hours, minutes)
 
             val context = binding.root.context
 
@@ -79,12 +79,12 @@ class TimeSlotAdapter :
                 binding.cardView.setCardBackgroundColor(
                     ContextCompat.getColor(context, CoreR.color.custom_main)
                 )
-                binding.textTime.setTextColor(ContextCompat.getColor(context, CoreR.color.white))
+                binding.tvTime.setTextColor(ContextCompat.getColor(context, CoreR.color.white))
             } else {
                 binding.cardView.setCardBackgroundColor(
                     ContextCompat.getColor(context, CoreR.color.background_color)
                 )
-                binding.textTime.setTextColor(
+                binding.tvTime.setTextColor(
                     ContextCompat.getColor(
                         context,
                         CoreR.color.custom_black_white

@@ -68,6 +68,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         currentBinding.toolbar.title = "Редактировать клиента"
         currentBinding.inputEditTextName.setText(client.name)
         currentBinding.inputEditTextPhone.setText(client.phoneNumber)
+        currentBinding.inputEditTextInstagram.setText(client.instagram)
         currentBinding.inputEditTextSource.setText(client.source)
         currentBinding.inputEditTextDiscount.setText(if (client.discount > 0) client.discount.toString() else "")
         currentBinding.inputEditTextNote.setText(client.note)

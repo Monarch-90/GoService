@@ -43,26 +43,26 @@ class AddEditClientViewModel @Inject constructor(
             val instagram = client.instagram.trim()
             val idToExclude = client.id
 
-            // Проверка 1: Имя + Телефон
-            if (name.isNotBlank() && phone.isNotBlank()) {
-                if (clientDao.findByNameAndPhone(name, phone, idToExclude) != null) {
-                    _eventChannel.send(AddEditClientEvent.ShowToast(message))
-                    return@launch
-                }
+            val isDuplicate = when {
+                // Проверка 1: Имя + Телефон
+                name.isNotBlank() && phone.isNotBlank() &&
+                        clientDao.findByNameAndPhone(name, phone, idToExclude) != null -> true
+
+                // Проверка 2: Имя + Инстаграм
+                name.isNotBlank() && instagram.isNotBlank() &&
+                        clientDao.findByNameAndInstagram(name, instagram, idToExclude) != null -> true
+
+                // Проверка 3: Телефон + Инстаграм
+                phone.isNotBlank() && instagram.isNotBlank() &&
+                        clientDao.findByPhoneAndInstagram(phone, instagram, idToExclude) != null -> true
+
+                // Если ни одно из условий не сработало
+                else -> false
             }
-            // Проверка 2: Имя + Инстаграм
-            if (name.isNotBlank() && instagram.isNotBlank()) {
-                if (clientDao.findByNameAndInstagram(name, instagram, idToExclude) != null) {
-                    _eventChannel.send(AddEditClientEvent.ShowToast(message))
-                    return@launch
-                }
-            }
-            // Проверка 3: Телефон + Инстаграм
-            if (phone.isNotBlank() && instagram.isNotBlank()) {
-                if (clientDao.findByPhoneAndInstagram(phone, instagram, idToExclude) != null) {
-                    _eventChannel.send(AddEditClientEvent.ShowToast(message))
-                    return@launch
-                }
+
+            if (isDuplicate) {
+                _eventChannel.send(AddEditClientEvent.ShowToast(message))
+                return@launch
             }
 
             // Если все проверки пройдены, сохраняем

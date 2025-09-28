@@ -9,7 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.avetiso.common_ui.actions.RecyclerViewActions
-import com.avetiso.common_ui.compose_picker.ComposePickerDialogFragment
+import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
 import com.avetiso.core.entity.TimeSlotEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
@@ -119,12 +119,12 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
     private fun showTimePicker(timeSlotToEdit: TimeSlotEntity?) {
         val isEditing = timeSlotToEdit != null
-        val title = if (isEditing) "Редактировать слот" else "Добавить слот времени"
+        val title = if (isEditing) "Редактировать слот" else "Добавить слот"
 
         val initialHour = timeSlotToEdit?.let { it.startTimeMinutes / 60 } ?: 0
         val initialMinute = timeSlotToEdit?.let { it.startTimeMinutes % 60 } ?: 0
 
-        val dialog = ComposePickerDialogFragment.newInstance(
+        val dialog = ComposeTimePickerDialogFragment.newInstance(
             title = title,
             initialHour = initialHour,
             initialMinute = initialMinute

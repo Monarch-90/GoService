@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.data.dao.ServiceDao
-import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.core.entity.ServiceEntity
@@ -167,16 +166,23 @@ class AddAppointmentViewModel @Inject constructor(
             val currentState = _state.value
             val client = currentState.selectedClient ?: return@launch
             val services = currentState.selectedServices
-            val timeSlot = currentState.selectedTimeSlots.firstOrNull() ?: return@launch
+            val timeSlots = currentState.selectedTimeSlots
 
             // 1. Проверяем на дубликат с помощью новой чистой функции
-            if (isDuplicate(client, services, timeSlot)) {
+            if (isDuplicate(client, services, timeSlots)) {
                 _navigationChannel.send(NavigationEvent.ShowToast("Такая запись уже существует на эту дату"))
                 return@launch
             }
 
             // 2. Если все в порядке, создаем и сохраняем сущность
-            val appointmentToSave = createAppointmentEntity(client, services, timeSlot)
+            // Передаем старый статус в функцию создания
+            val appointmentToSave = if (appointmentToEditId != -1L) {
+                val originalStatus = appointmentDao.getAppointmentById(appointmentToEditId)?.status ?: "Активна"
+                createAppointmentEntity(client, services, originalStatus, timeSlots)
+            } else {
+                createAppointmentEntity(client, services, "Активна", timeSlots)
+            }
+
             if (appointmentToEditId != -1L) {
                 appointmentDao.updateAppointment(appointmentToSave)
             } else {
@@ -191,23 +197,27 @@ class AddAppointmentViewModel @Inject constructor(
     private suspend fun isDuplicate(
         client: ClientEntity,
         services: Set<ServiceEntity>,
-        timeSlot: TimeSlotEntity
+        timeSlots: Set<TimeSlotEntity>,
     ): Boolean {
         val selectedDate: String = savedStateHandle["selectedDate"]
             ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
             ?: return true // Если дата неизвестна, считаем дубликатом для безопасности
 
         val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
-        val newServiceSnapshots = services.map { ServiceSnapshot(
-            id = it.id, name = it.name, categoryName = it.categoryName,
-            isPriceFrom = it.isPriceFrom, price = it.price,
-            currency = it.currency, durationMinutes = it.durationMinutes
-        )}.toSet()
+        val newServiceSnapshots = services.map {
+            ServiceSnapshot(
+                id = it.id, name = it.name, categoryName = it.categoryName,
+                isPriceFrom = it.isPriceFrom, price = it.price,
+                currency = it.currency, durationMinutes = it.durationMinutes
+            )
+        }.toSet()
+
+        val newTimeSlotIds = timeSlots.map { it.id }.sorted()
 
         for (existing in existingAppointments) {
             if (appointmentToEditId != -1L && existing.id == appointmentToEditId) continue
 
-            val isTimeSlotSame = existing.startTimeMinutes == timeSlot.startTimeMinutes
+            val isTimeSlotSame = existing.timeSlotIds.sorted() == newTimeSlotIds
             val isClientSame = existing.clientName == client.name &&
                     existing.clientPhoneNumber == client.phoneNumber &&
                     existing.clientInstagram == client.instagram
@@ -226,29 +236,38 @@ class AddAppointmentViewModel @Inject constructor(
     private suspend fun createAppointmentEntity(
         client: ClientEntity,
         services: Set<ServiceEntity>,
-        timeSlot: TimeSlotEntity
+        status: String,
+        timeSlots: Set<TimeSlotEntity>,
     ): AppointmentEntity {
         val selectedDate: String = savedStateHandle["selectedDate"]
             ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
             ?: "" // Если дата пустая, это будет обработано дальше
 
         val totalDuration = services.sumOf { it.durationMinutes }
-        val serviceSnapshots = services.map { ServiceSnapshot(
-            id = it.id, name = it.name, categoryName = it.categoryName,
-            isPriceFrom = it.isPriceFrom, price = it.price,
-            currency = it.currency, durationMinutes = it.durationMinutes
-        )}
+        val serviceSnapshots = services.map {
+            ServiceSnapshot(
+                id = it.id, name = it.name, categoryName = it.categoryName,
+                isPriceFrom = it.isPriceFrom, price = it.price,
+                currency = it.currency, durationMinutes = it.durationMinutes
+            )
+        }
         val servicesJson = Gson().toJson(serviceSnapshots)
+
+        // НАХОДИМ САМОЕ РАННЕЕ ВРЕМЯ ИЗ ВСЕХ ВЫБРАННЫХ СЛОТОВ
+        val earliestStartTime = timeSlots.minOfOrNull { it.startTimeMinutes } ?: 0
 
         return AppointmentEntity(
             id = if (appointmentToEditId != -1L) appointmentToEditId else 0,
             date = selectedDate,
-            startTimeMinutes = timeSlot.startTimeMinutes,
+            startTimeMinutes = earliestStartTime,
+            timeSlotIds = timeSlots.map { it.id }.sorted(),
             totalDurationMinutes = totalDuration,
             clientName = client.name,
             clientPhoneNumber = client.phoneNumber,
             clientInstagram = client.instagram,
-            servicesJson = servicesJson
+            discountPercent = client.discount,
+            status = status,
+            servicesJson = servicesJson,
         )
     }
 

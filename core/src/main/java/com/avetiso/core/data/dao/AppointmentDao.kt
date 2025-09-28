@@ -23,6 +23,9 @@ interface AppointmentDao {
     @Query("SELECT * FROM appointments WHERE date = :date")
     suspend fun getAppointmentsForDateSync(date: String): List<AppointmentEntity>
 
+    @Query("SELECT DISTINCT date FROM appointments WHERE date LIKE :yearMonth || '%'")
+    fun getEventDatesForMonth(yearMonth: String): Flow<List<String>>
+
     @Update
     suspend fun updateAppointment(appointment: AppointmentEntity)
 

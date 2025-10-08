@@ -7,12 +7,12 @@
         android:id="@+id/clients_nav_graph"
         android:icon="@drawable/ic_clients"
         android:title="Клиенты" />
-    <item
-        android:id="@+id/supplies_nav_graph"
-        android:icon="@drawable/ic_supplies"
-        android:title="Расходники" />
-    <item
-        android:id="@+id/windows_nav_graph"
-        android:icon="@drawable/ic_windows"
-        android:title="Окошки" />
+<!--    <item-->
+<!--        android:id="@+id/supplies_nav_graph"-->
+<!--        android:icon="@drawable/ic_supplies"-->
+<!--        android:title="Расходники" />-->
+<!--    <item-->
+<!--        android:id="@+id/windows_nav_graph"-->
+<!--        android:icon="@drawable/ic_windows"-->
+<!--        android:title="Окошки" />-->
 </menu>

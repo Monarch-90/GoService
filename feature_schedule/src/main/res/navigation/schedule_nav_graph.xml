@@ -4,6 +4,8 @@
     android:id="@+id/schedule_nav_graph"
     app:startDestination="@id/scheduleFragment">
 
+    <include app:graph="@navigation/clients_nav_graph" />
+
     <fragment
         android:id="@+id/scheduleFragment"
         android:name="com.avetiso.feature_schedule.ui.ScheduleFragment"
@@ -48,18 +50,6 @@
                 app:nullable="true"
                 android:defaultValue="@null" />
         </action>
-    </fragment>
-
-    <fragment
-        android:id="@+id/addEditClientFragment"
-        android:name="com.avetiso.feature_clients.add_edit.ui.AddEditClientFragment"
-        android:label="AddEditClientFragment"
-        tools:layout="@layout/fragment_add_edit_client" >
-        <argument
-            android:name="clientToEdit"
-            app:argType="com.avetiso.core.entity.ClientEntity"
-            app:nullable="true"
-            android:defaultValue="@null" />
     </fragment>
 
     <fragment

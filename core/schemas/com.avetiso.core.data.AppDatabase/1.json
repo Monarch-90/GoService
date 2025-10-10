@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e2bbdd4fa62f86815b1ded7a3c435ac7",
+    "identityHash": "362ee5c0460aa03f710bff1f726710d4",
     "entities": [
       {
         "tableName": "services",
@@ -108,7 +108,7 @@
       },
       {
         "tableName": "clients",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, `instagram` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `socialLink` TEXT NOT NULL, `source` TEXT NOT NULL, `discount` INTEGER NOT NULL, `note` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, `instagram` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `socialLink` TEXT NOT NULL, `source` TEXT NOT NULL, `discount` INTEGER NOT NULL, `note` TEXT NOT NULL, `customFields` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -161,6 +161,12 @@
           {
             "fieldPath": "note",
             "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customFields",
+            "columnName": "customFields",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -259,7 +265,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e2bbdd4fa62f86815b1ded7a3c435ac7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '362ee5c0460aa03f710bff1f726710d4')"
     ]
   }
 }

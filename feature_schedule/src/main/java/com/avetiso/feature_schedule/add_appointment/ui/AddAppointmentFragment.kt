@@ -5,12 +5,15 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
+import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentState
@@ -18,7 +21,9 @@ import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.mvi.NavigationEvent
 import com.avetiso.feature_schedule.databinding.FragmentAddAppointmentBinding
 import com.avetiso.feature_schedule.databinding.ViewStepperBinding
+import com.avetiso.navigation.ClientSelectorProvider
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -27,17 +32,24 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
     private var binding: FragmentAddAppointmentBinding? = null
     private val viewModel: AddAppointmentViewModel by viewModels()
 
+    // Внедряем не сам фрагмент, а "поставщика" фрагментов
+    @Inject
+    lateinit var clientSelectorProvider: ClientSelectorProvider
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAddAppointmentBinding.bind(view)
 
         val currentBinding = binding ?: return
 
-        currentBinding.viewPager.adapter = AddAppointmentViewPagerAdapter(this)
+        currentBinding.viewPager.adapter = AddAppointmentViewPagerAdapter(this) {
+            clientSelectorProvider.getClientSelectorFragment()
+        }
         currentBinding.viewPager.isUserInputEnabled = false
 
         setupClickListeners(currentBinding)
         observeViewModel()
+        setupFragmentResultListeners()
     }
 
     private fun setupClickListeners(currentBinding: FragmentAddAppointmentBinding) {
@@ -122,22 +134,30 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
         // Обновляем ViewPager
         currentBinding.viewPager.setCurrentItem(state.currentStep, true)
 
-        // Обновляем кнопку
-//        currentBinding.buttonNext.visibility =
-//            if (state.isNextButtonEnabled) View.VISIBLE else View.GONE
-
         // Новый код для управления видимостью кнопок
         val isLastStep = (state.currentStep == ADD_APPOINTMENT_PAGE_COUNT - 1)
 
-// Показываем/скрываем кнопку "Далее" (стрелка)
+        // Показываем/скрываем кнопку "Далее" (стрелка)
         currentBinding.btnNext.visibility =
             if (!isLastStep && state.isNextButtonEnabled) View.VISIBLE else View.GONE
-// Показываем/скрываем кнопку "Готово"
+        // Показываем/скрываем кнопку "Готово"
         currentBinding.btnDone.visibility =
             if (isLastStep && state.isNextButtonEnabled) View.VISIBLE else View.GONE
 
         // Обновляем степпер
         updateStepper(currentBinding.stepper, state.currentStep)
+    }
+
+    private fun setupFragmentResultListeners() {
+        // Слушаем результат от экрана выбора клиента
+        setFragmentResultListener("client_selection_request") { _, bundle ->
+            // Получаем клиента из bundle
+            val client = BundleCompat.getParcelable(bundle, "selected_client", ClientEntity::class.java)
+            if (client != null) {
+                // Отправляем событие в наш AddAppointmentViewModel
+                viewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
+            }
+        }
     }
 
     private fun updateStepper(stepperBinding: ViewStepperBinding, currentStep: Int) {

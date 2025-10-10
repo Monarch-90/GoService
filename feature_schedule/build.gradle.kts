@@ -39,7 +39,7 @@ dependencies {
 
     implementation(project(":core")) // Все фичи зависят от core
     implementation(project(":common_ui"))
-    implementation(project(":feature_clients"))
+    implementation(project(":navigation"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

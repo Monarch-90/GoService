@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step3.mvi
+package com.avetiso.feature_clients.selector.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
@@ -13,11 +14,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class Step3SelectClientViewModel @Inject constructor(
+class ClientSelectorViewModel @Inject constructor(
     private val clientDao: ClientDao,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(Step3State())
+    private val _state = MutableStateFlow(ClientSelectorState())
+    val state = _state.asStateFlow()
 
     // Этот Flow будет переизлучать список клиентов при изменении searchQuery
     val clients = _state
@@ -34,8 +36,20 @@ class Step3SelectClientViewModel @Inject constructor(
         _state.update { it.copy(searchQuery = query) }
     }
 
+    fun onClientSelected(client: ClientEntity) {
+        _state.update {
+            // Логика переключения: если кликнули по уже выбранному, снимаем выбор
+            val newSelection = if (it.selectedClient == client) null else client
+            it.copy(selectedClient = newSelection)
+        }
+    }
+
     fun deleteClient(client: ClientEntity) {
         viewModelScope.launch {
+            // Если удаляем выбранного клиента, сбрасываем выбор
+            if (_state.value.selectedClient == client) {
+                _state.update { it.copy(selectedClient = null) }
+            }
             clientDao.deleteClient(client)
         }
     }

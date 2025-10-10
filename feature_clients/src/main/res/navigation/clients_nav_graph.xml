@@ -1,0 +1,33 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/clients_nav_graph"
+    app:startDestination="@id/clientsFragment">
+
+    <fragment
+        android:id="@+id/clientsFragment"
+        android:name="com.avetiso.feature_clients.ui.ClientsFragment"
+        android:label="fragment_clients"
+        tools:layout="@layout/fragment_clients">
+        <action
+            android:id="@+id/action_clientsFragment_to_addEditClientFragment"
+            app:destination="@id/addEditClientFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addEditClientFragment"
+        android:name="com.avetiso.feature_clients.add_edit.ui.AddEditClientFragment"
+        android:label="AddEditClientFragment"
+        tools:layout="@layout/fragment_add_edit_client">
+
+        <argument
+            android:name="clientToEdit"
+            android:defaultValue="@null"
+            app:argType="com.avetiso.core.entity.ClientEntity"
+            app:nullable="true" />
+
+        <deepLink app:uri="goservice://clients/add_edit" />
+
+    </fragment>
+
+</navigation>

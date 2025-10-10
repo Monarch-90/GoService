@@ -26,6 +26,7 @@ gson = "2.13.1"
 composeBom = "2025.08.01"
 chargemapNumberPicker = "1.0.3"
 material3 = "1.3.2"
+navigationCommonKtx = "2.9.5"
 
 [libraries]
 # AndroidX
@@ -83,6 +84,7 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 # RecyclerView
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigationCommonKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

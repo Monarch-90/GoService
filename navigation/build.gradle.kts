@@ -1,27 +1,22 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.navigation.safeargs.kotlin)
 }
 
 android {
-    namespace = "com.avetiso.feature_clients"
+    namespace = "com.avetiso.navigation"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 24
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    buildFeatures {
-        viewBinding = true
     }
 }
 
@@ -34,16 +29,12 @@ kotlin {
 dependencies {
 
     implementation(project(":core")) // Все фичи зависят от core
-    implementation(project(":common_ui"))
-    implementation(project(":navigation"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.navigation.fragment.ktx)
-
-    // Hilt (для ViewModel)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 }

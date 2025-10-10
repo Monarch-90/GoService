@@ -6,10 +6,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.avetiso.goservice.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private var binding: ActivityMainBinding? = null
-    private var currentNavController: LiveData<NavController>? = null
+    private var navController: NavController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -25,53 +26,54 @@ class MainActivity : AppCompatActivity() {
 
         val activityBinding = ActivityMainBinding.inflate(layoutInflater)
         binding = activityBinding
+
         setContentView(activityBinding.root)
 
         ViewCompat.setOnApplyWindowInsetsListener(activityBinding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-
             activityBinding.navHostFragment.updatePadding(top = systemBars.top)
             activityBinding.bottomNavView.updatePadding(bottom = systemBars.bottom)
             insets
         }
 
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        if (savedInstanceState == null) {
-            setupBottomNavigationBar()
+        binding?.bottomNavView?.let { bottomNavView ->
+            // Стандартное подключение
+            setupWithNavController(bottomNavView, navHostFragment.navController)
+
+            // ПРАВИЛЬНЫЙ ОБРАБОТЧИК ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ
+            bottomNavView.setOnItemSelectedListener { item ->
+                val builder = NavOptions.Builder()
+                    .setLaunchSingleTop(true) // Не пересоздавать вкладку, если она уже на вершине стека
+                    .setRestoreState(true) // ВОССТАНАВЛИВАТЬ СОСТОЯНИЕ при возвращении
+
+                builder.setPopUpTo(
+                    destinationId = navHostFragment.navController.graph.findStartDestination().id,
+                    inclusive = false,
+                    saveState = true
+                )
+
+                val options = builder.build()
+
+                try {
+                    // Выполняем навигацию с нашими опциями
+                    navHostFragment.navController.navigate(item.itemId, null, options)
+                    true
+                } catch (e: IllegalArgumentException) {
+                    // Иногда может быть ошибка, если кликнуть очень быстро
+                    // при пересоздании. Просто игнорируем.
+                    true
+                }
+            }
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        // Восстанавливаем навигацию после смены конфигурации
-        setupBottomNavigationBar()
-    }
-
-    private fun setupBottomNavigationBar() {
-        val bottomNavigationView = binding?.bottomNavView ?: return
-
-        // Список ID наших графов навигации для каждой вкладки
-        val navGraphIds = listOf(
-            com.avetiso.feature_schedule.R.navigation.schedule_nav_graph,
-            com.avetiso.feature_clients.R.navigation.clients_nav_graph
-            // Сюда добавишь остальные, когда они будут готовы
-            // R.navigation.supplies_nav_graph,
-            // R.navigation.windows_nav_graph
-        )
-
-        // Используем наш новый метод-расширение
-        val controller = bottomNavigationView.setupWithNavController(
-            navGraphIds = navGraphIds,
-            fragmentManager = supportFragmentManager,
-            containerId = R.id.nav_host_fragment,
-            intent = intent
-        )
-
-        currentNavController = controller
-    }
-
+    // Этот метод нужен для корректной работы кнопки "назад"
     override fun onSupportNavigateUp(): Boolean {
-        return currentNavController?.value?.navigateUp() ?: false
+        return navController?.navigateUp() ?: super.onSupportNavigateUp()
     }
 
     override fun onDestroy() {

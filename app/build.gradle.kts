@@ -47,12 +47,13 @@ kotlin {
 }
 
 dependencies {
-    // Зависимости от наших модулей
+    // Зависимости от модулей
     implementation(project(":core"))
     implementation(project(":feature_schedule"))
     implementation(project(":feature_clients"))
     implementation(project(":feature_supplies"))
     implementation(project(":feature_windows"))
+    implementation(project(":navigation"))
 
     // Стандартные библиотеки AndroidX
     implementation(libs.androidx.core.ktx)
@@ -66,6 +67,7 @@ dependencies {
 
     // Hilt для внедрения зависимостей
     implementation(libs.hilt.android)
+    implementation(libs.androidx.navigation.common.ktx)
     ksp(libs.hilt.compiler)
 
     // Desugar (десахаризация)

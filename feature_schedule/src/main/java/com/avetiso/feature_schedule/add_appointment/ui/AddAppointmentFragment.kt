@@ -128,7 +128,7 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
             0 -> getString(R.string.add_appointment_step_1_title)
             1 -> getString(R.string.add_appointment_step_2_title)
             2 -> getString(R.string.add_appointment_step_3_title)
-            else -> "" // На случай непредвиденного шага
+            else -> throw IllegalStateException("Непредвиденный шаг в AddAppointmentFragment: ${state.currentStep}")
         }
 
         // Обновляем ViewPager

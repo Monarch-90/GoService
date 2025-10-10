@@ -6,6 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -58,7 +59,7 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
             getItemName = { client -> client.name },
             onEdit = { client ->
                 // Навигация на экран редактирования
-                clientsNavigator.navigateToAddEditClient(findNavController(), client)
+                clientsNavigator.navigateToAddEditClient(findNavController(), client.id)
             },
             onDelete = { client ->
                 viewModel.deleteClient(client)
@@ -107,13 +108,10 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
                 }
                 // Слушаем результат с экрана добавления/редактирования
                 launch {
-                    findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("client_updated")
-                        ?.observe(viewLifecycleOwner) { updated ->
-                            if (updated) {
-                                viewModel.onSearchQueryChanged(binding?.etSearch?.text.toString())
-                                findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>("client_updated")
-                            }
-                        }
+                    setFragmentResultListener("client_updated_request") { _, _ ->
+                        // Результат получен. Просто перезапрашиваем данные.
+                        viewModel.onSearchQueryChanged(binding?.etSearch?.text.toString())
+                    }
                 }
             }
         }

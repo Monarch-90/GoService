@@ -30,9 +30,16 @@ class AddEditClientViewModel @Inject constructor(
 
     init {
         // Получаем клиента для редактирования из аргументов навигации
-        val client: ClientEntity? = savedStateHandle["clientToEdit"]
-        if (client != null) {
-            _state.update { it.copy(client = client, isEditing = true) }
+        val clientId: Long = savedStateHandle.get<Long>("clientId") ?: -1L
+
+        if (clientId != -1L) {
+            // Если это не новый клиент, запускаем загрузку из БД
+            viewModelScope.launch {
+                val client = clientDao.getClientById(clientId)
+                if (client != null) {
+                    _state.update { it.copy(client = client, isEditing = true) }
+                }
+            }
         }
     }
 
@@ -73,6 +80,18 @@ class AddEditClientViewModel @Inject constructor(
             }
             // Отправляем событие для навигации назад
             _eventChannel.send(AddEditClientEvent.NavigateBackWithResult)
+        }
+    }
+
+    fun handleViewEvent(event: AddEditClientEvent) {
+        when (event) {
+            is AddEditClientEvent.InitialDataSet -> {
+                _state.update { it.copy(isInitialDataSet = true) }
+            }
+            // Другие события от View можно будет добавлять сюда
+            else -> {
+                // Игнорируем события, которые ViewModel сам отправляет (ShowToast и т.д.)
+            }
         }
     }
 }

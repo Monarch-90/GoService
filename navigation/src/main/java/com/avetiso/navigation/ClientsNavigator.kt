@@ -13,5 +13,5 @@ interface ClientsNavigator {
      * @param navController Текущий NavController, который должен выполнить навигацию.
      * @param clientToEdit Клиент для редактирования или null, если создается новый.
      */
-    fun navigateToAddEditClient(navController: NavController, clientToEdit: ClientEntity?)
+    fun navigateToAddEditClient(navController: NavController, clientId: Long?)
 }

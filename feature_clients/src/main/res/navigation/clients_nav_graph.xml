@@ -21,12 +21,13 @@
         tools:layout="@layout/fragment_add_edit_client">
 
         <argument
-            android:name="clientToEdit"
-            android:defaultValue="@null"
-            app:argType="com.avetiso.core.entity.ClientEntity"
-            app:nullable="true" />
+            android:name="clientId"
+            app:argType="long"
+            android:defaultValue="-1L" />
 
-        <deepLink app:uri="goservice://clients/add_edit" />
+        <deepLink app:uri="goservice://clients/add" />
+
+        <deepLink app:uri="goservice://clients/edit/{clientId}" />
 
     </fragment>
 

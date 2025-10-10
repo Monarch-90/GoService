@@ -1,16 +1,15 @@
 package com.avetiso.feature_clients.add_edit.ui
 
-import android.R.attr.hint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatEditText
-import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -21,7 +20,6 @@ import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientEvent
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientViewModel
 import com.avetiso.feature_clients.databinding.FragmentAddEditClientBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,10 +46,10 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
                 // Подписка на состояние (для заполнения полей в режиме редактирования)
                 launch {
                     viewModel.state.collect { state ->
-                        // Заполняем поля только один раз, при первом заходе в режим редактирования
-                        if (state.isEditing && customFieldViews.isEmpty()) {
+                        if (state.isEditing && !state.isInitialDataSet) {
                             state.client?.let { client ->
                                 populateFields(client)
+                                viewModel.handleViewEvent(AddEditClientEvent.InitialDataSet)
                             }
                         }
                     }
@@ -64,11 +62,12 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
                             is AddEditClientEvent.ShowToast -> {
                                 Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
                             }
-
                             is AddEditClientEvent.NavigateBackWithResult -> {
-                                findNavController().previousBackStackEntry?.savedStateHandle?.set("client_updated", true)
+                                setFragmentResult("client_updated_request", bundleOf("updated" to true))
                                 findNavController().navigateUp()
                             }
+                            // Она обработает InitialDataSet и любые другие события, которые нас здесь не интересуют.
+                            else -> { /* Игнорируем события, предназначенные для ViewModel */ }
                         }
                     }
                 }

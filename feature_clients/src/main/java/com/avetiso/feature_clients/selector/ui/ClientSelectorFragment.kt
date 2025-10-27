@@ -21,6 +21,8 @@ import com.avetiso.feature_clients.selector.mvi.ClientSelectorViewModel
 import com.avetiso.navigation.ClientsNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -42,19 +44,24 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
         setupRecyclerView()
         setupListeners()
         observeState()
+
+        setFragmentResultListener("client_updated_request") { _, _ ->
+            viewModel.onSearchQueryChanged(viewModel.state.value.searchQuery)
+        }
     }
 
     private fun setupRecyclerView() {
-        clientAdapter = ClientAdapter()
-        binding?.rvClients?.adapter = clientAdapter
+        val currentBinding = binding ?: return
+        val adapter = ClientAdapter().also { clientAdapter = it }
+        currentBinding.rvClients.adapter = adapter
 
         // Отключает анимацию на андроид 15
-        binding?.rvClients?.itemAnimator = null
+        currentBinding.rvClients.itemAnimator = null
 
         actions = RecyclerViewActions(
             fragment = this,
-            recyclerView = binding!!.rvClients,
-            adapter = clientAdapter!!,
+            recyclerView = currentBinding.rvClients,
+            adapter = adapter,
             getItemId = { client -> client.id },
             getItemName = { client -> client.name },
             onEdit = { client ->
@@ -65,21 +72,15 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
                 viewModel.deleteClient(client)
             },
             onItemClick = { client ->
-                // Обновляем состояние в локальном ViewModel
                 viewModel.onClientSelected(client)
-
-                // Отправляем результат обратно родительскому фрагменту
-                setFragmentResult("client_selection_request", bundleOf("selected_client" to client))
-                findNavController().navigateUp() // И закрываем себя
             },
             onActionsShown = {
-                // При показе действий сбрасываем выбор в локальном ViewModel
-                val currentState = viewModel.state.value
-                viewModel.onClientSelected(currentState.selectedClient ?: return@RecyclerViewActions)
+                viewModel.clearClientSelection()
+                setFragmentResult("client_selection_request", bundleOf("selected_client" to null))
             }
         )
         // Передаем actions в адаптер
-        clientAdapter?.actions = actions
+        adapter.actions = actions
     }
 
     private fun setupListeners() {
@@ -100,27 +101,26 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
                         clientAdapter?.submitList(clients)
                     }
                 }
-                // Подписка на состояние выбора для подсветки
                 launch {
-                    viewModel.state.collect { state ->
-                        clientAdapter?.updateSelection(state.selectedClient)
-                    }
-                }
-                // Слушаем результат с экрана добавления/редактирования
-                launch {
-                    setFragmentResultListener("client_updated_request") { _, _ ->
-                        // Результат получен. Просто перезапрашиваем данные.
-                        viewModel.onSearchQueryChanged(binding?.etSearch?.text.toString())
-                    }
+                    viewModel.state
+                        .map { it.selectedClient }
+                        .distinctUntilChanged()
+                        .collect { selectedClient ->
+                            // 1. Обновляем UI (подсветка)
+                            clientAdapter?.updateSelection(selectedClient) // Безопасный вызов
+                            // 2. Отправляем результат родителю
+                            setFragmentResult("client_selection_request", bundleOf("selected_client" to selectedClient))
+                        }
                 }
             }
         }
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        binding?.rvClients?.adapter = null
         binding = null
         clientAdapter = null
         actions = null
+        super.onDestroyView()
     }
 }

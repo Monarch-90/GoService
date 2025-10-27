@@ -37,11 +37,14 @@ class ClientSelectorViewModel @Inject constructor(
     }
 
     fun onClientSelected(client: ClientEntity) {
-        _state.update {
-            // Логика переключения: если кликнули по уже выбранному, снимаем выбор
-            val newSelection = if (it.selectedClient == client) null else client
-            it.copy(selectedClient = newSelection)
+        _state.update { currentState ->
+            val newSelection = if (currentState.selectedClient == client) null else client
+            currentState.copy(selectedClient = newSelection)
         }
+    }
+
+    fun clearClientSelection() {
+        _state.update { it.copy(selectedClient = null) }
     }
 
     fun deleteClient(client: ClientEntity) {

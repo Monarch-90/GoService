@@ -15,6 +15,6 @@ sealed interface AddAppointmentEvent {
     data class TimeSlotClicked(val timeSlot: TimeSlotEntity) : AddAppointmentEvent
     // Новое событие для очистки выбора слотов
     data object ClearTimeSlotSelection : AddAppointmentEvent
-    data class ClientSelected(val client: ClientEntity) : AddAppointmentEvent
+    data class ClientSelected(val client: ClientEntity?) : AddAppointmentEvent
     data object ClearClientSelection : AddAppointmentEvent
 }

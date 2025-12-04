@@ -79,18 +79,22 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
     }
 
     private fun setupRecyclerView() {
-        // Создаем адаптер без лямбды
-        serviceAdapter = AvailableServiceAdapter()
-        binding?.rvSelectedServices?.adapter = serviceAdapter
+        // 1. Безопасно получаем binding. Если он null, выходим из функции.
+        val currentBinding = binding ?: return
+
+        // 2. Создаем адаптер и сохраняем его в локальную переменную (она точно не null)
+        val adapter = AvailableServiceAdapter().also { serviceAdapter = it }
+
+        currentBinding.rvSelectedServices.adapter = adapter
 
         // Отключает анимацию на андроид 15
-        binding?.rvSelectedServices?.itemAnimator = null
+        currentBinding.rvSelectedServices.itemAnimator = null
 
         // Инициализируем наш механизм действий
         actions = RecyclerViewActions(
             fragment = this,
-            recyclerView = binding!!.rvSelectedServices,
-            adapter = serviceAdapter!!,
+            recyclerView = currentBinding.rvSelectedServices,
+            adapter = adapter,
             getItemId = { service -> service.id },
             getItemName = { service -> service.name },
             onEdit = { service ->
@@ -122,7 +126,7 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
             }
         )
         // Передаем actions в адаптер
-        serviceAdapter?.actions = actions
+        adapter.actions = actions
     }
 
     private fun setupSearch() {
@@ -133,9 +137,10 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        binding?.rvSelectedServices?.adapter = null
         binding = null
         serviceAdapter = null
         actions = null
+        super.onDestroyView()
     }
 }

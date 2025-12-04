@@ -1,12 +1,9 @@
 package com.avetiso.feature_schedule.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -16,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.common_ui.compose_picker.ComposeDatePickerDialogFragment
-import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
@@ -24,13 +20,9 @@ import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.DialogAddNoteBinding
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
-import com.avetiso.feature_schedule.mvi.ScheduleEvent
 import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,25 +45,28 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
 
-    private var appointmentAdapter = AppointmentAdapter(
-        onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
-        onNoteClicked = { appointment -> showNoteDialog(appointment) }
-    )
+    private var appointmentAdapter: AppointmentAdapter? = null
 
     private var actions: RecyclerViewActions<Appointment>? = null
     private var scheduleDatePicker: ComposeDatePickerDialogFragment? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val currentBinding = FragmentScheduleBinding.bind(view)
-        binding = currentBinding
+        binding = FragmentScheduleBinding.bind(view)
 
-        currentBinding.rvAppointments.adapter = appointmentAdapter
+        val currentBinding = binding ?: return
+
+        val adapter = AppointmentAdapter(
+            onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
+            onNoteClicked = { appointment -> showNoteDialog(appointment) }
+        ).also { appointmentAdapter = it }
+
+        currentBinding.rvAppointments.adapter = adapter
 
         actions = RecyclerViewActions(
             fragment = this,
-            recyclerView = binding!!.rvAppointments,
-            adapter = appointmentAdapter,
+            recyclerView = currentBinding.rvAppointments,
+            adapter = adapter,
             getItemId = { it.id },
             getItemName = { "Удалить запись?" },
             onEdit = { appointment ->
@@ -108,7 +103,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             },
             triggerMode = TriggerMode.SWIPE_REVEAL
         )
-        appointmentAdapter.actions = actions
+        adapter.actions = actions
 
         // Инициализируем и настраиваем календарь
         calendarManager = CalendarManager(
@@ -175,7 +170,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 launch {
                     scheduleViewModel.appointmentsForDate.collect { appointmentsForAdapter ->
                         // Просто передаем готовый список в адаптер
-                        appointmentAdapter.submitList(appointmentsForAdapter)
+                        appointmentAdapter?.submitList(appointmentsForAdapter)
                     }
                 }
 
@@ -281,8 +276,11 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        binding?.rvAppointments?.adapter = null
         binding = null
         calendarManager = null // Очищаем ссылку на менеджер
+        appointmentAdapter = null
+        actions = null
+        super.onDestroyView()
     }
 }

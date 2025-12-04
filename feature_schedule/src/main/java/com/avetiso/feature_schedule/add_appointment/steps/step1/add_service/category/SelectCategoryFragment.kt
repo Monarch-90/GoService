@@ -31,6 +31,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     private var binding: FragmentSelectCategoryBinding? = null
     private val viewModel: SelectCategoryViewModel by viewModels()
     private var actions: RecyclerViewActions<CategoryEntity>? = null
+    private var categoryAdapter: CategoryAdapter? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -44,15 +45,15 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
     private fun setupRecyclerView() {
         val currentBinding = binding ?: return
-        val categoryAdapter = CategoryAdapter()
+        val adapter = CategoryAdapter().also { categoryAdapter = it }
 
-        currentBinding.rvCategories.adapter = categoryAdapter
+        currentBinding.rvCategories.adapter = adapter
         currentBinding.rvCategories.layoutManager = LinearLayoutManager(requireContext())
 
         actions = RecyclerViewActions(
             fragment = this,
             recyclerView = currentBinding.rvCategories,
-            adapter = categoryAdapter,
+            adapter = adapter,
             getItemId = { category -> category.id },
             getItemName = { category -> category.name },
             onEdit = { category ->
@@ -67,12 +68,11 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
                     bundleOf("selected_category_name" to category.name)
                 )
                 findNavController().navigateUp()
-            },
-            onActionsShown = {}
+            }
         )
 
         // Просто присваиваем actions в адаптер.
-        categoryAdapter.actions = actions
+        adapter.actions = actions
     }
 
     private fun setupClickListeners() {

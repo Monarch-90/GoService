@@ -22,9 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-private const val REQUEST_KEY_ADD = "time_slot_add"
-private const val REQUEST_KEY_EDIT = "time_slot_edit"
-
 @AndroidEntryPoint
 class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
@@ -32,7 +29,6 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     private var timeSlotAdapter: TimeSlotAdapter? = null
 
     private var actions: RecyclerViewActions<TimeSlotEntity>? = null
-    private var editingTimeSlotId: Long? = null
 
     private val viewModel: Step2SelectTimeViewModel by viewModels()
     private val parentViewModel: AddAppointmentViewModel by viewModels({ requireParentFragment() })
@@ -47,16 +43,22 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     }
 
     private fun setupRecyclerView() {
-        timeSlotAdapter = TimeSlotAdapter()
+        // 1. Безопасно получаем binding
         val currentBinding = binding ?: return
-        currentBinding.rvTimeSlots.adapter = timeSlotAdapter
+
+        // 2. Создаем адаптер и сохраняем ссылку
+        val adapter = TimeSlotAdapter().also { timeSlotAdapter = it }
+
+        currentBinding.rvTimeSlots.adapter = adapter
+
+        // Отключение анимации
         currentBinding.rvTimeSlots.itemAnimator = null
 
         // RecyclerViewActions теперь работает с TimeSlotEntity
         actions = RecyclerViewActions(
             fragment = this,
             recyclerView = currentBinding.rvTimeSlots,
-            adapter = timeSlotAdapter!!,
+            adapter = adapter,
             // Все лямбды теперь получают на вход `TimeSlotEntity`
             getItemId = { entity -> entity.id },
             getItemName = { entity ->
@@ -73,7 +75,7 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
                 parentViewModel.handleEvent(AddAppointmentEvent.ClearTimeSlotSelection)
             }
         )
-        timeSlotAdapter?.actions = actions
+        adapter.actions = actions
     }
 
 
@@ -162,10 +164,10 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         binding?.rvTimeSlots?.adapter = null
         timeSlotAdapter = null
         actions = null
         binding = null
+        super.onDestroyView()
     }
 }

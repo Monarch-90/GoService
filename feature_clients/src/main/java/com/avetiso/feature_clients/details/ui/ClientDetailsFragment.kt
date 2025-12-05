@@ -133,8 +133,14 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
 
             currentBinding.tvPhone.text = client.phoneNumber
 
-            currentBinding.tvInstagram.isVisible = client.instagram.isNotBlank()
-            currentBinding.tvInstagram.text = client.instagram
+            val formattedInstagram = when {
+                client.instagram.isBlank() -> ""
+                !client.instagram.startsWith("@") -> "@${client.instagram}"
+                else -> client.instagram
+            }
+
+            currentBinding.tvInstagram.text = formattedInstagram
+            currentBinding.tvInstagram.isVisible = formattedInstagram.isNotBlank()
             currentBinding.tvInstagram.paintFlags = currentBinding.tvInstagram.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
             // Очищаем контейнер перед добавлением полей, чтобы не дублировать при обновлениях

@@ -16,19 +16,44 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
     var actions: RecyclerViewActions<ClientEntity>? = null
     private var selectedClient: ClientEntity? = null
 
+    // Карта для хранения позиций: ID клиента -> Позиция в списке
+    private val clientIdToPositionMap = mutableMapOf<Long, Int>()
+
+    // Переопределяем submitList, чтобы обновлять карту позиций
+    override fun submitList(list: List<ClientEntity>?) {
+        updatePositionMap(list)
+        super.submitList(list)
+    }
+
+    override fun submitList(list: List<ClientEntity>?, commitCallback: Runnable?) {
+        updatePositionMap(list)
+        super.submitList(list, commitCallback)
+    }
+
+    // Вспомогательная функция для обновления карты
+    private fun updatePositionMap(list: List<ClientEntity>?) {
+        clientIdToPositionMap.clear()
+        list?.forEachIndexed { index, client ->
+            clientIdToPositionMap[client.id] = index
+        }
+    }
+
     // Метод для обновления выделения, как в первом шаге
     fun updateSelection(client: ClientEntity?) {
         val oldClient = selectedClient
         selectedClient = client
 
-        // Обновляем старый и новый элементы, чтобы перерисовать их состояние
+        // Находим старую позицию через Map (O(1))
         if (oldClient != null) {
-            val oldPosition = currentList.indexOf(oldClient)
-            if (oldPosition != -1) notifyItemChanged(oldPosition)
+            clientIdToPositionMap[oldClient.id]?.let { oldPosition ->
+                notifyItemChanged(oldPosition)
+            }
         }
+        // Находим новую позицию через Map (O(1))
         if (client != null) {
-            val newPosition = currentList.indexOf(client)
-            if (newPosition != -1) notifyItemChanged(newPosition)
+            clientIdToPositionMap[client.id]?.let { newPosition ->
+                notifyItemChanged(newPosition)
+            }
         }
     }
 
@@ -54,8 +79,6 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
 
         fun bind(client: ClientEntity, isSelected: Boolean) {
             binding.tvClientName.text = client.name
-            binding.tvClientPhone.text = client.phoneNumber
-            binding.tvInstagram.text = client.instagram
 
             // Управляем видимостью индикатора выделения
             binding.viewSelectedCheck.isVisible = isSelected

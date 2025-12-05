@@ -67,7 +67,6 @@ class AddAppointmentViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             currentStep = previousStep,
-                            // ✅ ГЛАВНОЕ ИСПРАВЛЕНИЕ:
                             // При возврате на шаг назад, мы ПЕРЕСЧИТЫВАЕМ состояние кнопки
                             // на основе уже имеющихся данных в state.
                             isNextButtonEnabled = isStepComplete(previousStep, it)
@@ -126,12 +125,13 @@ class AddAppointmentViewModel @Inject constructor(
             }
 
             is AddAppointmentEvent.ClientSelected -> {
-                _state.update {
-                    it.copy(
-                        // Логика переключения: если кликнули по уже выбранному, снимаем выбор
-                        selectedClient = if (it.selectedClient == event.client) null else event.client,
-                        isNextButtonEnabled = it.selectedClient != event.client // Кнопка активна, если мы выбрали нового клиента
-                    )
+                _state.update { currentState ->
+                    // 1. Сначала обновляем состояние с выбранным клиентом.
+                    val updatedState = currentState.copy(selectedClient = event.client)
+
+                    // 2. Затем, на основе этого НОВОГО состояния, вычисляем,
+                    //    должна ли кнопка быть активна, используя нашу общую функцию.
+                    updatedState.copy(isNextButtonEnabled = isStepComplete(updatedState.currentStep, updatedState))
                 }
             }
 

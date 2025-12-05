@@ -150,13 +150,12 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
 
     private fun setupFragmentResultListeners() {
         // Слушаем результат от экрана выбора клиента
-        setFragmentResultListener("client_selection_request") { _, bundle ->
-            // Получаем клиента из bundle
+        childFragmentManager.setFragmentResultListener(
+            "client_selection_request",
+            viewLifecycleOwner // Using viewLifecycleOwner ensures the listener is automatically removed.
+        ) { _, bundle ->
             val client = BundleCompat.getParcelable(bundle, "selected_client", ClientEntity::class.java)
-            if (client != null) {
-                // Отправляем событие в наш AddAppointmentViewModel
-                viewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
-            }
+            viewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
         }
     }
 

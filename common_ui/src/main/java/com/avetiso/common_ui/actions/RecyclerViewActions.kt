@@ -11,6 +11,7 @@ import com.avetiso.common_ui.actions.listeners.ItemActionTouchListener
 import com.avetiso.common_ui.actions.listeners.SwipeRevealTouchListener
 import com.avetiso.common_ui.actions.listeners.TapOutsideTouchListener
 import com.avetiso.common_ui.databinding.DeleteDialogBinding
+import com.avetiso.common_ui.utils.DialogUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class RecyclerViewActions<T : Any>(
@@ -22,8 +23,8 @@ class RecyclerViewActions<T : Any>(
     private val onEdit: (T) -> Unit,
     private val onDelete: (T) -> Unit,
     private val onItemClick: ((T) -> Unit)? = null,
-    private val onActionsShown: () -> Unit,
-    private val onActionsDismissed: () -> Unit = {},
+    private val onActionsShown: (() -> Unit)? = null,
+    private val onActionsDismissed: (() -> Unit)? = null,
     val triggerMode: TriggerMode = TriggerMode.LONG_PRESS,
 ) {
     var activeItemId: Any?
@@ -81,7 +82,11 @@ class RecyclerViewActions<T : Any>(
                     // Эта лямбда теперь правильно вызывает диалог
                     onDelete = { position ->
                         adapter.currentList.getOrNull(position)?.let { item ->
-                            showDeleteConfirmationDialog(item) // 1. Показываем диалог
+                            DialogUtils.showDeleteConfirmationDialog(
+                                context = fragment.requireContext(),
+                                itemName = getItemName(item),
+                                onConfirm = { onDelete(item) }
+                            )                                  // 1. Показываем диалог
                             dismissActions()                   // 2. Закрываем свайп
                         }
                     }
@@ -105,7 +110,7 @@ class RecyclerViewActions<T : Any>(
         if (newActiveId == activeItemId) return
 
         dismissActions()
-        onActionsShown()
+        onActionsShown?.invoke()
         activeItemId = newActiveId
 
         val holder = recyclerView.findViewHolderForAdapterPosition(position) ?: return
@@ -124,7 +129,7 @@ class RecyclerViewActions<T : Any>(
     }
 
     fun dismissActions() {
-        onActionsDismissed()
+        onActionsDismissed?.invoke()
 
         val oldActiveId = activeItemId ?: return
         val oldPosition = findIndexOfItem(oldActiveId)
@@ -170,7 +175,11 @@ class RecyclerViewActions<T : Any>(
                     dismissActions()
                 }
                 holder.deleteButton.setOnClickListener {
-                    showDeleteConfirmationDialog(item)
+                    DialogUtils.showDeleteConfirmationDialog(
+                        context = fragment.requireContext(),
+                        itemName = getItemName(item),
+                        onConfirm = { onDelete(item) }
+                    )
                     dismissActions()
                 }
             } else {

@@ -2,6 +2,7 @@ package com.avetiso.goservice
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -12,10 +13,11 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.avetiso.goservice.databinding.ActivityMainBinding
+import com.avetiso.navigation.DrawerController
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), DrawerController {
 
     private var binding: ActivityMainBinding? = null
     private var navController: NavController? = null
@@ -74,6 +76,14 @@ class MainActivity : AppCompatActivity() {
     // Этот метод нужен для корректной работы кнопки "назад"
     override fun onSupportNavigateUp(): Boolean {
         return navController?.navigateUp() ?: super.onSupportNavigateUp()
+    }
+
+    override fun openSideDrawer() {
+        binding?.drawerLayout?.openDrawer(GravityCompat.START)
+    }
+
+    override fun closeSideDrawer() {
+        binding?.drawerLayout?.closeDrawer(GravityCompat.START)
     }
 
     override fun onDestroy() {

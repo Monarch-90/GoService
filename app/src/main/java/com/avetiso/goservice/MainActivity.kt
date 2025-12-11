@@ -42,33 +42,33 @@ class MainActivity : AppCompatActivity(), DrawerController {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        binding?.bottomNavView?.let { bottomNavView ->
-            // Стандартное подключение
-            setupWithNavController(bottomNavView, navHostFragment.navController)
+        // ✅ НАСТРОЙКА БОКОВОГО МЕНЮ (РУЧНАЯ ОБРАБОТКА)
+        binding?.sideNavView?.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.settingsFragment -> {
+                    // 1. Пытаемся найти экшен или назначение
+                    try {
+                        // Опции для очистки стека, чтобы не плодить фрагменты настроек
+                        val navOptions = NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .build()
 
-            // ПРАВИЛЬНЫЙ ОБРАБОТЧИК ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ
-            bottomNavView.setOnItemSelectedListener { item ->
-                val builder = NavOptions.Builder()
-                    .setLaunchSingleTop(true) // Не пересоздавать вкладку, если она уже на вершине стека
-                    .setRestoreState(true) // ВОССТАНАВЛИВАТЬ СОСТОЯНИЕ при возвращении
-
-                builder.setPopUpTo(
-                    destinationId = navHostFragment.navController.graph.findStartDestination().id,
-                    inclusive = false,
-                    saveState = true
-                )
-
-                val options = builder.build()
-
-                try {
-                    // Выполняем навигацию с нашими опциями
-                    navHostFragment.navController.navigate(item.itemId, null, options)
-                    true
-                } catch (e: IllegalArgumentException) {
-                    // Иногда может быть ошибка, если кликнуть очень быстро
-                    // при пересоздании. Просто игнорируем.
+                        navController?.navigate(R.id.settingsFragment, null, navOptions)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    // 2. Закрываем шторку
+                    binding?.drawerLayout?.closeDrawer(GravityCompat.START)
                     true
                 }
+                R.id.nav_about -> {
+                    // Тут позже сделаем диалог "О приложении"
+                    // Пока просто закроем шторку и покажем Тост
+                    android.widget.Toast.makeText(this, "О приложении", android.widget.Toast.LENGTH_SHORT).show()
+                    binding?.drawerLayout?.closeDrawer(GravityCompat.START)
+                    true
+                }
+                else -> false
             }
         }
     }

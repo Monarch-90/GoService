@@ -14,6 +14,6 @@ data class ServiceEntity(
     val categoryName: String,
     val isPriceFrom: Boolean,
     val price: Double,
-    val currency: String,
+    val currency: String?,
     val durationMinutes: Int,
 ) : Parcelable

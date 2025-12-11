@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
+import com.avetiso.common_ui.utils.DialogUtils
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
@@ -35,6 +36,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     // ФЛАГ, чтобы отследить первую загрузку
     private var isInitialDataLoaded = false
+
+    // ФЛАГ: Чтобы отличать программную установку от клика пользователя
+    private var isUserAction = false
+
+    // Флаг, чтобы настроить спиннер только один раз при получении данных
+    private var isSpinnerSetup = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -75,6 +82,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                         } else {
                             binding?.toggleBtnPriceFrom?.uncheck(R.id.btn_price_from)
                         }
+
+                        // ✅ Инициализируем спиннер только когда получили валюту из БД (не null)
+                        // и только если еще не инициализировали
+                        if (state.selectedCurrency != null && !isSpinnerSetup) {
+                            setupCurrencySpinner(state.selectedCurrency)
+                            isSpinnerSetup = true
+                        }
                     }
                 }
 
@@ -85,6 +99,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                             is AddServiceEvent.ShowToast -> {
                                 Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
                             }
+
                             is AddServiceEvent.NavigateBackWithResult -> {
                                 // Этот код переехал сюда из saveService()
                                 findNavController().previousBackStackEntry?.savedStateHandle?.set(
@@ -92,6 +107,17 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                                     true
                                 )
                                 findNavController().navigateUp()
+                            }
+
+                            is AddServiceEvent.AskToSetDefaultCurrency -> {
+                                DialogUtils.showYesNoDialog(
+                                    context = requireContext(),
+                                    title = "Валюта по умолчанию",
+                                    message = "Установить ${event.currency}?",
+                                    onPositiveClicked = {
+                                        viewModel.setNewDefaultCurrency(event.currency)
+                                    }
+                                )
                             }
                         }
                     }
@@ -118,7 +144,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         setupDurationPicker()
         setupCategoryPicker()
         setupPriceToggle()
-        setupCurrencySpinner()
     }
 
     private fun populateFieldsForEdit(service: ServiceEntity) {
@@ -240,8 +265,8 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
     }
 
-    private fun setupCurrencySpinner() {
-        val currencies = listOf("BYN", "USD", "EUR", "RUB", "KZT", "BTC", "ETH", "USDT")
+    private fun setupCurrencySpinner(selectedCurrency: String) {
+        val currencies = listOf("GEL", "USD", "EUR")
 
         // Позже мы добавим сюда логику "избранных" валют
 
@@ -251,25 +276,30 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
         binding?.spinnerCurrency?.adapter = adapter
 
-        val initialCurrencyIndex = currencies.indexOf(viewModel.uiState.value.selectedCurrency)
-        if (initialCurrencyIndex != -1) {
-            binding?.spinnerCurrency?.setSelection(initialCurrencyIndex)
+        // 1. Устанавливаем начальное значение (из ViewModel) БЕЗ вызова слушателя
+        val initialCurrency = viewModel.uiState.value.selectedCurrency
+        val initialIndex = currencies.indexOf(initialCurrency)
+        if (initialIndex >= 0) {
+            binding?.spinnerCurrency?.setSelection(initialIndex, false)
         }
 
-        binding?.spinnerCurrency?.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long,
-                ) {
-                    // Сообщаем ViewModel об изменении
-                    viewModel.setCurrency(currencies[position])
+        // 2. Настраиваем слушатель с проверкой флага
+        binding?.spinnerCurrency?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Реагируем ТОЛЬКО если это действие пользователя
+                if (isUserAction) {
+                    viewModel.onCurrencySelectedInSpinner(currencies[position])
                 }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // 3. Активируем флаг с задержкой (через post),
+        // чтобы пропустить автоматические вызовы при инициализации layout
+        binding?.spinnerCurrency?.post {
+            isUserAction = true
+        }
     }
 
 
@@ -280,5 +310,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+        isSpinnerSetup = false
+        isUserAction = false
     }
 }

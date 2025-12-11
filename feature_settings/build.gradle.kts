@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.avetiso.core"
+    namespace = "com.avetiso.feature_settings"
     compileSdk = 36
 
     defaultConfig {
@@ -27,34 +28,29 @@ kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
-
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
 }
 
 dependencies {
+    implementation(project(":core"))
+    implementation(project(":common_ui"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
-    // Hilt
+    // ViewModel & Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.fragment.ktx)
+
+    // Hilt (для ViewModel)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
-    // Gson
-    implementation(libs.gson)
-
-    // Data store
-    implementation(libs.androidx.datastore.preferences)
+    // Navigation (если нужна навигация внутри фичи)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 }
-
-// Parcelize
-apply(plugin = "kotlin-parcelize")

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "362ee5c0460aa03f710bff1f726710d4",
+    "identityHash": "0e0649c87ec3d15ce2fe9ca16e2c1bcc",
     "entities": [
       {
         "tableName": "services",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `categoryName` TEXT NOT NULL, `isPriceFrom` INTEGER NOT NULL, `price` REAL NOT NULL, `currency` TEXT NOT NULL, `durationMinutes` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `categoryName` TEXT NOT NULL, `isPriceFrom` INTEGER NOT NULL, `price` REAL NOT NULL, `currency` TEXT, `durationMinutes` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -41,8 +41,7 @@
           {
             "fieldPath": "currency",
             "columnName": "currency",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "durationMinutes",
@@ -265,7 +264,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '362ee5c0460aa03f710bff1f726710d4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0e0649c87ec3d15ce2fe9ca16e2c1bcc')"
     ]
   }
 }

@@ -50,7 +50,7 @@ interface ServiceDao {
         categoryName: String,
         isPriceFrom: Boolean,
         price: Double,
-        currency: String,
+        currency: String?,
         durationMinutes: Int,
         idToExclude: Long
     ): ServiceEntity?

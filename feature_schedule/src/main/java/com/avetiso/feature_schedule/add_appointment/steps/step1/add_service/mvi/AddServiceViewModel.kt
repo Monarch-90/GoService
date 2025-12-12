@@ -3,6 +3,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.ServiceDao
+import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.core.entity.ServiceEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,11 +12,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 
 @HiltViewModel
 class AddServiceViewModel @Inject constructor(
     private val serviceDao: ServiceDao,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     // Приватный MutableStateFlow для хранения и изменения состояния
@@ -26,6 +29,14 @@ class AddServiceViewModel @Inject constructor(
 
     private val _eventChannel = Channel<AddServiceEvent>()
     val events = _eventChannel.receiveAsFlow()
+
+    init {
+        // При старте загружаем валюту по умолчанию
+        viewModelScope.launch {
+            val defaultCurrency = settingsRepository.defaultCurrency.first()
+            _uiState.update { it.copy(selectedCurrency = defaultCurrency) }
+        }
+    }
 
     // Метод для обновления продолжительности
     fun setDuration(hour: Int, minute: Int) {
@@ -42,9 +53,36 @@ class AddServiceViewModel @Inject constructor(
     }
 
     // Метод для обновления валюты
-    fun setCurrency(currency: String) {
+    fun setCurrency(currency: String?) {
         _uiState.update { currentState ->
             currentState.copy(selectedCurrency = currency)
+        }
+    }
+
+    // Метод вызывается, когда пользователь меняет значение в спиннере
+    fun onCurrencySelectedInSpinner(newCurrency: String) {
+
+        // Обновляем UI
+        _uiState.update { it.copy(selectedCurrency = newCurrency) }
+
+        // ✅ Если валюта изменилась и это не инициализация (простая проверка),
+        // запускаем проверку, нужно ли показать диалог.
+        // Нюанс: Спиннер вызывает onItemSelected даже при инициализации.
+        // Чтобы избежать диалога при старте, можно проверить, отличается ли новая от сохраненной дефолтной.
+
+        viewModelScope.launch {
+            val savedDefault = settingsRepository.defaultCurrency.first()
+            if (newCurrency != savedDefault) {
+                // Отправляем событие во фрагмент, чтобы показать диалог
+                _eventChannel.send(AddServiceEvent.AskToSetDefaultCurrency(newCurrency))
+            }
+        }
+    }
+
+    // Метод для сохранения новой дефолтной валюты
+    fun setNewDefaultCurrency(currency: String) {
+        viewModelScope.launch {
+            settingsRepository.setDefaultCurrency(currency)
         }
     }
 

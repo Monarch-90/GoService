@@ -22,6 +22,7 @@ import com.avetiso.feature_schedule.databinding.DialogAddNoteBinding
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
+import com.avetiso.navigation.DrawerController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
@@ -118,6 +119,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private fun setupClickListeners() {
         val currentBinding = binding ?: return
+
         currentBinding.btnNextMonth.setOnClickListener {
             currentBinding.calendarView.findFirstVisibleMonth()?.let {
                 currentBinding.calendarView.smoothScrollToMonth(it.yearMonth.nextMonth)
@@ -144,6 +146,12 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 // Если дата не выбрана, показываем подсказку
                 Toast.makeText(requireContext(), "Пожалуйста, выберите день", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        currentBinding.toolbar.setNavigationOnClickListener {
+            // Мы проверяем: "Является ли родительская Activity контроллером шторки?"
+            // Если да — вызываем метод. Если нет — ничего не делаем (безопасно).
+            (requireActivity() as? DrawerController)?.openSideDrawer()
         }
     }
 

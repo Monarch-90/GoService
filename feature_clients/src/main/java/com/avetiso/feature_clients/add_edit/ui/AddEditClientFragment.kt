@@ -1,15 +1,9 @@
 package com.avetiso.feature_clients.add_edit.ui
 
-import android.app.AlertDialog
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -19,16 +13,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientEvent
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientViewModel
-import com.avetiso.feature_clients.databinding.DialogAddFieldBinding
 import com.avetiso.feature_clients.databinding.FragmentAddEditClientBinding
 import com.avetiso.feature_clients.databinding.ItemCustomFieldBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -44,6 +36,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         binding = FragmentAddEditClientBinding.bind(view)
 
         setupListeners()
+        setupResultListeners()
         observeUi()
     }
 
@@ -131,48 +124,33 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         currentBinding.btnAddField.setOnClickListener { showAddFieldDialog() }
     }
 
+    // Обработка ввода из InputDialogFragment
+    private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(INPUT_FIELD_KEY, viewLifecycleOwner) { _, bundle ->
+            val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: return@setFragmentResultListener
+            addCustomFieldView(text)
+        }
+    }
+
     private fun showAddFieldDialog() {
-        // 1. "Надуваем" кастомный макет с помощью ViewBinding
-        val dialogBinding = DialogAddFieldBinding.inflate(LayoutInflater.from(requireContext()))
+        val usedNames = mutableListOf(
+            getString(com.avetiso.core.R.string.Имя_клиента),
+            getString(com.avetiso.core.R.string.Номер_телефона),
+            getString(com.avetiso.core.R.string.Инстаграм),
+            getString(com.avetiso.core.R.string.Источник_привлечения),
+            getString(com.avetiso.core.R.string.Личная_скидка),
+            getString(com.avetiso.core.R.string.Примечание),
+        )
 
-        // 2. Создаем диалог, передавая ему ViewBinding.root
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .create()
+        // Добавляем уже созданные кастомные поля
+        usedNames.addAll(customFieldViews.keys)
 
-        // 3. Устанавливаем слушатели на НАШИ кнопки из макета
-        dialogBinding.btnNegative.setOnClickListener {
-            dialog.dismiss() // Просто закрываем
-        }
-
-        dialogBinding.btnPositive.setOnClickListener {
-            val fieldName = dialogBinding.ietFieldName.text.toString().trim()
-
-            // Проверка на пустоту и дублирование
-            if (fieldName.isEmpty()) {
-                dialogBinding.ilFieldName.error = "Название не может быть пустым"
-                return@setOnClickListener // Остаемся в диалоге
-            }
-            if (customFieldViews.containsKey(fieldName)) {
-                dialogBinding.ilFieldName.error = "Такое поле уже существует"
-                return@setOnClickListener // Остаемся в диалоге
-            }
-
-            // Если все ок:
-            addCustomFieldView(fieldName) // Добавляем View
-            dialog.dismiss() // Закрываем диалог
-        }
-
-        // Убираем ошибку при начале ввода
-        dialogBinding.ietFieldName.addTextChangedListener {
-            dialogBinding.ilFieldName.error = null
-        }
-
-        // 4. Показываем диалог
-        dialog.show()
-
-        // 5. Применяем кастомный фон (как в твоем RecyclerViewActions)
-        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
+        InputDialogFragment.newInstance(
+            requestKey = INPUT_FIELD_KEY,
+            title = getString(com.avetiso.core.R.string.Новое_поле),
+            hint = getString(com.avetiso.core.R.string.Название_поля),
+            forbiddenValues = usedNames,
+        ).show(childFragmentManager, InputDialogFragment.TAG)
     }
 
     private fun addCustomFieldView(fieldName: String, fieldValue: String = "") {
@@ -236,6 +214,10 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         )
 
         viewModel.saveClient(clientToSave)
+    }
+
+    companion object {
+        private const val INPUT_FIELD_KEY = "input_field_request"
     }
 
     override fun onDestroyView() {

@@ -9,7 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.avetiso.common_ui.utils.DialogUtils
+import com.avetiso.common_ui.dialogs.ConfirmationDialogFragment
 import com.avetiso.feature_settings.R
 import com.avetiso.feature_settings.databinding.FragmentSettingsBinding
 import com.avetiso.feature_settings.mvi.SettingsEvent
@@ -29,11 +29,36 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     // Флаг инициализации
     private var isSpinnerInitialized = false
 
+    // Сюда мы положим "USD", пока пользователь думает над диалогом.
+    private var pendingCurrency: String? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSettingsBinding.bind(view)
 
+        setupResultListeners() // Регистрируем. ОТВЕТЫ: Входящие данные (что мне возвращают другие)
         observeState()
+    }
+
+    private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(CHANGE_CURRENCY_KEY, viewLifecycleOwner) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(ConfirmationDialogFragment.RESULT_CONFIRMED)
+
+            // Достаем из памяти ту валюту, про которую спрашивали
+            val currency = pendingCurrency
+
+            if (currency != null) {
+                if (isConfirmed) {
+                    // Если нажали ДА - сохраняем
+                    viewModel.confirmCurrencyChange(currency)
+                } else {
+                    // Если нажали НЕТ (или отмена) - откатываем спиннер назад
+                    viewModel.onDeclineCurrencyChange()
+                }
+            }
+            // Очищаем память
+            pendingCurrency = null
+        }
     }
 
     private fun observeState() {
@@ -60,17 +85,16 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                     viewModel.events.collect { event ->
                         when (event) {
                             is SettingsEvent.AskConfirmation -> {
-                                DialogUtils.showYesNoDialog(
-                                    context = requireContext(),
-                                    title = "Валюта по умолчанию",
+                                pendingCurrency = event.currency
+
+                                // Показываем диалог
+                                ConfirmationDialogFragment.newInstance(
+                                    requestKey = CHANGE_CURRENCY_KEY,
+                                    title = "Изменение настроек",
                                     message = "Установить ${event.currency}?",
-                                    onPositiveClicked = {
-                                        viewModel.confirmCurrencyChange(event.currency)
-                                    },
-                                    onNegativeClicked = {
-                                        viewModel.onDeclineCurrencyChange()
-                                    }
-                                )
+                                    positiveText = "Да",
+                                    negativeText = "Нет"
+                                ).show(childFragmentManager, ConfirmationDialogFragment.TAG)
                             }
 
                             is SettingsEvent.RestoreSelection -> {
@@ -105,6 +129,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     viewModel.onCurrencySelected(currencies[position])
                 }
+
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
         }
@@ -130,6 +155,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             binding?.spinnerDefaultCurrency?.setSelection(position)
             binding?.spinnerDefaultCurrency?.post { isUserAction = true }
         }
+    }
+
+    companion object {
+        private const val CHANGE_CURRENCY_KEY = "change_currency_request"
     }
 
     override fun onDestroyView() {

@@ -15,7 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
-import com.avetiso.common_ui.utils.DialogUtils
+import com.avetiso.common_ui.dialogs.ConfirmationDialogFragment
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
@@ -43,6 +43,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     // Флаг, чтобы настроить спиннер только один раз при получении данных
     private var isSpinnerSetup = false
 
+    // Сюда мы положим "USD", пока пользователь думает над диалогом.
+    private var pendingCurrency: String? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAddServiceBinding.bind(view)
@@ -56,18 +59,35 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             isInitialDataLoaded = true // Ставим флаг, что данные загружены
         }
 
+        binding?.btnSave?.setOnClickListener {
+            saveService()
+        }
+
+        setupResultListeners() // Регистрируем. ОТВЕТЫ: Входящие данные (что мне возвращают другие)
+        setupFields()
+        observeUi()
+    }
+
+    private fun setupResultListeners() {
+        // Слушатель для диалога валюты
+        childFragmentManager.setFragmentResultListener(SET_DEFAULT_CURRENCY_KEY, viewLifecycleOwner) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(ConfirmationDialogFragment.RESULT_CONFIRMED)
+
+            if (isConfirmed) {
+                // Если ДА - берем валюту из памяти и сохраняем
+                pendingCurrency?.let { currency ->
+                    viewModel.setNewDefaultCurrency(currency)
+                }
+            }
+            // Если НЕТ - ничего делать не надо, просто забываем
+            pendingCurrency = null
+        }
+
         // Слушаем результат с экрана выбора категории
         setFragmentResultListener("category_selection") { _, bundle ->
             val selectedCategoryName = bundle.getString("selected_category_name")
             binding?.textCategory?.text = selectedCategoryName
         }
-
-        binding?.btnSave?.setOnClickListener {
-            saveService()
-        }
-
-        setupFields()
-        observeUi()
     }
 
     private fun observeUi() {
@@ -110,14 +130,15 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                             }
 
                             is AddServiceEvent.AskToSetDefaultCurrency -> {
-                                DialogUtils.showYesNoDialog(
-                                    context = requireContext(),
+                                pendingCurrency = event.currency // Запомнили
+
+                                ConfirmationDialogFragment.newInstance(
+                                    requestKey = SET_DEFAULT_CURRENCY_KEY,
                                     title = "Валюта по умолчанию",
                                     message = "Установить ${event.currency}?",
-                                    onPositiveClicked = {
-                                        viewModel.setNewDefaultCurrency(event.currency)
-                                    }
-                                )
+                                    positiveText = "Да",
+                                    negativeText = "Нет"
+                                ).show(childFragmentManager, ConfirmationDialogFragment.TAG)
                             }
                         }
                     }
@@ -302,9 +323,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
     }
 
-
     private fun updateDurationText(hour: Int, minute: Int) {
         binding?.textDuration?.text = String.format("%d ч %02d мин", hour, minute)
+    }
+
+    companion object {
+        private const val SET_DEFAULT_CURRENCY_KEY = "set_default_currency_request"
     }
 
     override fun onDestroyView() {

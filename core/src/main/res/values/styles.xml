@@ -40,4 +40,41 @@
     <style name="textSize_16" parent="Widget.AppCompat.TextView">
         <item name="android:textSize">16sp</item>
     </style>
+
+    <style name="ThemeOverlay.GoService.Dialog" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@color/custom_dialog_background</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
+    <style name="DialogTitle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/custom_black_white</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="DialogMessage">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/custom_black_white</item>
+        <item name="android:paddingStart">32dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="DialogTitle.Delete">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="DialogMessage.Delete">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textColor">@color/custom_main</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 </resources>

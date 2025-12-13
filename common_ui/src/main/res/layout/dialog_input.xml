@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_box_corners"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_title"
+        style="@style/DialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="0dp"
+        tools:text="Новая категория" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="24dp"
+        app:cursorErrorColor="@color/error_ping">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:paddingHorizontal="24dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_negative"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Отмена"
+            android:textColor="@color/grey" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_positive"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Сохранить"
+            android:textColor="@color/grey" />
+    </LinearLayout>
+</LinearLayout>

@@ -11,8 +11,12 @@ import com.avetiso.common_ui.actions.listeners.ItemActionTouchListener
 import com.avetiso.common_ui.actions.listeners.SwipeRevealTouchListener
 import com.avetiso.common_ui.actions.listeners.TapOutsideTouchListener
 import com.avetiso.common_ui.databinding.DeleteDialogBinding
-import com.avetiso.common_ui.utils.DialogUtils
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.common_ui.dialogs.DialogUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+
+// Уникальный ключ для общения с диалогом удаления
+private const val DELETE_REQUEST_KEY = "delete_item_request"
 
 class RecyclerViewActions<T : Any>(
     private val fragment: Fragment,
@@ -35,9 +39,26 @@ class RecyclerViewActions<T : Any>(
             recyclerView.tag = value
         }
 
+    // Временное хранилище для элемента, который мы собираемся удалить
+    private var itemPendingDelete: T? = null
+
     init {
-        // Полностью переработанная логика.
-        // Вместо ItemTouchHelper мы добавляем наши кастомные слушатели.
+        fragment.childFragmentManager.setFragmentResultListener(
+            DELETE_REQUEST_KEY,
+            fragment.viewLifecycleOwner
+        ) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)
+            if (isConfirmed) {
+                // Если пользователь нажал "Удалить"
+                itemPendingDelete?.let { item ->
+                    onDelete(item)
+                    dismissActions()
+                }
+            }
+            // Очищаем ссылку, чтобы не держать объект в памяти
+            itemPendingDelete = null
+        }
+
         when (triggerMode) {
             TriggerMode.LONG_PRESS -> {
                 val touchListener = ItemActionTouchListener(
@@ -82,12 +103,8 @@ class RecyclerViewActions<T : Any>(
                     // Эта лямбда теперь правильно вызывает диалог
                     onDelete = { position ->
                         adapter.currentList.getOrNull(position)?.let { item ->
-                            DialogUtils.showDeleteConfirmationDialog(
-                                context = fragment.requireContext(),
-                                itemName = getItemName(item),
-                                onConfirm = { onDelete(item) }
-                            )                                  // 1. Показываем диалог
-                            dismissActions()                   // 2. Закрываем свайп
+                            showDeleteConfirmationDialog(item)
+                            dismissActions()                   // Сразу закрываем свайп
                         }
                     }
                 )
@@ -175,11 +192,7 @@ class RecyclerViewActions<T : Any>(
                     dismissActions()
                 }
                 holder.deleteButton.setOnClickListener {
-                    DialogUtils.showDeleteConfirmationDialog(
-                        context = fragment.requireContext(),
-                        itemName = getItemName(item),
-                        onConfirm = { onDelete(item) }
-                    )
+                    showDeleteConfirmationDialog(item)
                     dismissActions()
                 }
             } else {
@@ -191,31 +204,13 @@ class RecyclerViewActions<T : Any>(
     }
 
     private fun showDeleteConfirmationDialog(item: T) {
-        // "Надуваем" кастомный макет
-        val binding = DeleteDialogBinding.inflate(LayoutInflater.from(fragment.requireContext()))
+        // Запоминаем, что мы хотим удалить
+        itemPendingDelete = item
 
-        // Текст из string
-        binding.tvMessage.text =
-            fragment.getString(R.string.delete_dialog_message, getItemName(item))
-
-        // Создаем диалог, передавая ему готовый макет
-        val dialog = MaterialAlertDialogBuilder(fragment.requireContext())
-            .setView(binding.root)
-            .create()
-
-        // Назначаем слушателей нажатий на наши кнопки
-        binding.btnNegative.setOnClickListener {
-            dialog.dismiss() // Просто закрываем диалог
-        }
-        binding.btnPositive.setOnClickListener {
-            onDelete(item)   // Выполняем действие
-            dialog.dismiss() // Или закрываем диалог
-        }
-
-        // Показываем диалог
-        dialog.show()
-
-        // Скругление фона
-        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
+        // Создаем и показываем DialogFragment
+        DeleteDialogFragment.newInstance(
+            requestKey = DELETE_REQUEST_KEY,
+            message = fragment.getString(R.string.delete_dialog_message, getItemName(item))
+        ).show(fragment.childFragmentManager, DeleteDialogFragment.TAG)
     }
 }

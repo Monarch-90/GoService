@@ -11,15 +11,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.avetiso.common_ui.databinding.DeleteDialogBinding
-import com.avetiso.common_ui.utils.DialogUtils
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.databinding.FragmentClientDetailsBinding
 import com.avetiso.feature_clients.databinding.ItemClientDetailFieldBinding
 import com.avetiso.feature_clients.details.mvi.ClientDetailsEvent
 import com.avetiso.feature_clients.details.mvi.ClientDetailsViewModel
 import com.avetiso.navigation.ClientsNavigator
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,8 +41,9 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentClientDetailsBinding.bind(view)
 
-        setupListeners()
-        observeState()
+        setupListeners() // КЛИКИ: Исходящие действия (что я нажимаю)
+        setupResultListeners() // ОТВЕТЫ: Входящие данные (что мне возвращают другие)
+        observeState() // ДАННЫЕ: Подписка на ViewModel
         observeEvents()
     }
 
@@ -61,6 +60,15 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
 
         currentBinding.btnDelete.setOnClickListener {
             showDeleteConfirmationDialog()
+        }
+    }
+
+    private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(DELETE_REQUEST_KEY, viewLifecycleOwner) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)
+            if (isConfirmed) {
+                viewModel.onDeleteClicked()
+            }
         }
     }
 
@@ -189,14 +197,11 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
     private fun showDeleteConfirmationDialog() {
         val clientName = viewModel.state.value.client?.name ?: ""
 
-        // Вызываем общий метод из Common_ui
-        DialogUtils.showDeleteConfirmationDialog(
-            context = requireContext(),
-            itemName = clientName,
-            onConfirm = {
-                viewModel.onDeleteClicked()
-            }
-        )
+        // Используем новый DeleteDialogFragment
+        DeleteDialogFragment.newInstance(
+            requestKey = DELETE_REQUEST_KEY,
+            message = getString(com.avetiso.common_ui.R.string.delete_dialog_message, clientName)
+        ).show(childFragmentManager, DeleteDialogFragment.TAG)
     }
 
     private fun addDetailField(label: String, value: String, iconResId: Int) {
@@ -213,6 +218,10 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         fieldBinding.ivIcon.setImageResource(iconResId) // Устанавливаем иконку
 
         currentBinding.infoContainer.addView(fieldBinding.root)
+    }
+
+    companion object {
+        private const val DELETE_REQUEST_KEY = "delete_client_request" // ✅ Ключ
     }
 
     override fun onDestroyView() {

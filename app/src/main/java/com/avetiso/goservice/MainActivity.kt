@@ -12,6 +12,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.avetiso.goservice.databinding.ActivityMainBinding
 import com.avetiso.navigation.DrawerController
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +42,10 @@ class MainActivity : AppCompatActivity(), DrawerController {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
+
+        if (navController != null) {
+            activityBinding.bottomNavView.setupWithNavController(navController!!)
+        }
 
         // ✅ НАСТРОЙКА БОКОВОГО МЕНЮ (РУЧНАЯ ОБРАБОТКА)
         binding?.sideNavView?.setNavigationItemSelectedListener { menuItem ->

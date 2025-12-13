@@ -1,0 +1,11 @@
+<resources>
+    <string name="Имя_клиента">Имя клиента</string>
+    <string name="Номер_телефона">Номер телефона</string>
+    <string name="Инстаграм">Инстаграм</string>
+    <string name="Источник_привлечения">Источник привлечения</string>
+    <string name="Личная_скидка">Личная скидка, %</string>
+    <string name="Примечание">Примечание</string>
+    <string name="Новое_поле">Новое поле</string>
+    <string name="Название_поля">Название поля</string>
+    <string name="Введите_текст">Введите текст</string>
+</resources>

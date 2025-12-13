@@ -1,4 +1,4 @@
-package com.avetiso.common_ui.utils
+package com.avetiso.common_ui.dialogs
 
 import android.content.Context
 import android.view.LayoutInflater

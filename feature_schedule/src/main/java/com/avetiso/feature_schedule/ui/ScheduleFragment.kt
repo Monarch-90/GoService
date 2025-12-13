@@ -13,12 +13,12 @@ import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.common_ui.compose_picker.ComposeDatePickerDialogFragment
+import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
-import com.avetiso.feature_schedule.databinding.DialogAddNoteBinding
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
@@ -50,6 +50,9 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private var actions: RecyclerViewActions<Appointment>? = null
     private var scheduleDatePicker: ComposeDatePickerDialogFragment? = null
+
+    // Запоминаем ID записи, для которой пишем заметку
+    private var pendingAppointmentId: Long? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -114,6 +117,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         ).also { it.setupCalendar() }
 
         setupClickListeners()
+        setupResultListeners()
         observeViewModel()
     }
 
@@ -152,6 +156,18 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             // Мы проверяем: "Является ли родительская Activity контроллером шторки?"
             // Если да — вызываем метод. Если нет — ничего не делаем (безопасно).
             (requireActivity() as? DrawerController)?.openSideDrawer()
+        }
+    }
+
+    // Ловим введенный текст
+    private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(INPUT_NOTE_KEY, viewLifecycleOwner) { _, bundle ->
+            val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: ""
+
+            pendingAppointmentId?.let { id ->
+                scheduleViewModel.updateAppointmentNote(id, text)
+            }
+            pendingAppointmentId = null
         }
     }
 
@@ -257,30 +273,20 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     private fun showNoteDialog(appointment: Appointment) {
-        // "Надуваем" разметку и получаем binding
-        val dialogBinding = DialogAddNoteBinding.inflate(layoutInflater)
+        // Запоминаем ID записи, чтобы обновить её при получении результата
+        pendingAppointmentId = appointment.id
 
-        // Создаем диалог через MaterialAlertDialogBuilder, но без кнопок
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .create()
+        InputDialogFragment.newInstance(
+            requestKey = INPUT_NOTE_KEY,
+            title = getString(com.avetiso.core.R.string.Примечание),
+            hint = getString(com.avetiso.core.R.string.Введите_текст),
+            initialValue = appointment.note,
+            isMultiline = true // Включаем многострочный режим
+        ).show(childFragmentManager, InputDialogFragment.TAG)
+    }
 
-        dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners) // Фон
-
-        // Устанавливаем текущий текст заметки
-        dialogBinding.etNote.setText(appointment.note)
-
-        // Назначаем слушатели на наши кастомные кнопки
-        dialogBinding.btnNegative.setOnClickListener {
-            dialog.dismiss()
-        }
-        dialogBinding.btnPositive.setOnClickListener {
-            val newNote = dialogBinding.etNote.text.toString()
-            scheduleViewModel.updateAppointmentNote(appointment.id, newNote)
-            dialog.dismiss()
-        }
-
-        dialog.show()
+    companion object {
+        private const val INPUT_NOTE_KEY = "input_note_request"
     }
 
     override fun onDestroyView() {

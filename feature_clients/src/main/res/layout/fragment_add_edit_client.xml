@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:hint="Имя клиента">
+                android:hint="@string/Имя_клиента">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_name"
@@ -71,7 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Номер телефона">
+                android:hint="@string/Номер_телефона">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_phone"
@@ -86,7 +86,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Инстаграм"
+                android:hint="@string/Инстаграм"
                 app:prefixText="@">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -101,7 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Источник привлечения">
+                android:hint="@string/Источник_привлечения">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_source"
@@ -116,7 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Личная скидка, %">
+                android:hint="@string/Личная_скидка">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_discount"
@@ -137,7 +137,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Примечание">
+                android:hint="@string/Примечание">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_note"

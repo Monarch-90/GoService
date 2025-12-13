@@ -54,6 +54,7 @@ dependencies {
     implementation(project(":feature_supplies"))
     implementation(project(":feature_windows"))
     implementation(project(":navigation"))
+    implementation(project(":feature_settings"))
 
     // Стандартные библиотеки AndroidX
     implementation(libs.androidx.core.ktx)

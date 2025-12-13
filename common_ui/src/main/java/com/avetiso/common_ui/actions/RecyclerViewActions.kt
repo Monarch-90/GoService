@@ -11,6 +11,7 @@ import com.avetiso.common_ui.actions.listeners.ItemActionTouchListener
 import com.avetiso.common_ui.actions.listeners.SwipeRevealTouchListener
 import com.avetiso.common_ui.actions.listeners.TapOutsideTouchListener
 import com.avetiso.common_ui.databinding.DeleteDialogBinding
+import com.avetiso.common_ui.utils.DialogUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class RecyclerViewActions<T : Any>(
@@ -81,7 +82,11 @@ class RecyclerViewActions<T : Any>(
                     // Эта лямбда теперь правильно вызывает диалог
                     onDelete = { position ->
                         adapter.currentList.getOrNull(position)?.let { item ->
-                            showDeleteConfirmationDialog(item) // 1. Показываем диалог
+                            DialogUtils.showDeleteConfirmationDialog(
+                                context = fragment.requireContext(),
+                                itemName = getItemName(item),
+                                onConfirm = { onDelete(item) }
+                            )                                  // 1. Показываем диалог
                             dismissActions()                   // 2. Закрываем свайп
                         }
                     }
@@ -170,7 +175,11 @@ class RecyclerViewActions<T : Any>(
                     dismissActions()
                 }
                 holder.deleteButton.setOnClickListener {
-                    showDeleteConfirmationDialog(item)
+                    DialogUtils.showDeleteConfirmationDialog(
+                        context = fragment.requireContext(),
+                        itemName = getItemName(item),
+                        onConfirm = { onDelete(item) }
+                    )
                     dismissActions()
                 }
             } else {

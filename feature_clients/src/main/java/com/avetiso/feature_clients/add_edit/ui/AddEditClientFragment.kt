@@ -1,7 +1,10 @@
 package com.avetiso.feature_clients.add_edit.ui
 
 import android.app.AlertDialog
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
@@ -86,7 +89,10 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         currentBinding.toolbar.title = "Редактировать клиента"
         currentBinding.inputEditTextName.setText(client.name)
         currentBinding.inputEditTextPhone.setText(client.phoneNumber)
-        currentBinding.inputEditTextInstagram.setText(client.instagram)
+
+        val cleanInstagram = client.instagram.removePrefix("@")
+        currentBinding.inputEditTextInstagram.setText(cleanInstagram)
+
         currentBinding.inputEditTextSource.setText(client.source)
         currentBinding.inputEditTextDiscount.setText(if (client.discount > 0) client.discount.toString() else "")
         currentBinding.inputEditTextNote.setText(client.note)
@@ -104,9 +110,23 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
     private fun setupListeners() {
         val currentBinding = binding ?: return
+
         currentBinding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
         currentBinding.inputEditTextName.addTextChangedListener { currentBinding.inputLayoutName.error = null }
         currentBinding.inputEditTextPhone.addTextChangedListener { currentBinding.inputLayoutPhone.error = null }
+
+        currentBinding.inputEditTextInstagram.addTextChangedListener { editable ->
+            val text = editable.toString()
+            if (text.startsWith("@")) {
+                // Если пользователь ввел @ в начале, удаляем её моментально
+                val newText = text.substring(1)
+                currentBinding.inputEditTextInstagram.setText(newText)
+                // Возвращаем курсор в начало (или на позицию 0, так как мы удалили символ)
+                currentBinding.inputEditTextInstagram.setSelection(0)
+            }
+        }
+
         currentBinding.btnSave.setOnClickListener { saveClient() }
         currentBinding.btnAddField.setOnClickListener { showAddFieldDialog() }
     }
@@ -168,6 +188,8 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         // 2. Настраиваем надутый layout
         fieldBinding.ilCustomField.hint = fieldName
         fieldBinding.ietCustomField.setText(fieldValue)
+        fieldBinding.ietCustomField.inputType =
+            android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
 
         // 3. Настраиваем кнопку удаления
         fieldBinding.btnRemoveField.setOnClickListener {
@@ -195,6 +217,9 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
         val discountStr = currentBinding.inputEditTextDiscount.text.toString()
 
+        val rawInstagram = currentBinding.inputEditTextInstagram.text.toString().trim()
+        val finalInstagram = if (rawInstagram.isNotEmpty()) "@$rawInstagram" else ""
+
         val customFieldsMap = customFieldViews.mapValues { entry ->
             entry.value.text.toString().trim()
         }
@@ -203,7 +228,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
             id = viewModel.state.value.client?.id ?: 0L,
             name = name,
             phoneNumber = currentBinding.inputEditTextPhone.text.toString().trim(),
-            instagram = currentBinding.inputEditTextInstagram.text.toString().trim(),
+            instagram = finalInstagram,
             source = currentBinding.inputEditTextSource.text.toString().trim(),
             discount = discountStr.toIntOrNull() ?: 0,
             note = currentBinding.inputEditTextNote.text.toString().trim(),

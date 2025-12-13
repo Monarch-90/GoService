@@ -79,8 +79,6 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
 
         fun bind(client: ClientEntity, isSelected: Boolean) {
             binding.tvClientName.text = client.name
-            binding.tvClientPhone.text = client.phoneNumber
-            binding.tvInstagram.text = client.instagram
 
             // Управляем видимостью индикатора выделения
             binding.viewSelectedCheck.isVisible = isSelected

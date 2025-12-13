@@ -51,6 +51,9 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
+
+    // Data store
+    implementation(libs.androidx.datastore.preferences)
 }
 
 // Parcelize

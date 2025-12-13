@@ -13,7 +13,7 @@
     <View
         android:id="@+id/view_selected_check"
         android:layout_width="3dp"
-        android:layout_height="50dp"
+        android:layout_height="30dp"
         android:layout_marginEnd="10dp"
         android:background="@color/custom_main" />
 
@@ -57,26 +57,8 @@
                 app:srcCompat="@drawable/ic_percent"
                 app:tint="@color/blue_grey"
                 tools:visibility="visible" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_client_phone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/custom_main"
-            android:textSize="12sp"
-            tools:text="+375 (29) 123-45-67" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_instagram"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="10sp"
-            tools:text="\@instagram" />
     </LinearLayout>
 
     <include

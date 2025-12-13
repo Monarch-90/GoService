@@ -60,6 +60,10 @@ class ClientsFragment : Fragment(R.layout.fragment_clients) {
             adapter = adapter,
             getItemId = { it.id },
             getItemName = { it.name },
+            onItemClick = { client ->
+                val action = ClientsFragmentDirections.actionClientsFragmentToClientDetailsFragment(client.id)
+                findNavController().navigate(action)
+            },
             onEdit = { client ->
                 // Используем навигатор для перехода на экран редактирования, передавая ID
                 clientsNavigator.navigateToAddEditClient(findNavController(), client.id)

@@ -3,8 +3,6 @@ agp = "8.12.2"
 kotlin = "2.2.10"
 hiltAndroid = "2.57.1"
 ksp = "2.2.0-2.0.2"
-
-# Версии библиотек
 constraintlayout = "2.2.1"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -21,6 +19,7 @@ fragmentKtx = "1.8.9"
 recyclerview = "1.4.0"
 room = "2.7.2"
 gson = "2.13.1"
+datastore = "1.0.0"
 
 # Compose
 composeBom = "2025.08.01"
@@ -85,6 +84,9 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 # RecyclerView
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigationCommonKtx" }
+
+# Data store
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

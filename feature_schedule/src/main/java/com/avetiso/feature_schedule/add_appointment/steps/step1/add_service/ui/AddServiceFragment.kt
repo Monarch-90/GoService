@@ -43,9 +43,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     // Флаг, чтобы настроить спиннер только один раз при получении данных
     private var isSpinnerSetup = false
 
-    // Сюда мы положим "USD", пока пользователь думает над диалогом.
-    private var pendingCurrency: String? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAddServiceBinding.bind(view)
@@ -74,19 +71,18 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             val isConfirmed = bundle.getBoolean(ConfirmationDialogFragment.RESULT_CONFIRMED)
 
             if (isConfirmed) {
-                // Если ДА - берем валюту из памяти и сохраняем
-                pendingCurrency?.let { currency ->
-                    viewModel.setNewDefaultCurrency(currency)
-                }
+                viewModel.onDefaultCurrencyConfirmed()
+            } else {
+                viewModel.onDefaultCurrencyDeclined()
             }
-            // Если НЕТ - ничего делать не надо, просто забываем
-            pendingCurrency = null
         }
 
         // Слушаем результат с экрана выбора категории
         setFragmentResultListener("category_selection") { _, bundle ->
             val selectedCategoryName = bundle.getString("selected_category_name")
-            binding?.textCategory?.text = selectedCategoryName
+            if (selectedCategoryName != null) {
+                viewModel.setSelectedCategory(selectedCategoryName)
+            }
         }
 
         // Слушатель для времени (продолжительность)
@@ -118,6 +114,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                             setupCurrencySpinner(state.selectedCurrency)
                             isSpinnerSetup = true
                         }
+
+                        if (state.selectedCategoryName != null) {
+                            binding?.textCategory?.text = state.selectedCategoryName
+                        } else {
+                            binding?.textCategory?.text = "Выбрать категорию"
+                        }
                     }
                 }
 
@@ -139,8 +141,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                             }
 
                             is AddServiceEvent.AskToSetDefaultCurrency -> {
-                                pendingCurrency = event.currency // Запомнили
-
                                 ConfirmationDialogFragment.newInstance(
                                     requestKey = SET_DEFAULT_CURRENCY_KEY,
                                     title = "Валюта по умолчанию",
@@ -179,25 +179,29 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private fun populateFieldsForEdit(service: ServiceEntity) {
         binding?.toolbar?.title = "Редактировать услугу"
         binding?.ietName?.setText(service.name)
-        binding?.textCategory?.text = service.categoryName
         binding?.ietPrice?.setText(service.price.toString())
+
 
         // Обновляем состояние в ViewModel, чтобы все работало корректно
         val hours = service.durationMinutes / 60
         val minutes = service.durationMinutes % 60
+
         viewModel.setDuration(hours, minutes)
         viewModel.setPriceFrom(service.isPriceFrom)
         viewModel.setCurrency(service.currency)
+
+        // Загружаем категорию во ViewModel
+        viewModel.setSelectedCategory(service.categoryName)
     }
 
     private fun saveService() {
         val name = binding?.ietName?.text?.toString()
-        val category = binding?.textCategory?.text?.toString()
         val priceStr = binding?.ietPrice?.text?.toString()
         val duration = binding?.textDuration?.text?.toString()
 
         // Получаем актуальное состояние прямо из ViewModel
         val currentState = viewModel.uiState.value
+        val category = currentState.selectedCategoryName
 
         when {
             name.isNullOrBlank() -> {

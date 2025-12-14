@@ -29,6 +29,7 @@ class AddServiceViewModel @Inject constructor(
 
     private val _eventChannel = Channel<AddServiceEvent>()
     val events = _eventChannel.receiveAsFlow()
+    private var pendingCurrencyForDefault: String? = null
 
     init {
         // При старте загружаем валюту по умолчанию
@@ -73,6 +74,8 @@ class AddServiceViewModel @Inject constructor(
         viewModelScope.launch {
             val savedDefault = settingsRepository.defaultCurrency.first()
             if (newCurrency != savedDefault) {
+                // Запоминаем внутри ViewModel
+                pendingCurrencyForDefault = newCurrency
                 // Отправляем событие во фрагмент, чтобы показать диалог
                 _eventChannel.send(AddServiceEvent.AskToSetDefaultCurrency(newCurrency))
             }
@@ -113,5 +116,23 @@ class AddServiceViewModel @Inject constructor(
             }
             _eventChannel.send(AddServiceEvent.NavigateBackWithResult)
         }
+    }
+
+    // Вызывается фрагментом, когда пользователь нажал "ДА" в диалоге
+    fun onDefaultCurrencyConfirmed() {
+        val currency = pendingCurrencyForDefault
+        if (currency != null) {
+            setNewDefaultCurrency(currency)
+        }
+        pendingCurrencyForDefault = null
+    }
+
+    // Вызывается фрагментом, когда пользователь нажал "НЕТ" (опционально, для очистки)
+    fun onDefaultCurrencyDeclined() {
+        pendingCurrencyForDefault = null
+    }
+
+    fun setSelectedCategory(categoryName: String) {
+        _uiState.update { it.copy(selectedCategoryName = categoryName) }
     }
 }

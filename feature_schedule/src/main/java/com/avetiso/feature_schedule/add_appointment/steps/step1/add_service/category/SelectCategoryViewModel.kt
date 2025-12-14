@@ -19,6 +19,7 @@ class SelectCategoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
+    private var pendingCategory: CategoryEntity? = null
 
     val categories = _searchQuery
         .debounce(300L) // Ждем 300 мс после ввода, чтобы не делать лишних запросов
@@ -41,13 +42,52 @@ class SelectCategoryViewModel @Inject constructor(
         }
     }
 
-    fun addOrUpdateCategory(name: String, id: Long? = null) {
+    // 1. Фрагмент сообщает: "Пользователь хочет создать новую категорию"
+    fun onAddCategoryClicked() {
+        pendingCategory = null
+    }
+
+    // 2. Фрагмент сообщает: "Пользователь хочет редактировать эту категорию"
+    fun onEditCategoryClicked(category: CategoryEntity) {
+        pendingCategory = category
+    }
+
+    // 3. Фрагмент сообщает: "Диалог вернул это название"
+    fun onCategoryNameInput(name: String) {
+        // Логика проверки на дубликаты должна быть здесь или в UseCase,
+        // но для простоты оставим проверку в UI слое (или перенесем сюда полностью).
+        // В рамках текущего рефакторинга мы фокусируемся на сохранении состояния.
+
         viewModelScope.launch {
-            if (id == null) {
-                categoryDao.insertCategory(CategoryEntity(name = name))
+            val categoryToEdit = pendingCategory
+
+            if (categoryToEdit == null) {
+                createCategory(name)
             } else {
-                categoryDao.updateCategory(CategoryEntity(id = id, name = name))
+                updateCategory(categoryToEdit.id, name)
             }
+
+            // Сбрасываем состояние после успешной операции
+            pendingCategory = null
         }
+    }
+
+    // Вызывается UI для проверки на дубликат ПЕРЕД закрытием/сохранением
+    fun isDuplicate(name: String): Boolean {
+        val currentList = categories.value
+        val idToExclude = pendingCategory?.id // null, если создание
+
+        return currentList.any { category ->
+            // Проверяем совпадение имен, исключая саму себя (при редактировании)
+            category.id != idToExclude && category.name.equals(name, ignoreCase = true)
+        }
+    }
+
+    private suspend fun createCategory(name: String) {
+        categoryDao.insertCategory(CategoryEntity(name = name))
+    }
+
+    private suspend fun updateCategory(id: Long, name: String) {
+        categoryDao.updateCategory(CategoryEntity(id = id, name = name))
     }
 }

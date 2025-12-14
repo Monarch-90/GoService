@@ -31,9 +31,6 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     private var actions: RecyclerViewActions<CategoryEntity>? = null
     private var categoryAdapter: CategoryAdapter? = null
 
-    // Запоминаем категорию, которую редактируем (null, если создаем новую)
-    private var pendingCategory: CategoryEntity? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSelectCategoryBinding.bind(view)
@@ -55,24 +52,16 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
     private fun handleCategoryInput(name: String) {
         val currentCategories = viewModel.categories.value
-        val isEditMode = pendingCategory != null
 
         // Проверка на дубликаты
-        val hasDuplicate = currentCategories.any {
-            // Если редактируем - исключаем саму себя из проверки
-            (if (isEditMode) it.id != pendingCategory?.id else true) &&
-                    it.name.equals(name, ignoreCase = true)
-        }
+        val hasDuplicate = viewModel.isDuplicate(name)
 
         if (hasDuplicate) {
             Toast.makeText(requireContext(), "Такая категория уже существует", Toast.LENGTH_SHORT).show()
-            // Опционально: можно тут же снова открыть диалог с введенным текстом, но Toast обычно достаточно
         } else {
-            viewModel.addOrUpdateCategory(name, pendingCategory?.id)
+            // ✅ ЧИСТОТА: Просто передаем данные. ViewModel сама знает, редактируем мы или создаем.
+            viewModel.onCategoryNameInput(name)
         }
-
-        // Сброс
-        pendingCategory = null
     }
 
     private fun setupRecyclerView() {
@@ -81,6 +70,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
         currentBinding.rvCategories.adapter = adapter
         currentBinding.rvCategories.layoutManager = LinearLayoutManager(requireContext())
+        currentBinding.rvCategories.itemAnimator = null
 
         actions = RecyclerViewActions(
             fragment = this,
@@ -120,7 +110,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             if (actions?.activeItemId != null) {
                 actions?.dismissActions()
             } else {
-                showCategoryInputDialog()
+                showCategoryInputDialog(null)
             }
         }
     }
@@ -150,8 +140,14 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     }
 
     private fun showCategoryInputDialog(category: CategoryEntity? = null) {
-        pendingCategory = category // Запоминаем для последующей обработки
         val isEditMode = category != null
+
+        // СООБЩАЕМ VIEWMODEL О НАМЕРЕНИИ
+        if (isEditMode) {
+            viewModel.onEditCategoryClicked(category!!)
+        } else {
+            viewModel.onAddCategoryClicked()
+        }
 
         val title = if (isEditMode) "Редактировать категорию" else "Новая категория"
         val initialValue = category?.name ?: ""

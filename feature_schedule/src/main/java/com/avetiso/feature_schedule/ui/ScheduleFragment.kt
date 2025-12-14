@@ -277,7 +277,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             title = getString(com.avetiso.core.R.string.Примечание),
             hint = getString(com.avetiso.core.R.string.Введите_текст),
             initialValue = appointment.note,
-            isMultiline = true // Включаем многострочный режим
+            isMultiline = true, // Включаем многострочный режим
+            allowEmpty = true,
         ).show(childFragmentManager, InputDialogFragment.TAG)
     }
 

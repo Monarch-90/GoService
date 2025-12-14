@@ -24,6 +24,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
         val requestKey = arguments?.getString(ARG_REQUEST_KEY) ?: ""
         val isMultiline = arguments?.getBoolean(ARG_IS_MULTILINE) ?: false
         val forbiddenValues = arguments?.getStringArrayList(ARG_FORBIDDEN_VALUES) ?: emptyList<String>()
+        val allowEmpty = arguments?.getBoolean(ARG_ALLOW_EMPTY) ?: false
 
         binding.tvTitle.text = title
         binding.inputLayout.hint = hint
@@ -51,7 +52,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
             val text = binding.inputEditText.text.toString().trim()
 
             when {
-                text.isBlank() -> {
+                text.isBlank() && !allowEmpty -> {
                     binding.inputLayout.error = "Поле не может быть пустым"
                 }
                 // ПРОВЕРКА НА ДУБЛИКАТ ВНУТРИ ДИАЛОГА
@@ -77,6 +78,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
         private const val ARG_INITIAL_VALUE = "arg_initial_value"
         private const val ARG_IS_MULTILINE = "arg_is_multiline"
         private const val ARG_FORBIDDEN_VALUES = "arg_forbidden_values"
+        private const val ARG_ALLOW_EMPTY = "arg_allow_empty"
 
         fun newInstance(
             requestKey: String,
@@ -85,6 +87,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
             initialValue: String = "",
             isMultiline: Boolean = false,
             forbiddenValues: List<String> = emptyList(),
+            allowEmpty: Boolean = false,
         ): InputDialogFragment {
             return InputDialogFragment().apply {
                 arguments = bundleOf(
@@ -94,6 +97,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
                     ARG_INITIAL_VALUE to initialValue,
                     ARG_IS_MULTILINE to isMultiline,
                     ARG_FORBIDDEN_VALUES to ArrayList(forbiddenValues),
+                    ARG_ALLOW_EMPTY to allowEmpty,
                 )
             }
         }

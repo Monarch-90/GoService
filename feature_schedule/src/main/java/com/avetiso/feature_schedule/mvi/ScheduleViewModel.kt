@@ -37,6 +37,7 @@ class ScheduleViewModel @Inject constructor(
 
     private val _selectedDate = MutableStateFlow("")
     private val gson = Gson()
+    private var pendingAppointmentId: Long? = null
 
     val appointmentsForDate: StateFlow<List<Appointment>> = _selectedDate
         .flatMapLatest { date ->
@@ -154,14 +155,6 @@ class ScheduleViewModel @Inject constructor(
         _scheduleState.value = ScheduleState.Idle
     }
 
-    fun updateAppointmentNote(appointmentId: Long, newNote: String) {
-        viewModelScope.launch {
-            val appointment = appointmentDao.getAppointmentById(appointmentId) ?: return@launch
-            val updatedAppointment = appointment.copy(note = newNote)
-            appointmentDao.updateAppointment(updatedAppointment)
-        }
-    }
-
     fun deleteAppointment(appointmentId: Long) {
         viewModelScope.launch {
             val appointmentToDelete = appointmentDao.getAppointmentById(appointmentId)
@@ -169,5 +162,23 @@ class ScheduleViewModel @Inject constructor(
                 appointmentDao.deleteAppointment(it)
             }
         }
+    }
+
+    // 1. Фрагмент вызывает это, когда открывает диалог
+    fun onEditNoteClicked(appointmentId: Long) {
+        pendingAppointmentId = appointmentId
+    }
+
+    // 2. Фрагмент вызывает это, когда диалог вернул результат
+    fun onNoteDialogResult(newText: String) {
+        val id = pendingAppointmentId ?: return // Если ID потерялся, ничего не делаем
+
+        viewModelScope.launch {
+            val appointment = appointmentDao.getAppointmentById(id) ?: return@launch
+            val updatedAppointment = appointment.copy(note = newText)
+            appointmentDao.updateAppointment(updatedAppointment)
+        }
+
+        pendingAppointmentId = null // Сбрасываем после сохранения
     }
 }

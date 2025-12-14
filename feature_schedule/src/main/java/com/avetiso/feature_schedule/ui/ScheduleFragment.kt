@@ -50,9 +50,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private var actions: RecyclerViewActions<Appointment>? = null
 
-    // Запоминаем ID записи, для которой пишем заметку
-    private var pendingAppointmentId: Long? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentScheduleBinding.bind(view)
@@ -163,11 +160,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         // Ловим введенный текст
         childFragmentManager.setFragmentResultListener(INPUT_NOTE_KEY, viewLifecycleOwner) { _, bundle ->
             val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: ""
-
-            pendingAppointmentId?.let { id ->
-                scheduleViewModel.updateAppointmentNote(id, text)
-            }
-            pendingAppointmentId = null
+            scheduleViewModel.onNoteDialogResult(text)
         }
 
         // Слушаем результат выбора даты
@@ -277,7 +270,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private fun showNoteDialog(appointment: Appointment) {
         // Запоминаем ID записи, чтобы обновить её при получении результата
-        pendingAppointmentId = appointment.id
+        scheduleViewModel.onEditNoteClicked(appointment.id)
 
         InputDialogFragment.newInstance(
             requestKey = INPUT_NOTE_KEY,

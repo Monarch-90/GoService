@@ -3,9 +3,10 @@ package com.avetiso.feature_clients.add_edit.ui
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.core.os.bundleOf
-import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
@@ -14,13 +15,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.dialogs.InputDialogFragment
-import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientEvent
+import com.avetiso.feature_clients.add_edit.mvi.AddEditClientState
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientViewModel
 import com.avetiso.feature_clients.databinding.FragmentAddEditClientBinding
 import com.avetiso.feature_clients.databinding.ItemCustomFieldBinding
-import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -29,7 +29,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
     private var binding: FragmentAddEditClientBinding? = null
     private val viewModel: AddEditClientViewModel by viewModels()
-    private val customFieldViews = mutableMapOf<String, TextInputEditText>()
+    private val customFieldViews = mutableMapOf<String, ItemCustomFieldBinding>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,19 +43,14 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
     private fun observeUi() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Подписка на состояние (для заполнения полей в режиме редактирования)
+                // 1. Подписка на состояние (Рендер UI)
                 launch {
                     viewModel.state.collect { state ->
-                        if (state.isEditing && !state.isInitialDataSet) {
-                            state.client?.let { client ->
-                                populateFields(client)
-                                viewModel.handleViewEvent(AddEditClientEvent.InitialDataSet)
-                            }
-                        }
+                        render(state)
                     }
                 }
 
-                // Подписка на события (Toast и навигация)
+                // 2. Подписка на события (Тосты, Навигация)
                 launch {
                     viewModel.events.collect { event ->
                         when (event) {
@@ -67,9 +62,8 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
                                 setFragmentResult("client_updated_request", bundleOf("updated" to true))
                                 findNavController().navigateUp()
                             }
-                            // Она обработает InitialDataSet и любые другие события, которые нас здесь не интересуют.
-                            else -> { /* Игнорируем события, предназначенные для ViewModel */
-                            }
+
+                            else -> {}
                         }
                     }
                 }
@@ -77,50 +71,113 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         }
     }
 
-    private fun populateFields(client: ClientEntity) {
+    private fun render(state: AddEditClientState) {
         val currentBinding = binding ?: return
-        currentBinding.toolbar.title = "Редактировать клиента"
-        currentBinding.inputEditTextName.setText(client.name)
-        currentBinding.inputEditTextPhone.setText(client.phoneNumber)
 
-        val cleanInstagram = client.instagram.removePrefix("@")
-        currentBinding.inputEditTextInstagram.setText(cleanInstagram)
+        currentBinding.toolbar.title = if (state.isEditing) "Редактировать клиента" else "Новый клиент"
 
-        currentBinding.inputEditTextSource.setText(client.source)
-        currentBinding.inputEditTextDiscount.setText(if (client.discount > 0) client.discount.toString() else "")
-        currentBinding.inputEditTextNote.setText(client.note)
-
-        // Сначала очищаем контейнер, чтобы не было дублей
-        currentBinding.customFieldsContainer.removeAllViews()
-        customFieldViews.clear()
-
-        // Создаем View для каждого кастомного поля
-        client.customFields?.forEach { (fieldName, fieldValue) ->
-            addCustomFieldView(fieldName, fieldValue)
+        // Функция-помощник для обновления текста без "дёрганья" курсора
+        fun updateTextIfChanged(editText: EditText, newText: String) {
+            if (editText.text.toString() != newText) {
+                editText.setText(newText)
+                // Ставим курсор в конец
+                editText.setSelection(newText.length)
+            }
         }
+
+        updateTextIfChanged(currentBinding.inputEditTextName, state.nameInput)
+        updateTextIfChanged(currentBinding.inputEditTextPhone, state.phoneInput)
+        updateTextIfChanged(currentBinding.inputEditTextInstagram, state.instagramInput)
+        updateTextIfChanged(currentBinding.inputEditTextSource, state.sourceInput)
+        updateTextIfChanged(currentBinding.inputEditTextDiscount, state.discountInput)
+        updateTextIfChanged(currentBinding.inputEditTextNote, state.noteInput)
+
+        renderCustomFields(state.customFieldsInput)
     }
 
+    private fun renderCustomFields(customFields: Map<String, String>) {
+        val currentBinding = binding ?: return
+        val container = currentBinding.customFieldsContainer
+
+        // 1. Удаляем Views, которых больше нет в State
+        val fieldNamesToRemove = customFieldViews.keys.filter { !customFields.containsKey(it) }
+        fieldNamesToRemove.forEach { name ->
+            val viewBinding = customFieldViews[name]
+            if (viewBinding != null) {
+                container.removeView(viewBinding.root)
+                customFieldViews.remove(name)
+            }
+        }
+
+        // 2. Добавляем или обновляем Views
+        customFields.forEach { (fieldName, fieldValue) ->
+            if (customFieldViews.containsKey(fieldName)) {
+                // Если поле уже есть, просто обновляем текст (если он отличается)
+                val binding = customFieldViews[fieldName]!!
+                if (binding.ietCustomField.text.toString() != fieldValue) {
+                    binding.ietCustomField.setText(fieldValue)
+                }
+            } else {
+                // Если поля нет, создаем новое
+                val fieldBinding = ItemCustomFieldBinding.inflate(
+                    LayoutInflater.from(requireContext()),
+                    container,
+                    false
+                )
+
+                fieldBinding.ilCustomField.hint = fieldName
+                fieldBinding.ietCustomField.setText(fieldValue)
+                fieldBinding.ietCustomField.inputType =
+                    android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+
+                // Слушатель удаления
+                fieldBinding.btnRemoveField.setOnClickListener {
+                    viewModel.removeCustomField(fieldName)
+                }
+
+                // Слушатель ввода текста
+                fieldBinding.ietCustomField.doAfterTextChanged {
+                    viewModel.onCustomFieldValueChanged(fieldName, it.toString())
+                }
+
+                container.addView(fieldBinding.root)
+                customFieldViews[fieldName] = fieldBinding
+            }
+        }
+    }
 
     private fun setupListeners() {
         val currentBinding = binding ?: return
 
         currentBinding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
 
-        currentBinding.inputEditTextName.addTextChangedListener { currentBinding.inputLayoutName.error = null }
-        currentBinding.inputEditTextPhone.addTextChangedListener { currentBinding.inputLayoutPhone.error = null }
+        currentBinding.inputEditTextName.doAfterTextChanged { viewModel.onNameChanged(it.toString()) }
+        currentBinding.inputEditTextPhone.doAfterTextChanged { viewModel.onPhoneChanged(it.toString()) }
+        currentBinding.inputEditTextSource.doAfterTextChanged { viewModel.onSourceChanged(it.toString()) }
+        currentBinding.inputEditTextDiscount.doAfterTextChanged { viewModel.onDiscountChanged(it.toString()) }
+        currentBinding.inputEditTextNote.doAfterTextChanged { viewModel.onNoteChanged(it.toString()) }
 
-        currentBinding.inputEditTextInstagram.addTextChangedListener { editable ->
+        currentBinding.inputEditTextInstagram.doAfterTextChanged { editable ->
             val text = editable.toString()
             if (text.startsWith("@")) {
-                // Если пользователь ввел @ в начале, удаляем её моментально
                 val newText = text.substring(1)
                 currentBinding.inputEditTextInstagram.setText(newText)
-                // Возвращаем курсор в начало (или на позицию 0, так как мы удалили символ)
                 currentBinding.inputEditTextInstagram.setSelection(0)
+            } else {
+                viewModel.onInstagramChanged(text)
             }
         }
 
-        currentBinding.btnSave.setOnClickListener { saveClient() }
+        currentBinding.btnSave.setOnClickListener {
+            // Валидация UI перед отправкой в VM (для красивой ошибки на поле)
+            if (currentBinding.inputEditTextName.text.isNullOrBlank()) {
+                currentBinding.inputLayoutName.error = "Имя не может быть пустым"
+            } else {
+                currentBinding.inputLayoutName.error = null
+                viewModel.onSaveClicked()
+            }
+        }
+
         currentBinding.btnAddField.setOnClickListener { showAddFieldDialog() }
     }
 
@@ -128,11 +185,13 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
     private fun setupResultListeners() {
         childFragmentManager.setFragmentResultListener(INPUT_FIELD_KEY, viewLifecycleOwner) { _, bundle ->
             val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: return@setFragmentResultListener
-            addCustomFieldView(text)
+            viewModel.addCustomField(text)
         }
     }
 
     private fun showAddFieldDialog() {
+        val state = viewModel.state.value
+
         val usedNames = mutableListOf(
             getString(com.avetiso.core.R.string.Имя_клиента),
             getString(com.avetiso.core.R.string.Номер_телефона),
@@ -143,7 +202,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         )
 
         // Добавляем уже созданные кастомные поля
-        usedNames.addAll(customFieldViews.keys)
+        usedNames.addAll(state.customFieldsInput.keys)
 
         InputDialogFragment.newInstance(
             requestKey = INPUT_FIELD_KEY,
@@ -153,69 +212,6 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         ).show(childFragmentManager, InputDialogFragment.TAG)
     }
 
-    private fun addCustomFieldView(fieldName: String, fieldValue: String = "") {
-        val currentBinding = binding ?: return
-
-        // 1. "Надуваем" наш кастомный layout
-        val fieldBinding = ItemCustomFieldBinding.inflate(
-            LayoutInflater.from(requireContext()), // Используем LayoutInflater
-            currentBinding.customFieldsContainer, // Указываем родителя
-            false // Не прикрепляем сразу, добавим ниже
-        )
-
-        // 2. Настраиваем надутый layout
-        fieldBinding.ilCustomField.hint = fieldName
-        fieldBinding.ietCustomField.setText(fieldValue)
-        fieldBinding.ietCustomField.inputType =
-            android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-
-        // 3. Настраиваем кнопку удаления
-        fieldBinding.btnRemoveField.setOnClickListener {
-            // Удаляем View из контейнера
-            currentBinding.customFieldsContainer.removeView(fieldBinding.root)
-            // Удаляем поле из нашей Map
-            customFieldViews.remove(fieldName)
-        }
-
-        // 4. Добавляем готовое View в контейнер
-        currentBinding.customFieldsContainer.addView(fieldBinding.root)
-
-        // 5. Сохраняем ссылку на EditText (ключ - fieldName, значение - EditText)
-        customFieldViews[fieldName] = fieldBinding.ietCustomField
-    }
-
-    private fun saveClient() {
-        val currentBinding = binding ?: return
-        val name = currentBinding.inputEditTextName.text.toString().trim()
-
-        if (name.isBlank()) {
-            currentBinding.inputLayoutName.error = "Имя не может быть пустым"
-            return
-        }
-
-        val discountStr = currentBinding.inputEditTextDiscount.text.toString()
-
-        val rawInstagram = currentBinding.inputEditTextInstagram.text.toString().trim()
-        val finalInstagram = if (rawInstagram.isNotEmpty()) "@$rawInstagram" else ""
-
-        val customFieldsMap = customFieldViews.mapValues { entry ->
-            entry.value.text.toString().trim()
-        }
-
-        val clientToSave = ClientEntity(
-            id = viewModel.state.value.client?.id ?: 0L,
-            name = name,
-            phoneNumber = currentBinding.inputEditTextPhone.text.toString().trim(),
-            instagram = finalInstagram,
-            source = currentBinding.inputEditTextSource.text.toString().trim(),
-            discount = discountStr.toIntOrNull() ?: 0,
-            note = currentBinding.inputEditTextNote.text.toString().trim(),
-            customFields = customFieldsMap
-        )
-
-        viewModel.saveClient(clientToSave)
-    }
-
     companion object {
         private const val INPUT_FIELD_KEY = "input_field_request"
     }
@@ -223,5 +219,6 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+        customFieldViews.clear()
     }
 }

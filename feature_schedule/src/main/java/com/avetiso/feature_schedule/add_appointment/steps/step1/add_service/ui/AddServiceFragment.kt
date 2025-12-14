@@ -88,6 +88,15 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             val selectedCategoryName = bundle.getString("selected_category_name")
             binding?.textCategory?.text = selectedCategoryName
         }
+
+        // Слушатель для времени (продолжительность)
+        childFragmentManager.setFragmentResultListener(DURATION_PICKER_KEY, viewLifecycleOwner) { _, bundle ->
+            val hour = bundle.getInt(ComposeTimePickerDialogFragment.RESULT_HOUR)
+            val minute = bundle.getInt(ComposeTimePickerDialogFragment.RESULT_MINUTE)
+
+            // Передаем данные во ViewModel
+            viewModel.setDuration(hour, minute)
+        }
     }
 
     private fun observeUi() {
@@ -241,8 +250,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun setupDurationPicker() {
         binding?.textDuration?.setOnClickListener {
-            // Сбрасываем фон ПЕРЕД открытием диалога
-            binding?.textDuration?.background = null
 
             val currentState = viewModel.uiState.value
             showDurationPickerDialog(currentState.selectedHour, currentState.selectedMinute)
@@ -250,24 +257,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
-        val dialog = ComposeTimePickerDialogFragment.newInstance(
+        ComposeTimePickerDialogFragment.newInstance(
+            requestKey = DURATION_PICKER_KEY,
             title = "Выберите продолжительность",
             initialHour = hour,
             initialMinute = minute
-        )
-
-        // Устанавливаем новый колбэк
-        dialog.onConfirm = { selectedHour, selectedMinute ->
-            viewModel.setDuration(selectedHour, selectedMinute)
-            true
-        }
-
-        dialog.onDismissListener = {
-            // Этот код вернет item_appointment_bg всегда, при закрытии диалога
-            binding?.textDuration?.setBackgroundResource(com.avetiso.core.R.drawable.item_appointment_bg)
-        }
-
-        dialog.show(childFragmentManager, "HourMinutePickerDialogFragment")
+            // extraId нам здесь не нужен, по умолчанию будет -1
+        ).show(childFragmentManager, "HourMinutePickerDialogFragment")
     }
 
     private fun setupCategoryPicker() {
@@ -329,6 +325,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     companion object {
         private const val SET_DEFAULT_CURRENCY_KEY = "set_default_currency_request"
+        private const val DURATION_PICKER_KEY = "duration_picker_request"
     }
 
     override fun onDestroyView() {

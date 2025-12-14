@@ -49,7 +49,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     private var appointmentAdapter: AppointmentAdapter? = null
 
     private var actions: RecyclerViewActions<Appointment>? = null
-    private var scheduleDatePicker: ComposeDatePickerDialogFragment? = null
 
     // Запоминаем ID записи, для которой пишем заметку
     private var pendingAppointmentId: Long? = null
@@ -159,8 +158,9 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         }
     }
 
-    // Ловим введенный текст
+
     private fun setupResultListeners() {
+        // Ловим введенный текст
         childFragmentManager.setFragmentResultListener(INPUT_NOTE_KEY, viewLifecycleOwner) { _, bundle ->
             val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: ""
 
@@ -168,6 +168,19 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 scheduleViewModel.updateAppointmentNote(id, text)
             }
             pendingAppointmentId = null
+        }
+
+        // Слушаем результат выбора даты
+        childFragmentManager.setFragmentResultListener(RESCHEDULE_DATE_KEY, viewLifecycleOwner) { _, bundle ->
+            val selectedMillis = bundle.getLong(ComposeDatePickerDialogFragment.RESULT_DATE_KEY)
+            val appointmentId = bundle.getLong(ComposeDatePickerDialogFragment.RESULT_EXTRA_ID)
+
+            if (appointmentId != -1L) {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val newDate = sdf.format(Date(selectedMillis))
+                // ID пришел из диалога, всё надежно
+                scheduleViewModel.updateAppointmentStatus(appointmentId, "Перенос", newDate)
+            }
         }
     }
 
@@ -203,7 +216,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                         when (state) {
                             is ScheduleState.Success -> {
                                 // Если успешно - закрываем диалог и сбрасываем состояние
-                                scheduleDatePicker?.dismiss()
+
                                 scheduleViewModel.resetScheduleState()
                             }
 
@@ -255,21 +268,11 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     private fun showRescheduleDatePicker(appointment: Appointment) {
-        val dialog = ComposeDatePickerDialogFragment.newInstance(
-            title = "Выберите дату"
-        )
-
-        // Устанавливаем слушатель, который сработает при нажатии "ОК"
-        dialog.onConfirmClicked = { selectedMillis ->
-            // Конвертируем timestamp в нужный нам формат YYYY-MM-DD
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val newDate = sdf.format(Date(selectedMillis))
-
-            scheduleViewModel.updateAppointmentStatus(appointment.id, "Перенос", newDate)
-        }
-
-        scheduleDatePicker = dialog
-        scheduleDatePicker?.show(childFragmentManager, "DATE_PICKER")
+        ComposeDatePickerDialogFragment.newInstance(
+            requestKey = RESCHEDULE_DATE_KEY,
+            title = "Выберите дату",
+            extraId = appointment.id // Передаем ID записи на хранение в диалог
+        ).show(childFragmentManager, "DATE_PICKER")
     }
 
     private fun showNoteDialog(appointment: Appointment) {
@@ -287,6 +290,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     companion object {
         private const val INPUT_NOTE_KEY = "input_note_request"
+        private const val RESCHEDULE_DATE_KEY = "reschedule_date_request"
     }
 
     override fun onDestroyView() {

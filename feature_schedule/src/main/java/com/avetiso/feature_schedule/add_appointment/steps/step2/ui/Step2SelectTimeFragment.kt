@@ -39,6 +39,7 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
         setupRecyclerView()
         setupClickListeners()
+        setupResultListeners()
         observeViewModels()
     }
 
@@ -86,6 +87,34 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
         }
     }
 
+    private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(TIME_PICKER_KEY, viewLifecycleOwner) { _, bundle ->
+            val hour = bundle.getInt(ComposeTimePickerDialogFragment.RESULT_HOUR)
+            val minute = bundle.getInt(ComposeTimePickerDialogFragment.RESULT_MINUTE)
+            val slotId = bundle.getLong(ComposeTimePickerDialogFragment.RESULT_EXTRA_ID)
+
+            // Валидация на дубликаты
+            val totalMinutes = hour * 60 + minute
+            val isEditing = slotId != -1L
+
+            val isDuplicate = if (isEditing) {
+                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != slotId }
+            } else {
+                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes }
+            }
+
+            if (isDuplicate) {
+                Toast.makeText(requireContext(), "Такой слот уже существует", Toast.LENGTH_SHORT).show()
+            } else {
+                if (isEditing) {
+                    viewModel.updateTimeSlot(slotId, hour, minute)
+                } else {
+                    viewModel.addTimeSlot(hour, minute)
+                }
+            }
+        }
+    }
+
     private fun observeViewModels() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -126,41 +155,19 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
         val initialHour = timeSlotToEdit?.let { it.startTimeMinutes / 60 } ?: 0
         val initialMinute = timeSlotToEdit?.let { it.startTimeMinutes % 60 } ?: 0
 
-        val dialog = ComposeTimePickerDialogFragment.newInstance(
+        val extraId = timeSlotToEdit?.id ?: -1L
+
+        ComposeTimePickerDialogFragment.newInstance(
+            requestKey = TIME_PICKER_KEY,
             title = title,
             initialHour = initialHour,
-            initialMinute = initialMinute
-        )
+            initialMinute = initialMinute,
+            extraId = extraId
+        ).show(childFragmentManager, "ComposePickerDialogFragment")
+    }
 
-        dialog.onConfirm = { hour, minute ->
-            val totalMinutes = hour * 60 + minute
-
-            // Определяем, существует ли уже такой слот
-            val isDuplicate = if (isEditing) {
-                // При редактировании ищем дубликат, исключая сам редактируемый слот
-                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != timeSlotToEdit!!.id }
-            } else {
-                // При добавлении ищем любой слот с таким же временем
-                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes }
-            }
-
-            if (isDuplicate) {
-                // Если дубликат найден, показываем Toast и возвращаем false
-                Toast.makeText(requireContext(), "Такой слот уже существует", Toast.LENGTH_SHORT).show()
-                false // <-- Говорим пикеру не закрываться
-            } else {
-                // Если дубликата нет, вызываем метод ViewModel
-                if (isEditing) {
-                    viewModel.updateTimeSlot(timeSlotToEdit!!.id, hour, minute)
-                } else {
-                    viewModel.addTimeSlot(hour, minute)
-                }
-                // и возвращаем true
-                true // <-- Говорим пикеру, что можно закрыться
-            }
-        }
-
-        dialog.show(childFragmentManager, "ComposePickerDialogFragment")
+    companion object {
+        private const val TIME_PICKER_KEY = "time_picker_request"
     }
 
     override fun onDestroyView() {

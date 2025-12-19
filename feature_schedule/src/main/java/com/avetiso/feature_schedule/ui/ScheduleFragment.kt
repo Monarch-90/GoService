@@ -110,7 +110,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             calendarView = currentBinding.calendarView,
             viewModel = calendarViewModel,
             context = requireContext()
-        ).also { it.setupCalendar() }
+        ).also { it.setupCalendar(calendarViewModel.state.value.visibleMonth) }
 
         setupClickListeners()
         setupResultListeners()

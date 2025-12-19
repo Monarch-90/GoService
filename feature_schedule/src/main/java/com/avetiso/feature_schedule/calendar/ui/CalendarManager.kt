@@ -28,14 +28,14 @@ class CalendarManager(
     private var previousSelectedDate: LocalDate? = viewModel.state.value.selectedDate
     private var previousEventDates: Set<LocalDate> = emptySet()
 
-    fun setupCalendar() {
+    fun setupCalendar(initialMonth: YearMonth) {
         val currentMonth = YearMonth.now()
         val startMonth = currentMonth.minusMonths(100)
         val endMonth = currentMonth.plusMonths(100)
         val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
 
         calendarView.setup(startMonth, endMonth, firstDayOfWeek)
-        calendarView.scrollToMonth(currentMonth)
+        calendarView.scrollToMonth(initialMonth)
 
         calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
             override fun create(view: View) = DayViewContainer.create(view)

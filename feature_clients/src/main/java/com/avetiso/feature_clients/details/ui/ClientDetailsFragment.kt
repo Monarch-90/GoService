@@ -200,7 +200,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         // Используем новый DeleteDialogFragment
         DeleteDialogFragment.newInstance(
             requestKey = DELETE_REQUEST_KEY,
-            message = getString(com.avetiso.common_ui.R.string.delete_dialog_message, clientName)
+            message = getString(com.avetiso.core.R.string.delete_dialog_message, clientName)
         ).show(childFragmentManager, DeleteDialogFragment.TAG)
     }
 

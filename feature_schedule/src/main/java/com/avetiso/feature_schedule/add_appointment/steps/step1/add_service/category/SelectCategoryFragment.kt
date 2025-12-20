@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.core.entity.CategoryEntity
 import com.avetiso.feature_schedule.R
@@ -48,11 +49,15 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: return@setFragmentResultListener
             handleCategoryInput(text)
         }
+
+        childFragmentManager.setFragmentResultListener("delete_category_request", viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
+            }
+        }
     }
 
     private fun handleCategoryInput(name: String) {
-        val currentCategories = viewModel.categories.value
-
         // Проверка на дубликаты
         val hasDuplicate = viewModel.isDuplicate(name)
 
@@ -77,12 +82,18 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             recyclerView = currentBinding.rvCategories,
             adapter = adapter,
             getItemId = { category -> category.id },
-            getItemName = { category -> category.name },
             onEdit = { category ->
                 showCategoryInputDialog(category)
             },
-            onDelete = { category ->
-                viewModel.deleteCategory(category)
+            onDeleteClicked = { category ->
+                // 1. Сохраняем состояние во ViewModel
+                viewModel.onDeleteIconClicked(category)
+
+                // 2. Показываем диалог
+                DeleteDialogFragment.newInstance(
+                    requestKey = "delete_category_request",
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, category.name)
+                ).show(childFragmentManager, DeleteDialogFragment.TAG)
             },
             onItemClick = { category ->
                 setFragmentResult(

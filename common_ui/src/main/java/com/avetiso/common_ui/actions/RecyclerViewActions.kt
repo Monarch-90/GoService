@@ -1,31 +1,21 @@
 package com.avetiso.common_ui.actions
 
-import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.avetiso.common_ui.R
 import com.avetiso.common_ui.actions.listeners.ItemActionTouchListener
 import com.avetiso.common_ui.actions.listeners.SwipeRevealTouchListener
 import com.avetiso.common_ui.actions.listeners.TapOutsideTouchListener
-import com.avetiso.common_ui.databinding.DeleteDialogBinding
-import com.avetiso.common_ui.dialogs.DeleteDialogFragment
-import com.avetiso.common_ui.dialogs.DialogUtils
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-
-// Уникальный ключ для общения с диалогом удаления
-private const val DELETE_REQUEST_KEY = "delete_item_request"
 
 class RecyclerViewActions<T : Any>(
     private val fragment: Fragment,
     private val recyclerView: RecyclerView,
     private val adapter: ListAdapter<T, out ActionsViewHolder>,
     val getItemId: (T) -> Any,
-    private val getItemName: (T) -> String,
     private val onEdit: (T) -> Unit,
-    private val onDelete: (T) -> Unit,
+    private val onDeleteClicked: (T) -> Unit,
     private val onItemClick: ((T) -> Unit)? = null,
     private val onActionsShown: (() -> Unit)? = null,
     private val onActionsDismissed: (() -> Unit)? = null,
@@ -39,26 +29,7 @@ class RecyclerViewActions<T : Any>(
             recyclerView.tag = value
         }
 
-    // Временное хранилище для элемента, который мы собираемся удалить
-    private var itemPendingDelete: T? = null
-
     init {
-        fragment.childFragmentManager.setFragmentResultListener(
-            DELETE_REQUEST_KEY,
-            fragment.viewLifecycleOwner
-        ) { _, bundle ->
-            val isConfirmed = bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)
-            if (isConfirmed) {
-                // Если пользователь нажал "Удалить"
-                itemPendingDelete?.let { item ->
-                    onDelete(item)
-                    dismissActions()
-                }
-            }
-            // Очищаем ссылку, чтобы не держать объект в памяти
-            itemPendingDelete = null
-        }
-
         when (triggerMode) {
             TriggerMode.LONG_PRESS -> {
                 val touchListener = ItemActionTouchListener(
@@ -103,7 +74,7 @@ class RecyclerViewActions<T : Any>(
                     // Эта лямбда теперь правильно вызывает диалог
                     onDelete = { position ->
                         adapter.currentList.getOrNull(position)?.let { item ->
-                            showDeleteConfirmationDialog(item)
+                            onDeleteClicked(item)
                             dismissActions()                   // Сразу закрываем свайп
                         }
                     }
@@ -192,7 +163,7 @@ class RecyclerViewActions<T : Any>(
                     dismissActions()
                 }
                 holder.deleteButton.setOnClickListener {
-                    showDeleteConfirmationDialog(item)
+                    onDeleteClicked(item)
                     dismissActions()
                 }
             } else {
@@ -201,16 +172,5 @@ class RecyclerViewActions<T : Any>(
                 holder.deleteButton.setOnClickListener(null)
             }
         }
-    }
-
-    private fun showDeleteConfirmationDialog(item: T) {
-        // Запоминаем, что мы хотим удалить
-        itemPendingDelete = item
-
-        // Создаем и показываем DialogFragment
-        DeleteDialogFragment.newInstance(
-            requestKey = DELETE_REQUEST_KEY,
-            message = fragment.getString(R.string.delete_dialog_message, getItemName(item))
-        ).show(fragment.childFragmentManager, DeleteDialogFragment.TAG)
     }
 }

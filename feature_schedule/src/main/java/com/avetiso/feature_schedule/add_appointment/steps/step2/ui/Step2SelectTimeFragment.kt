@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.core.entity.TimeSlotEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
@@ -62,13 +63,16 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
             adapter = adapter,
             // Все лямбды теперь получают на вход `TimeSlotEntity`
             getItemId = { entity -> entity.id },
-            getItemName = { entity ->
-                val hours = entity.startTimeMinutes / 60
-                val minutes = entity.startTimeMinutes % 60
-                String.format("%02d:%02d", hours, minutes)
-            },
             onEdit = { entity -> showTimePicker(timeSlotToEdit = entity) },
-            onDelete = { entity -> viewModel.deleteTimeSlot(entity) },
+            onDeleteClicked = { timeSlot ->
+                viewModel.onDeleteIconClicked(timeSlot)
+
+                DeleteDialogFragment.newInstance(
+                    requestKey = "delete_timeslot_request",
+                    // ✅ Используем ТУ ЖЕ логику, что и в адаптере
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, timeSlot.formattedTime)
+                ).show(childFragmentManager, DeleteDialogFragment.TAG)
+            },
             onItemClick = { clickedEntity ->
                 parentViewModel.handleEvent(AddAppointmentEvent.TimeSlotClicked(clickedEntity))
             },
@@ -111,6 +115,12 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
                 } else {
                     viewModel.addTimeSlot(hour, minute)
                 }
+            }
+        }
+
+        childFragmentManager.setFragmentResultListener("delete_timeslot_request", viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
             }
         }
     }

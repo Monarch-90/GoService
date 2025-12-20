@@ -24,6 +24,8 @@ class Step1SelectServiceViewModel @Inject constructor(
     private val _state = MutableStateFlow(Step1State())
     val state = _state.asStateFlow()
 
+    private var servicePendingDelete: ServiceEntity? = null
+
     init {
         // Мы "слушаем" изменения нашего состояния...
         state
@@ -68,9 +70,18 @@ class Step1SelectServiceViewModel @Inject constructor(
         }
     }
 
-    fun deleteService(service: ServiceEntity) {
+    // 1. Нажали на урну
+    fun onDeleteIconClicked(service: ServiceEntity) {
+        servicePendingDelete = service
+    }
+
+    // 2. Подтвердили в диалоге
+    fun onDeleteConfirmed() {
+        val service = servicePendingDelete ?: return
         viewModelScope.launch {
+            // Предполагается, что serviceDao у тебя есть в конструкторе
             serviceDao.deleteService(service)
         }
+        servicePendingDelete = null
     }
 }

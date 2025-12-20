@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.ui.AddAppointmentFragmentDirections
@@ -76,6 +77,12 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
                 }
             }
         }
+
+        childFragmentManager.setFragmentResultListener("delete_service_request", viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
+            }
+        }
     }
 
     private fun setupRecyclerView() {
@@ -96,7 +103,6 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
             recyclerView = currentBinding.rvSelectedServices,
             adapter = adapter,
             getItemId = { service -> service.id },
-            getItemName = { service -> service.name },
             onEdit = { service ->
                 // Ваша логика перехода на экран редактирования
                 val direction =
@@ -106,9 +112,15 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
                 // Используем основной NavController родительского фрагмента для навигации
                 requireParentFragment().findNavController().navigate(direction)
             },
-            onDelete = { service ->
-                // Вызываем новый метод в ViewModel для удаления
-                viewModel.deleteService(service)
+            onDeleteClicked = { service ->
+                // 1. Запоминаем в VM
+                viewModel.onDeleteIconClicked(service)
+
+                // 2. Показываем диалог
+                DeleteDialogFragment.newInstance(
+                    requestKey = "delete_service_request",
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, service.name)
+                ).show(childFragmentManager, DeleteDialogFragment.TAG)
             },
             onItemClick = { service ->
                 // Здесь сохраняется ваша логика выбора услуги

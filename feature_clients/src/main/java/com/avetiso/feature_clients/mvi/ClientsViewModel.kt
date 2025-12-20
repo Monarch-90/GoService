@@ -23,6 +23,9 @@ class ClientsViewModel @Inject constructor(
     private val _state = MutableStateFlow(ClientsState())
     val state = _state.asStateFlow()
 
+    // ✅ State: кого хотим удалить
+    private var clientPendingDelete: ClientEntity? = null
+
     init {
         // Подписываемся на изменения поискового запроса
         _state
@@ -44,9 +47,17 @@ class ClientsViewModel @Inject constructor(
         _state.update { it.copy(searchQuery = query) }
     }
 
-    fun deleteClient(client: ClientEntity) {
+    // 1. Фрагмент говорит: нажали иконку удаления
+    fun onDeleteIconClicked(client: ClientEntity) {
+        clientPendingDelete = client
+    }
+
+    // 2. Фрагмент говорит: пользователь нажал "Да"
+    fun onDeleteConfirmed() {
+        val client = clientPendingDelete ?: return
         viewModelScope.launch {
             clientDao.deleteClient(client)
         }
+        clientPendingDelete = null
     }
 }

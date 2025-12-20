@@ -1,4 +1,7 @@
 <resources>
+    <string name="delete_dialog_message">\"%1$s\"</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_delete">Удалить</string>
     <string name="Имя_клиента">Имя клиента</string>
     <string name="Номер_телефона">Номер телефона</string>
     <string name="Инстаграм">Инстаграм</string>

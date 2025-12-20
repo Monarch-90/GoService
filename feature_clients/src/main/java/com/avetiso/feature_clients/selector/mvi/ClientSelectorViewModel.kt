@@ -21,9 +21,12 @@ class ClientSelectorViewModel @Inject constructor(
     private val _state = MutableStateFlow(ClientSelectorState())
     val state = _state.asStateFlow()
 
+    // ✅ State: кого хотим удалить
+    private var clientPendingDelete: ClientEntity? = null
+
     // Этот Flow будет переизлучать список клиентов при изменении searchQuery
     val clients = _state
-        .debounce(300)
+        .debounce(300L)
         .flatMapLatest { state ->
             if (state.searchQuery.isBlank()) {
                 clientDao.getAllClients()
@@ -47,13 +50,17 @@ class ClientSelectorViewModel @Inject constructor(
         _state.update { it.copy(selectedClient = null) }
     }
 
-    fun deleteClient(client: ClientEntity) {
+    // 1. Фрагмент говорит: нажали иконку удаления
+    fun onDeleteIconClicked(client: ClientEntity) {
+        clientPendingDelete = client
+    }
+
+    // 2. Фрагмент говорит: пользователь нажал "Да"
+    fun onDeleteConfirmed() {
+        val client = clientPendingDelete ?: return
         viewModelScope.launch {
-            // Если удаляем выбранного клиента, сбрасываем выбор
-            if (_state.value.selectedClient == client) {
-                _state.update { it.copy(selectedClient = null) }
-            }
             clientDao.deleteClient(client)
         }
+        clientPendingDelete = null
     }
 }

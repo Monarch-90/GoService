@@ -20,6 +20,7 @@ class SelectCategoryViewModel @Inject constructor(
 
     private val _searchQuery = MutableStateFlow("")
     private var pendingCategory: CategoryEntity? = null
+    private var categoryPendingDelete: CategoryEntity? = null
 
     val categories = _searchQuery
         .debounce(300L) // Ждем 300 мс после ввода, чтобы не делать лишних запросов
@@ -36,10 +37,18 @@ class SelectCategoryViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    fun deleteCategory(category: CategoryEntity) {
+    // 1. Вызывается при нажатии на кнопку удаления
+    fun onDeleteIconClicked(category: CategoryEntity) {
+        categoryPendingDelete = category
+    }
+
+    // 2. Вызывается, когда пользователь подтвердил удаление в диалоге
+    fun onDeleteConfirmed() {
+        val category = categoryPendingDelete ?: return
         viewModelScope.launch {
             categoryDao.deleteCategory(category)
         }
+        categoryPendingDelete = null
     }
 
     // 1. Фрагмент сообщает: "Пользователь хочет создать новую категорию"

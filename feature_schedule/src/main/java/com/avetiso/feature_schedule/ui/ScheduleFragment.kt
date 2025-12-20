@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.common_ui.compose_picker.ComposeDatePickerDialogFragment
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
@@ -68,7 +69,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             recyclerView = currentBinding.rvAppointments,
             adapter = adapter,
             getItemId = { it.id },
-            getItemName = { "Удалить запись?" },
             onEdit = { appointment ->
                 val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
                     selectedDate = calendarViewModel.state.value.selectedDate.toString(),
@@ -76,9 +76,19 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 )
                 findNavController().navigate(action)
             },
-            onDelete = { appointment ->
-                // Просто вызываем метод из ViewModel
-                scheduleViewModel.deleteAppointment(appointment.id)
+            onDeleteClicked = { appointment ->
+                // ✅ 1. Передаем только ID (так как appointment - это UI модель)
+                scheduleViewModel.onDeleteIconClicked(appointment.id)
+
+                // ✅ 2. Формируем текст.
+                // Внимание: в твоем маппере поле называется serviceNames (во множественном числе)
+                val messageText = "Удалить запись?"
+
+                // 3. Показываем диалог
+                DeleteDialogFragment.newInstance(
+                    requestKey = "delete_appointment_request",
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, messageText)
+                ).show(childFragmentManager, DeleteDialogFragment.TAG)
             },
             onItemClick = { /* TODO: Логика клика, если нужна */ },
             onActionsShown = {
@@ -173,6 +183,13 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 val newDate = sdf.format(Date(selectedMillis))
                 // ID пришел из диалога, всё надежно
                 scheduleViewModel.updateAppointmentStatus(appointmentId, "Перенос", newDate)
+            }
+        }
+
+        // Слушаем результат диалога удаления записи
+        childFragmentManager.setFragmentResultListener("delete_appointment_request", viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+                scheduleViewModel.onDeleteConfirmed()
             }
         }
     }

@@ -38,6 +38,7 @@ class ScheduleViewModel @Inject constructor(
     private val _selectedDate = MutableStateFlow("")
     private val gson = Gson()
     private var pendingAppointmentId: Long? = null
+    private var appointmentPendingDeleteId: Long? = null
 
     val appointmentsForDate: StateFlow<List<Appointment>> = _selectedDate
         .flatMapLatest { date ->
@@ -155,13 +156,22 @@ class ScheduleViewModel @Inject constructor(
         _scheduleState.value = ScheduleState.Idle
     }
 
-    fun deleteAppointment(appointmentId: Long) {
+    // 1. Фрагмент передает ID (так как у него есть только Appointment c ID)
+    fun onDeleteIconClicked(id: Long) {
+        appointmentPendingDeleteId = id
+    }
+
+    // 2. Подтвердили удаление
+    fun onDeleteConfirmed() {
+        val id = appointmentPendingDeleteId ?: return
         viewModelScope.launch {
-            val appointmentToDelete = appointmentDao.getAppointmentById(appointmentId)
-            appointmentToDelete?.let {
-                appointmentDao.deleteAppointment(it)
+            // Ищем Entity в базе по ID
+            val entity = appointmentDao.getAppointmentById(id)
+            if (entity != null) {
+                appointmentDao.deleteAppointment(entity)
             }
         }
+        appointmentPendingDeleteId = null
     }
 
     // 1. Фрагмент вызывает это, когда открывает диалог

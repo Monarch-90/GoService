@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.adapter.ClientAdapter
@@ -48,6 +49,12 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
         setFragmentResultListener("client_updated_request") { _, _ ->
             viewModel.onSearchQueryChanged(viewModel.state.value.searchQuery)
         }
+
+        childFragmentManager.setFragmentResultListener("delete_client_selector_request", viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
+            }
+        }
     }
 
     private fun setupRecyclerView() {
@@ -63,13 +70,19 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
             recyclerView = currentBinding.rvClients,
             adapter = adapter,
             getItemId = { client -> client.id },
-            getItemName = { client -> client.name },
             onEdit = { client ->
                 // Навигация на экран редактирования
                 clientsNavigator.navigateToAddEditClient(findNavController(), client.id)
             },
-            onDelete = { client ->
-                viewModel.deleteClient(client)
+            onDeleteClicked = { client ->
+                // Сначала сохраняем состояние в ViewModel!
+                viewModel.onDeleteIconClicked(client)
+
+                // Потом показываем диалог
+                DeleteDialogFragment.newInstance(
+                    requestKey = "delete_client_selector_request",
+                        message = getString(com.avetiso.core.R.string.delete_dialog_message, client.name)
+                ).show(childFragmentManager, DeleteDialogFragment.TAG)
             },
             onItemClick = { client ->
                 viewModel.onClientSelected(client)

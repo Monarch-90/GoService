@@ -3,6 +3,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step2.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.TimeSlotDao
+import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -24,6 +25,8 @@ class Step2SelectTimeViewModel @Inject constructor(
 
     private val _eventChannel = Channel<Step2Event>()
     val events = _eventChannel.receiveAsFlow()
+
+    private var timeSlotPendingDelete: TimeSlotEntity? = null
 
     fun addTimeSlot(hour: Int, minute: Int) {
         viewModelScope.launch {
@@ -52,9 +55,18 @@ class Step2SelectTimeViewModel @Inject constructor(
         }
     }
 
-    fun deleteTimeSlot(timeSlot: TimeSlotEntity) {
+    // 1. Нажали на урну
+    fun onDeleteIconClicked(timeSlot: TimeSlotEntity) {
+        timeSlotPendingDelete = timeSlot
+    }
+
+    // 2. Подтвердили в диалоге
+    fun onDeleteConfirmed() {
+        val timeSlot = timeSlotPendingDelete ?: return
         viewModelScope.launch {
+            // Предполагается, что serviceDao у тебя есть в конструкторе
             timeSlotDao.deleteTimeSlot(timeSlot)
         }
+        timeSlotPendingDelete = null
     }
 }

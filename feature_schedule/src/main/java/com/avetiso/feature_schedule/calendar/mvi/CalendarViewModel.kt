@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.calendar.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.AppointmentDao
 import com.kizitonwose.calendar.core.yearMonth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,7 @@ class CalendarViewModel @Inject constructor(
             .map { it.visibleMonth } // Берем только видимый месяц
             .distinctUntilChanged()  // Реагируем, только если месяц сменился
             .flatMapLatest { month -> // Для каждого нового месяца делаем новый запрос в БД
-                val yearMonthPattern = month.format(DateTimeFormatter.ofPattern("yyyy-MM"))
+                val yearMonthPattern = month.format(DateTimeFormatter.ofPattern(AppConstants.Format.DATE_FORMAT_YEAR_MONTH))
                 appointmentDao.getEventDatesForMonth(yearMonthPattern)
             }
             .onEach { dateStrings -> // Когда из БД приходит список дат-строк

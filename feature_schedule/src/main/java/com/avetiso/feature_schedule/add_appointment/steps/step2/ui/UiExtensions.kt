@@ -1,5 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step2.ui
 
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity
 import java.util.Locale
 
@@ -15,5 +16,5 @@ val TimeSlotEntity.formattedTime: String
         val hours = this.startTimeMinutes / 60
         val minutes = this.startTimeMinutes % 60
         // %02d добавляет ноль в начале, если цифра одна (9 -> 09)
-        return String.format(Locale.getDefault(), "%02d:%02d", hours, minutes)
+        return String.format(Locale.getDefault(), AppConstants.Format.TIME_HH_MM, hours, minutes)
     }

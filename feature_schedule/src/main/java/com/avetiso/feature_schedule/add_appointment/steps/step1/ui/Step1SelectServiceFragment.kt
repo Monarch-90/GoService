@@ -11,8 +11,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.add_appointment.ui.AddAppointmentFragmentDirections
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
@@ -49,13 +51,13 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
         }
 
         val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
-        savedStateHandle?.getLiveData<Boolean>("service_updated")
+        savedStateHandle?.getLiveData<Boolean>(AppointmentConstants.Result.SERVICE_UPDATED)
             ?.observe(viewLifecycleOwner) { updated ->
                 if (updated) {
                     // Принудительно обновляем поиск, чтобы перезапросить данные
                     viewModel.handleEvent(Step1Event.SearchQueryChanged(binding?.etSearch?.text.toString()))
                     // Сбрасываем флаг, чтобы не было повторных обновлений
-                    savedStateHandle.remove<Boolean>("service_updated")
+                    savedStateHandle.remove<Boolean>(AppointmentConstants.Result.SERVICE_UPDATED)
                 }
             }
 
@@ -78,8 +80,11 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
             }
         }
 
-        childFragmentManager.setFragmentResultListener("delete_service_request", viewLifecycleOwner) { _, bundle ->
-            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.DELETE_SERVICE,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
                 viewModel.onDeleteConfirmed()
             }
         }
@@ -118,9 +123,9 @@ class Step1SelectServiceFragment : Fragment(R.layout.fragment_step1_select_servi
 
                 // 2. Показываем диалог
                 DeleteDialogFragment.newInstance(
-                    requestKey = "delete_service_request",
+                    requestKey = AppointmentConstants.Request.DELETE_SERVICE,
                     message = getString(com.avetiso.core.R.string.delete_dialog_message, service.name)
-                ).show(childFragmentManager, DeleteDialogFragment.TAG)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
             },
             onItemClick = { service ->
                 // Здесь сохраняется ваша логика выбора услуги

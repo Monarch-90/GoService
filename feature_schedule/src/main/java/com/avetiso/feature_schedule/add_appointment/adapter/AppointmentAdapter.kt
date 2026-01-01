@@ -12,7 +12,10 @@ import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.ISwipeableHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
+import com.avetiso.feature_schedule.ScheduleConstants
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
+import com.avetiso.feature_schedule.add_appointment.ui.toStatusColorRes
+import com.avetiso.feature_schedule.add_appointment.ui.toStatusLabelRes
 import com.avetiso.feature_schedule.databinding.ItemAppointmentBinding
 
 class AppointmentAdapter(
@@ -62,24 +65,13 @@ class AppointmentAdapter(
             binding.ivIconDiscount.isVisible = appointment.hasDiscount
             binding.tvDate.text = appointment.date
 
-            binding.chipStatus.text = appointment.status
-            val context = binding.root.context
+            // 1. Ставим текст статусов записи
+            binding.chipStatus.setText(appointment.status.toStatusLabelRes())
 
-            val statusColorId = when (appointment.status) {
-                "Активна" -> com.avetiso.core.R.color.green
-                "Исполнена" -> com.avetiso.core.R.color.main_dark
-                "Отмена" -> com.avetiso.core.R.color.grey
-                "Перенос" -> com.avetiso.core.R.color.orange_coral
-                "Неявка" -> com.avetiso.core.R.color.red
-                else -> 0
-            }
-
-            val statusColor = if (statusColorId != 0) {
-                ContextCompat.getColor(context, statusColorId)
-            } else {
-                ContextCompat.getColor(context, com.avetiso.core.R.color.black)
-            }
-            binding.chipStatus.chipIconTint = ColorStateList.valueOf(statusColor)
+            // 2. Ставим цвет статусов записи
+            val colorRes = appointment.status.toStatusColorRes()
+            val color = ContextCompat.getColor(binding.root.context, colorRes)
+            binding.chipStatus.chipIconTint = ColorStateList.valueOf(color)
 
             binding.chipStatus.setOnClickListener {
                 onStatusClicked(appointment)

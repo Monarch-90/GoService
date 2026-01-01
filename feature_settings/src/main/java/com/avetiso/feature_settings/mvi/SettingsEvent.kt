@@ -1,6 +1,8 @@
 package com.avetiso.feature_settings.mvi
 
+import com.avetiso.core.model.AppCurrency
+
 sealed interface SettingsEvent {
-    data class AskConfirmation(val currency: String) : SettingsEvent
-    data class RestoreSelection(val currency: String?) : SettingsEvent // Чтобы вернуть спиннер назад при отказе
+    data class AskConfirmation(val currency: AppCurrency) : SettingsEvent
+    data class RestoreSelection(val currencyCode: String?) : SettingsEvent // Чтобы вернуть спиннер назад при отказе
 }

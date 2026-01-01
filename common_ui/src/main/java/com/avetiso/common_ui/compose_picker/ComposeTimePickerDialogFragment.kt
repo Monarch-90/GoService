@@ -26,16 +26,14 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import com.avetiso.common_ui.CommonConstants
+import com.avetiso.core.AppConstants
 import com.chargemap.compose.numberpicker.NumberPicker
 
 class ComposeTimePickerDialogFragment : DialogFragment() {
 
     private var selectedHour by mutableIntStateOf(0)
     private var selectedMinute by mutableIntStateOf(0)
-
-    private val titleText: String by lazy {
-        requireArguments().getString(ARG_TITLE, "")
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +49,8 @@ class ComposeTimePickerDialogFragment : DialogFragment() {
                 val initialHour = requireArguments().getInt(ARG_INITIAL_HOUR)
                 val initialMinute = requireArguments().getInt(ARG_INITIAL_MINUTE)
                 val title = requireArguments().getString(ARG_TITLE, "")
-                val requestKey = requireArguments().getString(ARG_REQUEST_KEY) ?: "time_picker_result"
-                val extraId = requireArguments().getLong(ARG_EXTRA_ID, -1L)
+                val requestKey = requireArguments().getString(ARG_REQUEST_KEY) ?: CommonConstants.Result.TIME_PICKER
+                val extraId = requireArguments().getLong(ARG_EXTRA_ID, AppConstants.ID_NONE)
 
                 TimePickerDialogContent(
                     title = title,
@@ -61,9 +59,9 @@ class ComposeTimePickerDialogFragment : DialogFragment() {
                     onConfirm = { hour, minute ->
                         // Возвращаем результат через FragmentManager (переживает поворот)
                         setFragmentResult(requestKey, bundleOf(
-                            RESULT_HOUR to hour,
-                            RESULT_MINUTE to minute,
-                            RESULT_EXTRA_ID to extraId
+                            AppConstants.Result.RESULT_HOUR to hour,
+                            AppConstants.Result.RESULT_MINUTE to minute,
+                            AppConstants.Result.TIME_RESULT_EXTRA_ID to extraId
                         ))
                         dismiss()
                     },
@@ -85,16 +83,12 @@ class ComposeTimePickerDialogFragment : DialogFragment() {
         private const val ARG_REQUEST_KEY = "arg_request_key"
         private const val ARG_EXTRA_ID = "arg_extra_id"
 
-        const val RESULT_HOUR = "result_hour"
-        const val RESULT_MINUTE = "result_minute"
-        const val RESULT_EXTRA_ID = "result_extra_id"
-
         fun newInstance(
             requestKey: String,
             title: String,
             initialHour: Int,
             initialMinute: Int,
-            extraId: Long = -1L
+            extraId: Long = AppConstants.ID_NONE
         ): ComposeTimePickerDialogFragment {
             return ComposeTimePickerDialogFragment().apply {
                 arguments = bundleOf(

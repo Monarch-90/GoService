@@ -2,6 +2,7 @@ package com.avetiso.feature_clients.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,7 @@ class ClientsViewModel @Inject constructor(
     init {
         // Подписываемся на изменения поискового запроса
         _state
-            .debounce(300L)
+            .debounce(AppConstants.Time.SEARCH_DEBOUNCE)
             .flatMapLatest { state -> // flatMapLatest отменяет предыдущий запрос при новом поисковом запросе
                 if (state.searchQuery.isBlank()) {
                     clientDao.getAllClients()

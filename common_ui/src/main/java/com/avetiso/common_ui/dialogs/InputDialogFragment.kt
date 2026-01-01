@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.setFragmentResult
+import com.avetiso.common_ui.CommonConstants
 import com.avetiso.common_ui.databinding.DialogInputBinding
+import com.avetiso.core.AppConstants
 
 class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
 
@@ -61,7 +63,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
                 }
 
                 else -> {
-                    setFragmentResult(requestKey, bundleOf(RESULT_TEXT to text))
+                    setFragmentResult(requestKey, bundleOf(AppConstants.Result.RESULT_TEXT to text))
                     dismiss()
                 }
             }
@@ -69,9 +71,6 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
     }
 
     companion object {
-        const val TAG = "InputDialog"
-        const val RESULT_TEXT = "result_text"
-
         private const val ARG_REQUEST_KEY = "arg_request_key"
         private const val ARG_TITLE = "arg_title"
         private const val ARG_HINT = "arg_hint"

@@ -2,8 +2,9 @@ package com.avetiso.core.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.avetiso.core.AppConstants
 
-@Entity(tableName = "time_slots")
+@Entity(tableName = AppConstants.Data.TABLE_TIMESLOT)
 data class TimeSlotEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

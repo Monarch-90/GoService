@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.entity.ServiceEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +33,7 @@ class Step1SelectServiceViewModel @Inject constructor(
             // ...нас интересует только изменение поля `searchQuery`...
             .map { it.searchQuery }
             // ...убираем слишком быстрые повторные запросы (например, при быстром наборе текста)...
-            .debounce(300L)
+            .debounce(AppConstants.Time.SEARCH_DEBOUNCE)
             // ...и для каждого нового запроса отменяем старый и выполняем новый.
             .flatMapLatest { query ->
                 if (query.isBlank()) {

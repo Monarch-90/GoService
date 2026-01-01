@@ -2,6 +2,7 @@ package com.avetiso.feature_clients.selector.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +27,7 @@ class ClientSelectorViewModel @Inject constructor(
 
     // Этот Flow будет переизлучать список клиентов при изменении searchQuery
     val clients = _state
-        .debounce(300L)
+        .debounce(AppConstants.Time.SEARCH_DEBOUNCE)
         .flatMapLatest { state ->
             if (state.searchQuery.isBlank()) {
                 clientDao.getAllClients()

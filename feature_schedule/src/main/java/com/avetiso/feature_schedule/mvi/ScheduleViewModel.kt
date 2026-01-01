@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
+import com.avetiso.core.model.AppointmentStatus
 import com.avetiso.core.model.ServiceSnapshot
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -116,8 +118,8 @@ class ScheduleViewModel @Inject constructor(
         _selectedDate.value = date
     }
 
-    fun updateAppointmentStatus(appointmentId: Long, newStatus: String, newDate: String? = null) {
-        viewModelScope.launch {
+    fun updateAppointmentStatus(appointmentId: Long, newStatus: AppointmentStatus, newDate: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
             val appointmentToUpdate = appointmentDao.getAppointmentById(appointmentId) ?: return@launch
 
             // 🎯 1. ПРОВЕРЯЕМ, НЕ ЯВЛЯЕТСЯ ЛИ ПЕРЕНОС "ФИКТИВНЫМ" (НА ТУ ЖЕ ДАТУ)

@@ -7,12 +7,12 @@ import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
@@ -151,10 +151,10 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
     private fun setupFragmentResultListeners() {
         // Слушаем результат от экрана выбора клиента
         childFragmentManager.setFragmentResultListener(
-            "client_selection_request",
+            AppConstants.Requests.CLIENT_SELECT,
             viewLifecycleOwner // Using viewLifecycleOwner ensures the listener is automatically removed.
         ) { _, bundle ->
-            val client = BundleCompat.getParcelable(bundle, "selected_client", ClientEntity::class.java)
+            val client = BundleCompat.getParcelable(bundle, AppConstants.Result.SELECTED_CLIENT, ClientEntity::class.java)
             viewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
         }
     }

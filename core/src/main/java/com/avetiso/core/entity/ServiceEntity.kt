@@ -3,10 +3,11 @@ package com.avetiso.core.entity
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.avetiso.core.AppConstants
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity(tableName = "services")
+@Entity(tableName = AppConstants.Data.TABLE_SERVICES)
 data class ServiceEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

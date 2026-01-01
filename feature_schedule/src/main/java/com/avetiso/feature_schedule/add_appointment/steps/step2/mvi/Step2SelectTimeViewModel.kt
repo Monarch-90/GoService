@@ -28,29 +28,24 @@ class Step2SelectTimeViewModel @Inject constructor(
 
     private var timeSlotPendingDelete: TimeSlotEntity? = null
 
-    fun addTimeSlot(hour: Int, minute: Int) {
+    fun saveTimeSlot(hour: Int, minute: Int, id: Long = 0L) {
         viewModelScope.launch {
             val totalMinutes = hour * 60 + minute
-            val exists = timeSlots.value.any { it.startTimeMinutes == totalMinutes }
-            if (exists) {
-                // Отправляем событие, если слот существует
-                _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
-            } else {
-                timeSlotDao.insertTimeSlot(TimeSlotEntity(startTimeMinutes = totalMinutes))
-            }
-        }
-    }
 
-    fun updateTimeSlot(id: Long, hour: Int, minute: Int) {
-        viewModelScope.launch {
-            val totalMinutes = hour * 60 + minute
-            val exists = timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != id }
-            if (exists) {
-                // Отправляем событие и здесь
+            // УМНАЯ ПРОВЕРКА:
+            // Ищем слот с таким же временем, у которого ID НЕ совпадает с текущим.
+            // 1. При добавлении (id=0): найдет любой слот с таким временем.
+            // 2. При обновлении (id=5): найдет чужой слот, но проигнорирует "самого себя".
+            val isDuplicate = timeSlots.value.any {
+                it.startTimeMinutes == totalMinutes && it.id != id
+            }
+
+            if (isDuplicate) {
+                // Текст "Такой слот..." вынеси в ресурсы позже
                 _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
             } else {
-                val updatedSlot = TimeSlotEntity(id = id, startTimeMinutes = totalMinutes)
-                timeSlotDao.insertTimeSlot(updatedSlot)
+                // Room сам разберется: если id=0 -> INSERT, если id>0 -> UPDATE (при OnConflictStrategy.REPLACE)
+                timeSlotDao.insertTimeSlot(TimeSlotEntity(id = id, startTimeMinutes = totalMinutes))
             }
         }
     }

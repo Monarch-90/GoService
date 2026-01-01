@@ -18,6 +18,8 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import com.avetiso.common_ui.CommonConstants
+import com.avetiso.core.AppConstants
 
 class ComposeDatePickerDialogFragment : DialogFragment() {
 
@@ -31,13 +33,13 @@ class ComposeDatePickerDialogFragment : DialogFragment() {
                     title = requireArguments().getString(ARG_TITLE, ""),
                     initialDateMillis = requireArguments().getLong(ARG_INITIAL_DATE, System.currentTimeMillis()),
                     onConfirm = { selectedMillis ->
-                        val requestKey = requireArguments().getString(ARG_REQUEST_KEY) ?: "date_picker_result"
-                        val extraId = requireArguments().getLong(ARG_EXTRA_ID, -1L)
+                        val requestKey = requireArguments().getString(ARG_REQUEST_KEY) ?: CommonConstants.Result.DATE_PICKER
+                        val extraId = requireArguments().getLong(ARG_EXTRA_ID, AppConstants.ID_NONE)
 
                         // Возвращаем результат (Дата + ID записи)
                         setFragmentResult(requestKey, bundleOf(
-                            RESULT_DATE_KEY to selectedMillis,
-                            RESULT_EXTRA_ID to extraId
+                            AppConstants.Result.RESULT_DATE to selectedMillis,
+                            AppConstants.Result.DATE_RESULT_EXTRA_ID to extraId
                         ))
                         dismiss()
                     },
@@ -59,14 +61,11 @@ class ComposeDatePickerDialogFragment : DialogFragment() {
         private const val ARG_REQUEST_KEY = "arg_request_key"
         private const val ARG_EXTRA_ID = "arg_extra_id"
 
-        const val RESULT_DATE_KEY = "selected_date_millis"
-        const val RESULT_EXTRA_ID = "result_extra_id"
-
         fun newInstance(
             requestKey: String,
             title: String,
             initialDateMillis: Long? = null,
-            extraId: Long = -1L // Передаем ID записи внутрь диалога
+            extraId: Long = AppConstants.ID_NONE // Передаем ID записи внутрь диалога
         ): ComposeDatePickerDialogFragment {
             return ComposeDatePickerDialogFragment().apply {
                 arguments = bundleOf(

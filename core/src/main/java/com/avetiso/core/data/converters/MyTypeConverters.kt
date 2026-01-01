@@ -1,7 +1,6 @@
-package com.avetiso.core.data
+package com.avetiso.core.data.converters
 
 import androidx.room.TypeConverter
-import com.avetiso.core.model.ServiceSnapshot
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

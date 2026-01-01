@@ -12,7 +12,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ClientEntity
+import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.adapter.ClientAdapter
 import com.avetiso.feature_clients.databinding.FragmentClientsBinding
@@ -39,8 +41,11 @@ class ClientsFragment : Fragment(R.layout.fragment_clients) {
         binding = FragmentClientsBinding.bind(view)
 
         // ✅ Слушаем ответ от диалога здесь, во фрагменте
-        childFragmentManager.setFragmentResultListener(DELETE_REQUEST_KEY, viewLifecycleOwner) { _, bundle ->
-            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+        childFragmentManager.setFragmentResultListener(
+            ClientsConstants.Requests.CLIENT_DELETE,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
                 viewModel.onDeleteConfirmed()
             }
         }
@@ -49,7 +54,7 @@ class ClientsFragment : Fragment(R.layout.fragment_clients) {
         setupListeners()
         observeState()
 
-        setFragmentResultListener("client_updated_request") { _, _ ->
+        setFragmentResultListener(ClientsConstants.Requests.CLIENT_UPDATED) { _, _ ->
             viewModel.onSearchQueryChanged(viewModel.state.value.searchQuery)
         }
     }
@@ -80,9 +85,9 @@ class ClientsFragment : Fragment(R.layout.fragment_clients) {
                 viewModel.onDeleteIconClicked(client)
                 // 2. Показываем диалог
                 DeleteDialogFragment.newInstance(
-                    requestKey = DELETE_REQUEST_KEY,
+                    requestKey = ClientsConstants.Requests.CLIENT_DELETE,
                     message = getString(com.avetiso.core.R.string.delete_dialog_message, client.name)
-                ).show(childFragmentManager, DeleteDialogFragment.TAG)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
             }
         )
         adapter.actions = actions
@@ -108,10 +113,6 @@ class ClientsFragment : Fragment(R.layout.fragment_clients) {
                 }
             }
         }
-    }
-
-    companion object {
-        private const val DELETE_REQUEST_KEY = "delete_client_request"
     }
 
     override fun onDestroyView() {

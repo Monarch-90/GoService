@@ -3,8 +3,10 @@ package com.avetiso.feature_clients.add_edit.mvi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
+import com.avetiso.feature_clients.ClientsConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,9 +30,9 @@ class AddEditClientViewModel @Inject constructor(
 
     init {
         // Получаем клиента для редактирования из аргументов навигации
-        val clientId: Long = savedStateHandle.get<Long>("clientId") ?: -1L
+        val clientId: Long = savedStateHandle.get<Long>(ClientsConstants.Args.CLIENT_ID) ?: AppConstants.ID_NONE
 
-        if (clientId != -1L) {
+        if (clientId != AppConstants.ID_NONE) {
             loadClient(clientId)
         }
     }
@@ -38,6 +40,7 @@ class AddEditClientViewModel @Inject constructor(
     fun onSaveClicked() {
         val currentState = _state.value
         val name = currentState.nameInput.trim()
+        val prefix = AppConstants.Format.INSTAGRAM_PREFIX
 
         if (name.isBlank()) {
             // Можно добавить событие валидации, если нужно подсветить поле
@@ -46,7 +49,7 @@ class AddEditClientViewModel @Inject constructor(
 
         val phone = currentState.phoneInput.trim()
         val rawInstagram = currentState.instagramInput.trim()
-        val finalInstagram = if (rawInstagram.isNotEmpty()) "@$rawInstagram" else ""
+        val finalInstagram = if (rawInstagram.isNotEmpty()) "$prefix$rawInstagram" else ""
 
         val clientToSave = ClientEntity(
             id = currentState.originalClient?.id ?: 0L,
@@ -107,7 +110,7 @@ class AddEditClientViewModel @Inject constructor(
                         originalClient = client,
                         nameInput = client.name,
                         phoneInput = client.phoneNumber,
-                        instagramInput = client.instagram.removePrefix("@"),
+                        instagramInput = client.instagram.removePrefix(AppConstants.Format.INSTAGRAM_PREFIX),
                         sourceInput = client.source,
                         discountInput = if (client.discount > 0) client.discount.toString() else "",
                         noteInput = client.note,

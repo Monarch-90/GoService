@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
+import com.avetiso.common_ui.CommonConstants
 import com.avetiso.common_ui.databinding.DialogDeleteBinding
+import com.avetiso.core.AppConstants
 
 class DeleteDialogFragment : BaseDialogFragment<DialogDeleteBinding>() {
 
@@ -18,28 +20,25 @@ class DeleteDialogFragment : BaseDialogFragment<DialogDeleteBinding>() {
 
         val title = arguments?.getString(ARG_TITLE) ?: "Удаление"
         val message = arguments?.getString(ARG_MESSAGE) ?: ""
-        val requestKey = arguments?.getString(ARG_REQUEST_KEY) ?: "delete_request"
+        val requestKey = arguments?.getString(ARG_REQUEST_KEY) ?: CommonConstants.Request.DELETE_REQUEST
 
         binding.tvTitle.text = title
         binding.tvMessage.text = message
 
         binding.btnPositive.setOnClickListener {
             // Возвращаем True
-            setFragmentResult(requestKey, bundleOf(RESULT_CONFIRMED to true))
+            setFragmentResult(requestKey, bundleOf(AppConstants.Result.DELETE_CONFIRMED to true))
             dismiss()
         }
 
         binding.btnNegative.setOnClickListener {
             // Возвращаем False (хотя обычно на отмену просто закрывают, но для порядка можно вернуть)
-            setFragmentResult(requestKey, bundleOf(RESULT_CONFIRMED to false))
+            setFragmentResult(requestKey, bundleOf(AppConstants.Result.DELETE_CONFIRMED to false))
             dismiss()
         }
     }
 
     companion object {
-        const val TAG = "DeleteDialog"
-        const val RESULT_CONFIRMED = "delete_confirmed"
-
         private const val ARG_REQUEST_KEY = "arg_request_key"
         private const val ARG_TITLE = "arg_title"
         private const val ARG_MESSAGE = "arg_message"

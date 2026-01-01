@@ -15,6 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.dialogs.InputDialogFragment
+import com.avetiso.core.AppConstants
+import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientEvent
 import com.avetiso.feature_clients.add_edit.mvi.AddEditClientState
@@ -59,11 +61,12 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
                             }
 
                             is AddEditClientEvent.NavigateBackWithResult -> {
-                                setFragmentResult("client_updated_request", bundleOf("updated" to true))
+                                setFragmentResult(
+                                    ClientsConstants.Requests.CLIENT_UPDATED,
+                                    bundleOf(ClientsConstants.ResultKeys.IS_CLIENT_UPDATED to true)
+                                )
                                 findNavController().navigateUp()
                             }
-
-                            else -> {}
                         }
                     }
                 }
@@ -159,7 +162,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
         currentBinding.inputEditTextInstagram.doAfterTextChanged { editable ->
             val text = editable.toString()
-            if (text.startsWith("@")) {
+            if (text.startsWith(AppConstants.Format.INSTAGRAM_PREFIX)) {
                 val newText = text.substring(1)
                 currentBinding.inputEditTextInstagram.setText(newText)
                 currentBinding.inputEditTextInstagram.setSelection(0)
@@ -183,8 +186,11 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
     // Обработка ввода из InputDialogFragment
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(INPUT_FIELD_KEY, viewLifecycleOwner) { _, bundle ->
-            val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: return@setFragmentResultListener
+        childFragmentManager.setFragmentResultListener(
+            ClientsConstants.Requests.INPUT_FIELD,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val text = bundle.getString(AppConstants.Result.RESULT_TEXT) ?: return@setFragmentResultListener
             viewModel.addCustomField(text)
         }
     }
@@ -205,15 +211,11 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         usedNames.addAll(state.customFieldsInput.keys)
 
         InputDialogFragment.newInstance(
-            requestKey = INPUT_FIELD_KEY,
+            requestKey = ClientsConstants.Requests.INPUT_FIELD,
             title = getString(com.avetiso.core.R.string.Новое_поле),
             hint = getString(com.avetiso.core.R.string.Название_поля),
             forbiddenValues = usedNames,
-        ).show(childFragmentManager, InputDialogFragment.TAG)
-    }
-
-    companion object {
-        private const val INPUT_FIELD_KEY = "input_field_request"
+        ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }
 
     override fun onDestroyView() {

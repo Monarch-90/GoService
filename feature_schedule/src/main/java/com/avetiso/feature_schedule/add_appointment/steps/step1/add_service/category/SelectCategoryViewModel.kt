@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.cat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.CategoryDao
 import com.avetiso.core.entity.CategoryEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,7 @@ class SelectCategoryViewModel @Inject constructor(
     private var categoryPendingDelete: CategoryEntity? = null
 
     val categories = _searchQuery
-        .debounce(300L) // Ждем 300 мс после ввода, чтобы не делать лишних запросов
+        .debounce(AppConstants.Time.SEARCH_DEBOUNCE) // Ждем 300 мс после ввода, чтобы не делать лишних запросов
         .flatMapLatest { query ->
             if (query.isBlank()) {
                 categoryDao.getAllCategories() // Если поиск пуст, показываем всё

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.ClientDao
+import com.avetiso.feature_clients.ClientsConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,7 @@ class ClientDetailsViewModel @Inject constructor(
     private val _events = Channel<ClientDetailsEvent>()
     val events = _events.receiveAsFlow()
 
-    private val clientId: Long = checkNotNull(savedStateHandle["clientId"])
+    private val clientId: Long = checkNotNull(savedStateHandle[ClientsConstants.Args.CLIENT_ID])
 
     init {
         observeClientData()

@@ -2,7 +2,9 @@ package com.avetiso.feature_settings.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.repository.SettingsRepository
+import com.avetiso.core.model.AppCurrency
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -18,32 +20,49 @@ class SettingsViewModel @Inject constructor(
 
     // Подписываемся на реальные данные из БД
     val currentDefaultCurrency = settingsRepository.defaultCurrency
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(AppConstants.Ui.SNACKBAR_LONG_DURATION),
+            null
+        )
 
     private val _events = Channel<SettingsEvent>()
     val events = _events.receiveAsFlow()
 
+
+    private var pendingCurrency: AppCurrency? = null
+
     // Пользователь нажал на спиннер
-    fun onCurrencySelected(newCurrency: String) {
+    fun onCurrencySelected(newCurrency: AppCurrency) {
         // Важно: проверяем, отличается ли выбор от того, что уже сохранено
-        if (newCurrency != currentDefaultCurrency.value) {
+        if (newCurrency.name != currentDefaultCurrency.value) {
+
+            // Запоминаем выбор во ViewModel
+            pendingCurrency = newCurrency
+
             viewModelScope.launch {
                 _events.send(SettingsEvent.AskConfirmation(newCurrency))
             }
         }
     }
 
-    // Пользователь нажал "Да"
-    fun confirmCurrencyChange(currency: String) {
+    fun onConfirmationSuccess() {
+        val currencyToSave = pendingCurrency ?: return // Если пусто - выходим (защита)
+
         viewModelScope.launch {
-            settingsRepository.setDefaultCurrency(currency)
+            settingsRepository.setDefaultCurrency(currencyToSave.name)
+            // Очищаем временное хранилище после сохранения
+            pendingCurrency = null
         }
     }
 
     // Пользователь нажал "Нет"
     fun onDeclineCurrencyChange() {
+        // Очищаем ожидание
+        pendingCurrency = null
+
         viewModelScope.launch {
-            // Возвращаем спиннер на старое значение (которое сейчас в БД)
+            // Возвращаем спиннер визуально на старое значение (которое сейчас в БД)
             _events.send(SettingsEvent.RestoreSelection(currentDefaultCurrency.value))
         }
     }

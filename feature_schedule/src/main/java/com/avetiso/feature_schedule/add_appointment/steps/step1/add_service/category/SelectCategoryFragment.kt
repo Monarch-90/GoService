@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.common_ui.dialogs.InputDialogFragment
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.CategoryEntity
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.databinding.FragmentSelectCategoryBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -45,13 +47,13 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
     // Обработка результата ввода
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(INPUT_CATEGORY_KEY, viewLifecycleOwner) { _, bundle ->
-            val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: return@setFragmentResultListener
+        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.INPUT_CATEGORY, viewLifecycleOwner) { _, bundle ->
+            val text = bundle.getString(AppConstants.Result.RESULT_TEXT) ?: return@setFragmentResultListener
             handleCategoryInput(text)
         }
 
-        childFragmentManager.setFragmentResultListener("delete_category_request", viewLifecycleOwner) { _, bundle ->
-            if (bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)) {
+        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.DELETE_CATEGORY, viewLifecycleOwner) { _, bundle ->
+            if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
                 viewModel.onDeleteConfirmed()
             }
         }
@@ -64,7 +66,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         if (hasDuplicate) {
             Toast.makeText(requireContext(), "Такая категория уже существует", Toast.LENGTH_SHORT).show()
         } else {
-            // ✅ ЧИСТОТА: Просто передаем данные. ViewModel сама знает, редактируем мы или создаем.
+            // Просто передаем данные. ViewModel сама знает, редактируем мы или создаем.
             viewModel.onCategoryNameInput(name)
         }
     }
@@ -91,14 +93,14 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
                 // 2. Показываем диалог
                 DeleteDialogFragment.newInstance(
-                    requestKey = "delete_category_request",
+                    requestKey = AppointmentConstants.Request.DELETE_CATEGORY,
                     message = getString(com.avetiso.core.R.string.delete_dialog_message, category.name)
-                ).show(childFragmentManager, DeleteDialogFragment.TAG)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
             },
             onItemClick = { category ->
                 setFragmentResult(
-                    "category_selection",
-                    bundleOf("selected_category_name" to category.name)
+                    AppointmentConstants.Request.SELECTION_CATEGORY,
+                    bundleOf(AppointmentConstants.Result.SELECTED_CATEGORY_NAME to category.name)
                 )
                 findNavController().navigateUp()
             }
@@ -164,15 +166,11 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         val initialValue = category?.name ?: ""
 
         InputDialogFragment.newInstance(
-            requestKey = INPUT_CATEGORY_KEY,
+            requestKey = AppointmentConstants.Request.INPUT_CATEGORY,
             title = title,
             hint = "Название категории",
             initialValue = initialValue
-        ).show(childFragmentManager, InputDialogFragment.TAG)
-    }
-
-    companion object {
-        private const val INPUT_CATEGORY_KEY = "input_category_request"
+        ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }
 
     override fun onDestroyView() {

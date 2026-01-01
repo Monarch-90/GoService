@@ -8,10 +8,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI.setupWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.avetiso.goservice.databinding.ActivityMainBinding
 import com.avetiso.navigation.DrawerController
@@ -47,7 +45,7 @@ class MainActivity : AppCompatActivity(), DrawerController {
             activityBinding.bottomNavView.setupWithNavController(navController!!)
         }
 
-        // ✅ НАСТРОЙКА БОКОВОГО МЕНЮ (РУЧНАЯ ОБРАБОТКА)
+        // НАСТРОЙКА БОКОВОГО МЕНЮ (РУЧНАЯ ОБРАБОТКА)
         binding?.sideNavView?.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.settingsFragment -> {
@@ -66,6 +64,7 @@ class MainActivity : AppCompatActivity(), DrawerController {
                     binding?.drawerLayout?.closeDrawer(GravityCompat.START)
                     true
                 }
+
                 R.id.nav_about -> {
                     // Тут позже сделаем диалог "О приложении"
                     // Пока просто закроем шторку и покажем Тост
@@ -73,6 +72,7 @@ class MainActivity : AppCompatActivity(), DrawerController {
                     binding?.drawerLayout?.closeDrawer(GravityCompat.START)
                     true
                 }
+
                 else -> false
             }
         }

@@ -12,6 +12,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.core.AppConstants
+import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.databinding.FragmentClientDetailsBinding
 import com.avetiso.feature_clients.databinding.ItemClientDetailFieldBinding
@@ -64,8 +66,11 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
     }
 
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(DELETE_REQUEST_KEY, viewLifecycleOwner) { _, bundle ->
-            val isConfirmed = bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)
+        childFragmentManager.setFragmentResultListener(
+            ClientsConstants.Requests.CLIENT_DELETE,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)
             if (isConfirmed) {
                 viewModel.onDeleteClicked()
             }
@@ -131,7 +136,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
             // 3. Запускаем новый таймер
             marqueeJob = viewLifecycleOwner.lifecycleScope.launch {
                 // Ждем 2 секунды (2000 миллисекунд)
-                delay(2000)
+                delay(AppConstants.Ui.MARQUEE_START_DELAY)
 
                 // Если фрагмент еще жив и binding не null — запускаем
                 if (isActive) {
@@ -140,10 +145,11 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
             }
 
             currentBinding.tvPhone.text = client.phoneNumber
+            val prefix = AppConstants.Format.INSTAGRAM_PREFIX
 
             val formattedInstagram = when {
                 client.instagram.isBlank() -> ""
-                !client.instagram.startsWith("@") -> "@${client.instagram}"
+                !client.instagram.startsWith(prefix) -> "$prefix${client.instagram}"
                 else -> client.instagram
             }
 
@@ -199,9 +205,9 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
 
         // Используем новый DeleteDialogFragment
         DeleteDialogFragment.newInstance(
-            requestKey = DELETE_REQUEST_KEY,
+            requestKey = ClientsConstants.Requests.CLIENT_DELETE,
             message = getString(com.avetiso.core.R.string.delete_dialog_message, clientName)
-        ).show(childFragmentManager, DeleteDialogFragment.TAG)
+        ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
     }
 
     private fun addDetailField(label: String, value: String, iconResId: Int) {
@@ -218,10 +224,6 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         fieldBinding.ivIcon.setImageResource(iconResId) // Устанавливаем иконку
 
         currentBinding.infoContainer.addView(fieldBinding.root)
-    }
-
-    companion object {
-        private const val DELETE_REQUEST_KEY = "delete_client_request" // ✅ Ключ
     }
 
     override fun onDestroyView() {

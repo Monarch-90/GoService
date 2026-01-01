@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.AppointmentEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -14,16 +15,16 @@ interface AppointmentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAppointment(appointment: AppointmentEntity)
 
-    @Query("SELECT * FROM appointments WHERE date = :date ORDER BY startTimeMinutes ASC")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date = :date ORDER BY startTimeMinutes ASC")
     fun getAppointmentsForDate(date: String): Flow<List<AppointmentEntity>>
 
-    @Query("SELECT * FROM appointments WHERE id = :id")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE id = :id")
     suspend fun getAppointmentById(id: Long): AppointmentEntity?
 
-    @Query("SELECT * FROM appointments WHERE date = :date")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date = :date")
     suspend fun getAppointmentsForDateSync(date: String): List<AppointmentEntity>
 
-    @Query("SELECT DISTINCT date FROM appointments WHERE date LIKE :yearMonth || '%'")
+    @Query("SELECT DISTINCT date FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date LIKE :yearMonth || '%'")
     fun getEventDatesForMonth(yearMonth: String): Flow<List<String>>
 
     @Update

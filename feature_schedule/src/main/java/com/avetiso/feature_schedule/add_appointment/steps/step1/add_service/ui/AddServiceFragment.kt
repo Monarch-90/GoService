@@ -15,9 +15,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
-import com.avetiso.common_ui.dialogs.ConfirmationDialogFragment
+import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
+import com.avetiso.core.model.AppCurrency
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddServiceBinding
@@ -67,8 +70,8 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun setupResultListeners() {
         // Слушатель для диалога валюты
-        childFragmentManager.setFragmentResultListener(SET_DEFAULT_CURRENCY_KEY, viewLifecycleOwner) { _, bundle ->
-            val isConfirmed = bundle.getBoolean(ConfirmationDialogFragment.RESULT_CONFIRMED)
+        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.SET_DEFAULT_CURRENCY, viewLifecycleOwner) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(AppConstants.Result.RESULT_CONFIRMED)
 
             if (isConfirmed) {
                 viewModel.onDefaultCurrencyConfirmed()
@@ -78,17 +81,17 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
 
         // Слушаем результат с экрана выбора категории
-        setFragmentResultListener("category_selection") { _, bundle ->
-            val selectedCategoryName = bundle.getString("selected_category_name")
+        setFragmentResultListener(AppointmentConstants.Request.SELECTION_CATEGORY) { _, bundle ->
+            val selectedCategoryName = bundle.getString(AppointmentConstants.Result.SELECTED_CATEGORY_NAME)
             if (selectedCategoryName != null) {
                 viewModel.setSelectedCategory(selectedCategoryName)
             }
         }
 
         // Слушатель для времени (продолжительность)
-        childFragmentManager.setFragmentResultListener(DURATION_PICKER_KEY, viewLifecycleOwner) { _, bundle ->
-            val hour = bundle.getInt(ComposeTimePickerDialogFragment.RESULT_HOUR)
-            val minute = bundle.getInt(ComposeTimePickerDialogFragment.RESULT_MINUTE)
+        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.DURATION_PICKER, viewLifecycleOwner) { _, bundle ->
+            val hour = bundle.getInt(AppConstants.Result.RESULT_HOUR)
+            val minute = bundle.getInt(AppConstants.Result.RESULT_MINUTE)
 
             // Передаем данные во ViewModel
             viewModel.setDuration(hour, minute)
@@ -108,7 +111,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                             binding?.toggleBtnPriceFrom?.uncheck(R.id.btn_price_from)
                         }
 
-                        // ✅ Инициализируем спиннер только когда получили валюту из БД (не null)
+                        // Инициализируем спиннер только когда получили валюту из БД (не null)
                         // и только если еще не инициализировали
                         if (state.selectedCurrency != null && !isSpinnerSetup) {
                             setupCurrencySpinner(state.selectedCurrency)
@@ -134,20 +137,17 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                             is AddServiceEvent.NavigateBackWithResult -> {
                                 // Этот код переехал сюда из saveService()
                                 findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                                    "service_updated",
+                                    AppointmentConstants.Result.SERVICE_UPDATED,
                                     true
                                 )
                                 findNavController().navigateUp()
                             }
 
                             is AddServiceEvent.AskToSetDefaultCurrency -> {
-                                ConfirmationDialogFragment.newInstance(
-                                    requestKey = SET_DEFAULT_CURRENCY_KEY,
-                                    title = "Валюта по умолчанию",
-                                    message = "Установить ${event.currency}?",
-                                    positiveText = "Да",
-                                    negativeText = "Нет"
-                                ).show(childFragmentManager, ConfirmationDialogFragment.TAG)
+                                showChangeCurrencyDialog(
+                                    currencyName = event.currency.name,
+                                    requestKey = AppointmentConstants.Request.SET_DEFAULT_CURRENCY,
+                                )
                             }
                         }
                     }
@@ -197,18 +197,23 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private fun saveService() {
         val name = binding?.ietName?.text?.toString()
         val priceStr = binding?.ietPrice?.text?.toString()
-        val duration = binding?.textDuration?.text?.toString()
 
         // Получаем актуальное состояние прямо из ViewModel
         val currentState = viewModel.uiState.value
         val category = currentState.selectedCategoryName
+
+        // Считаем общее время в минутах для валидации
+        val totalMinutes = currentState.selectedHour * 60 + currentState.selectedMinute
+
+        // Получаем дефолтный текст категории для сравнения
+        val defaultCategoryText = "Выбрать категорию"
 
         when {
             name.isNullOrBlank() -> {
                 binding?.ilName?.error = "Название не может быть пустым"
             }
 
-            category.isNullOrBlank() || category == "Выбрать категорию" -> {
+            category.isNullOrBlank() || category == defaultCategoryText -> {
                 // Применяем красную рамку к TextView
                 binding?.textCategory?.setBackgroundResource(R.drawable.error_border)
                 // Можно также показать короткое сообщение
@@ -223,19 +228,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                 binding?.ilPrice?.error = "Укажите цену"
             }
 
-            duration.isNullOrBlank() || duration == "0 ч 00 мин" -> {
-                // Применяем красную рамку к TextView
+            totalMinutes == 0 -> {
                 binding?.textDuration?.setBackgroundResource(R.drawable.error_border)
-                Toast.makeText(
-                    requireContext(),
-                    "Укажите продолжительность",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(), "Укажите продолжительность", Toast.LENGTH_SHORT).show()
             }
 
             else -> {
                 // Все проверки пройдены, можно сохранять
-                val durationInMinutes = currentState.selectedHour * 60 + currentState.selectedMinute
                 val serviceToSave = ServiceEntity(
                     // Если мы редактируем, используем существующий id, иначе оставляем 0 (для новой)
                     id = serviceToEdit?.id ?: 0L,
@@ -244,7 +243,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                     isPriceFrom = currentState.isPriceFrom,
                     price = priceStr.toDouble(),
                     currency = currentState.selectedCurrency,
-                    durationMinutes = durationInMinutes
+                    durationMinutes = totalMinutes
                 )
 
                 viewModel.saveService(serviceToSave)
@@ -262,12 +261,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
         ComposeTimePickerDialogFragment.newInstance(
-            requestKey = DURATION_PICKER_KEY,
+            requestKey = AppointmentConstants.Request.DURATION_PICKER,
             title = "Выберите продолжительность",
             initialHour = hour,
             initialMinute = minute
             // extraId нам здесь не нужен, по умолчанию будет -1
-        ).show(childFragmentManager, "HourMinutePickerDialogFragment")
+        ).show(childFragmentManager, AppointmentConstants.Tags.DURATION_PICKER_DIALOG)
     }
 
     private fun setupCategoryPicker() {
@@ -287,7 +286,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun setupCurrencySpinner(selectedCurrency: String) {
-        val currencies = listOf("GEL", "USD", "EUR")
+        val currencies = AppCurrency.getCodesList()
 
         // Позже мы добавим сюда логику "избранных" валют
 
@@ -298,8 +297,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         binding?.spinnerCurrency?.adapter = adapter
 
         // 1. Устанавливаем начальное значение (из ViewModel) БЕЗ вызова слушателя
-        val initialCurrency = viewModel.uiState.value.selectedCurrency
-        val initialIndex = currencies.indexOf(initialCurrency)
+        val initialIndex = currencies.indexOf(selectedCurrency)
         if (initialIndex >= 0) {
             binding?.spinnerCurrency?.setSelection(initialIndex, false)
         }
@@ -325,11 +323,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun updateDurationText(hour: Int, minute: Int) {
         binding?.textDuration?.text = String.format("%d ч %02d мин", hour, minute)
-    }
-
-    companion object {
-        private const val SET_DEFAULT_CURRENCY_KEY = "set_default_currency_request"
-        private const val DURATION_PICKER_KEY = "duration_picker_request"
     }
 
     override fun onDestroyView() {

@@ -3,9 +3,11 @@ package com.avetiso.common_ui.dialogs
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import com.avetiso.common_ui.CommonConstants
+import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.DialogDeleteBinding
 import com.avetiso.core.AppConstants
 
@@ -18,7 +20,7 @@ class DeleteDialogFragment : BaseDialogFragment<DialogDeleteBinding>() {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val title = arguments?.getString(ARG_TITLE) ?: "Удаление"
+        val title = arguments?.getString(ARG_TITLE) ?: getString(R.string.Удаление)
         val message = arguments?.getString(ARG_MESSAGE) ?: ""
         val requestKey = arguments?.getString(ARG_REQUEST_KEY) ?: CommonConstants.Request.DELETE_REQUEST
 
@@ -46,7 +48,7 @@ class DeleteDialogFragment : BaseDialogFragment<DialogDeleteBinding>() {
         fun newInstance(
             requestKey: String,
             message: String,
-            title: String = "Удаление",
+            @StringRes title: Int = R.string.Удаление,
         ): DeleteDialogFragment {
             return DeleteDialogFragment().apply {
                 arguments = bundleOf(

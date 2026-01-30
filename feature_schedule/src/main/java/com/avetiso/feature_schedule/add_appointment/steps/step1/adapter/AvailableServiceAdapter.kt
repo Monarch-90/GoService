@@ -10,6 +10,7 @@ import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
+import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.databinding.ItemAvailableServiceBinding
 
 class AvailableServiceAdapter :
@@ -62,6 +63,7 @@ class AvailableServiceAdapter :
 
         // Метод bind не вешает слушатели, а только отображает данные
         fun bind(service: ServiceEntity, isSelected: Boolean) {
+            val context = binding.root.context
 
             // Название услуги
             binding.tvServiceName.text = service.name
@@ -70,7 +72,11 @@ class AvailableServiceAdapter :
             binding.tvServiceCategory.text = service.categoryName
 
             // Цена
-            val pricePrefix = if (service.isPriceFrom) "от " else ""
+            val pricePrefix = if (service.isPriceFrom) {
+                context.getString(R.string.от_)
+            } else {
+                ""
+            }
             val priceString = "${pricePrefix}${service.price} ${service.currency}"
 
             // продолжительность в формате ч:мм

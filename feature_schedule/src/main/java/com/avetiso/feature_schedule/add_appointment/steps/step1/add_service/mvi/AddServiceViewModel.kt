@@ -6,6 +6,8 @@ import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.model.AppCurrency
+import com.avetiso.core.model.UiText
+import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -107,7 +109,13 @@ class AddServiceViewModel @Inject constructor(
 
             // 2. Если дубликат найден, отправляем событие с ошибкой
             if (duplicate != null) {
-                _eventChannel.send(AddServiceEvent.ShowToast("Такая услуга уже существует"))
+                _eventChannel.send(
+                    AddServiceEvent.ShowToast(
+                        UiText.StringResource(
+                            R.string.Такая_услуга_уже_существует
+                        )
+                    )
+                )
                 return@launch
             }
 

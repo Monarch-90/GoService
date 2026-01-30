@@ -70,7 +70,10 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
     private fun setupResultListeners() {
         // Слушатель для диалога валюты
-        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.SET_DEFAULT_CURRENCY, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.SET_DEFAULT_CURRENCY,
+            viewLifecycleOwner
+        ) { _, bundle ->
             val isConfirmed = bundle.getBoolean(AppConstants.Result.RESULT_CONFIRMED)
 
             if (isConfirmed) {
@@ -89,7 +92,10 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
 
         // Слушатель для времени (продолжительность)
-        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.DURATION_PICKER, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.DURATION_PICKER,
+            viewLifecycleOwner
+        ) { _, bundle ->
             val hour = bundle.getInt(AppConstants.Result.RESULT_HOUR)
             val minute = bundle.getInt(AppConstants.Result.RESULT_MINUTE)
 
@@ -121,7 +127,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                         if (state.selectedCategoryName != null) {
                             binding?.textCategory?.text = state.selectedCategoryName
                         } else {
-                            binding?.textCategory?.text = "Выбрать категорию"
+                            binding?.textCategory?.text = context?.getString(R.string.Выбрать_категорию)
                         }
                     }
                 }
@@ -131,7 +137,13 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                     viewModel.events.collect { event ->
                         when (event) {
                             is AddServiceEvent.ShowToast -> {
-                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    event.message.asString(
+                                        requireContext()
+                                    ),
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
 
                             is AddServiceEvent.NavigateBackWithResult -> {
@@ -177,7 +189,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun populateFieldsForEdit(service: ServiceEntity) {
-        binding?.toolbar?.title = "Редактировать услугу"
+        binding?.toolbar?.title = context?.getString(R.string.Редактировать_услугу)
         binding?.ietName?.setText(service.name)
         binding?.ietPrice?.setText(service.price.toString())
 
@@ -206,11 +218,11 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         val totalMinutes = currentState.selectedHour * 60 + currentState.selectedMinute
 
         // Получаем дефолтный текст категории для сравнения
-        val defaultCategoryText = "Выбрать категорию"
+        val defaultCategoryText = context?.getString(R.string.Выбрать_категорию)
 
         when {
             name.isNullOrBlank() -> {
-                binding?.ilName?.error = "Название не может быть пустым"
+                binding?.ilName?.error = context?.getString(R.string.Название_не_может_быть_пустым)
             }
 
             category.isNullOrBlank() || category == defaultCategoryText -> {
@@ -219,18 +231,24 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
                 // Можно также показать короткое сообщение
                 Toast.makeText(
                     requireContext(),
-                    "Выберите категорию",
+                    context?.getString(R.string.Выберите_категорию),
                     Toast.LENGTH_SHORT
                 ).show()
             }
 
             priceStr.isNullOrBlank() -> {
-                binding?.ilPrice?.error = "Укажите цену"
+                binding?.ilPrice?.error = context?.getString(R.string.Укажите_цену)
             }
 
             totalMinutes == 0 -> {
                 binding?.textDuration?.setBackgroundResource(R.drawable.error_border)
-                Toast.makeText(requireContext(), "Укажите продолжительность", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    context?.getString(
+                        R.string.Укажите_продолжительность
+                    ),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             else -> {
@@ -262,7 +280,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private fun showDurationPickerDialog(hour: Int, minute: Int) {
         ComposeTimePickerDialogFragment.newInstance(
             requestKey = AppointmentConstants.Request.DURATION_PICKER,
-            title = "Выберите продолжительность",
+            title = context?.getString(R.string.Выберите_продолжительность).toString(),
             initialHour = hour,
             initialMinute = minute
             // extraId нам здесь не нужен, по умолчанию будет -1
@@ -322,7 +340,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun updateDurationText(hour: Int, minute: Int) {
-        binding?.textDuration?.text = String.format("%d ч %02d мин", hour, minute)
+        binding?.textDuration?.text = String.format(AppConstants.Format.DURATION, hour, minute)
     }
 
     override fun onDestroyView() {

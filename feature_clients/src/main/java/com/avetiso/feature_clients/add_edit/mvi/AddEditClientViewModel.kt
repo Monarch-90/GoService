@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
+import com.avetiso.core.model.UiText
 import com.avetiso.feature_clients.ClientsConstants
+import com.avetiso.feature_clients.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,7 +86,13 @@ class AddEditClientViewModel @Inject constructor(
             }
 
             if (isDuplicate) {
-                _eventChannel.send(AddEditClientEvent.ShowToast("Этот клиент уже добавлен"))
+                _eventChannel.send(
+                    AddEditClientEvent.ShowToast(
+                        UiText.StringResource(
+                            R.string.Этот_клиент_уже_добавлен
+                        )
+                    )
+                )
                 return@launch
             }
 

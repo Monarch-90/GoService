@@ -2,8 +2,8 @@ package com.avetiso.common_ui.dialogs.models
 
 import androidx.fragment.app.Fragment
 import com.avetiso.common_ui.CommonConstants
+import com.avetiso.common_ui.R
 import com.avetiso.common_ui.dialogs.ConfirmationDialogFragment
-import com.avetiso.core.AppConstants
 
 fun Fragment.showChangeCurrencyDialog(
     currencyName: String,
@@ -11,10 +11,10 @@ fun Fragment.showChangeCurrencyDialog(
 ) {
     val payload = ConfirmationDialogPayload(
         requestKey = requestKey,
-        title = "Изменение настроек", // Позже вынесем в strings.xml
-        message = "Установить $currencyName?",
-        positiveText = "Да",
-        negativeText = "Нет",
+        title = getString(R.string.Изменение_настроек),
+        message = getString(R.string.Установить_название, currencyName),
+        positiveText = getString(R.string.Да),
+        negativeText = getString(R.string.Нет),
         isDestructive = false // По умолчанию обычный стиль (не красный)
     )
 

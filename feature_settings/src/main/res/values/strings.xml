@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">feature_settings</string>
+
+    <string name="Основные">Основные</string>
+    <string name="Валюта_по_умолчанию">Валюта по умолчанию</string>
+    <string name="Будет_выбрана_при_создании_услуги">Будет выбрана при создании услуги</string>
+</resources>

@@ -7,12 +7,14 @@ import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.model.AppointmentStatus
 import com.avetiso.core.model.ServiceSnapshot
+import com.avetiso.core.usecase.CalculateServicePriceUseCase
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
+import com.avetiso.feature_schedule.add_appointment.mapper.AppointmentPriceMapper
+import com.avetiso.feature_schedule.add_appointment.steps.step2.ui.formattedTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -32,6 +33,8 @@ import javax.inject.Inject
 class ScheduleViewModel @Inject constructor(
     private val appointmentDao: AppointmentDao,
     private val timeSlotDao: TimeSlotDao,
+    private val calculatePriceUseCase: CalculateServicePriceUseCase,
+    private val uiMapper: AppointmentPriceMapper,
 ) : ViewModel() {
 
     private val _scheduleState = MutableStateFlow<ScheduleState>(ScheduleState.Idle)
@@ -71,11 +74,7 @@ class ScheduleViewModel @Inject constructor(
             .sortedBy { it.startTimeMinutes } // Сортируем по времени
 
         // 3. ФОРМАТИРУЕМ КАЖДЫЙ СЛОТ И ОБЪЕДИНЯЕМ В ОДНУ СТРОКУ
-        val timeString = timeSlots.joinToString(separator = "\n") { slot ->
-            val hours = slot.startTimeMinutes / 60
-            val minutes = slot.startTimeMinutes % 60
-            String.format("%02d:%02d", hours, minutes)
-        }
+        val timeString = timeSlots.joinToString(separator = "\n") { it.formattedTime }
 
         val serviceNamesString = services.joinToString(", ") { it.name }
         val discountPercent = appointmentEntity.discountPercent
@@ -84,22 +83,8 @@ class ScheduleViewModel @Inject constructor(
         val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
         val formattedDate = rawDate.format(formatter)
 
-        val priceString = services
-            .groupBy { it.currency }
-            .map { (currency, servicesInCurrency) ->
-                val total = servicesInCurrency.sumOf { it.price }
-                val isPriceFrom = servicesInCurrency.any { it.isPriceFrom }
-                val prefix = if (isPriceFrom) "от " else ""
-
-                val finalTotal = if (discountPercent > 0) {
-                    total * (1 - discountPercent / 100.0)
-                } else {
-                    total
-                }
-
-                "$prefix${"%.2f".format(finalTotal)} $currency"
-            }
-            .joinToString("\n")
+        val calculationResults = calculatePriceUseCase(services, appointmentEntity.discountPercent)
+        val priceString = uiMapper.mapToString(calculationResults)
 
         return Appointment(
             id = appointmentEntity.id,
@@ -122,25 +107,24 @@ class ScheduleViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val appointmentToUpdate = appointmentDao.getAppointmentById(appointmentId) ?: return@launch
 
-            // 🎯 1. ПРОВЕРЯЕМ, НЕ ЯВЛЯЕТСЯ ЛИ ПЕРЕНОС "ФИКТИВНЫМ" (НА ТУ ЖЕ ДАТУ)
+            // 1. ПРОВЕРЯЕМ, НЕ ЯВЛЯЕТСЯ ЛИ ПЕРЕНОС "ФИКТИВНЫМ" (НА ТУ ЖЕ ДАТУ)
             val isReschedulingToSameDate = newDate != null && newDate == appointmentToUpdate.date
 
             if (newDate != null && !isReschedulingToSameDate) {
                 val existingAppointmentsOnNewDate = appointmentDao.getAppointmentsForDateSync(newDate)
 
-                for (existing in existingAppointmentsOnNewDate) {
-                    // Сравниваем слоты, клиента и услуги
-                    val isTimeSlotSame = existing.timeSlotIds.sorted() == appointmentToUpdate.timeSlotIds.sorted()
-                    val isClientSame = existing.clientName == appointmentToUpdate.clientName &&
-                            existing.clientPhoneNumber == appointmentToUpdate.clientPhoneNumber &&
-                            existing.clientInstagram == appointmentToUpdate.clientInstagram
-                    val areServicesSame = existing.servicesJson == appointmentToUpdate.servicesJson
+                val isDuplicate = existingAppointmentsOnNewDate.any {
+                    it.timeSlotIds.sorted() == appointmentToUpdate.timeSlotIds.sorted() &&
+                            it.clientName == appointmentToUpdate.clientName &&
+                            it.clientPhoneNumber == appointmentToUpdate.clientPhoneNumber &&
+                            it.clientInstagram == appointmentToUpdate.clientInstagram &&
+                            it.servicesJson == appointmentToUpdate.servicesJson
+                }
 
-                    if (isTimeSlotSame && isClientSame && areServicesSame) {
-                        // Если все совпало - это дубликат. Отправляем событие и выходим.
-                        _scheduleState.value = ScheduleState.Error("Такая запись уже существует на эту дату")
-                        return@launch // Прерываем, диалог не закроется
-                    }
+                if (isDuplicate) {
+                    // Шлем ошибку
+                    _scheduleState.value = ScheduleState.Error(uiMapper.getDuplicateErrorString())
+                    return@launch
                 }
             }
 

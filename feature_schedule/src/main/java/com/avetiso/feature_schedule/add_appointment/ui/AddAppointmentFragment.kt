@@ -93,7 +93,11 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                             is NavigationEvent.NavigateToSchedule -> {
                                 // Возвращаемся на экран расписания
                                 findNavController().navigateUp()
-                                Toast.makeText(requireContext(), "Запись успешно создана", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    context?.getString(R.string.Запись_успешно_создана),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is NavigationEvent.ShowToast -> {

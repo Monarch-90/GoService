@@ -12,7 +12,6 @@ import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.ISwipeableHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
-import com.avetiso.feature_schedule.ScheduleConstants
 import com.avetiso.feature_schedule.add_appointment.data.Appointment
 import com.avetiso.feature_schedule.add_appointment.ui.toStatusColorRes
 import com.avetiso.feature_schedule.add_appointment.ui.toStatusLabelRes

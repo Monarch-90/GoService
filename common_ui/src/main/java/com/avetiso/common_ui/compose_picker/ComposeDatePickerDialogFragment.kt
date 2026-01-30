@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,6 +21,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.avetiso.common_ui.CommonConstants
 import com.avetiso.core.AppConstants
+import com.avetiso.common_ui.R
 
 class ComposeDatePickerDialogFragment : DialogFragment() {
 
@@ -123,10 +125,10 @@ private fun DatePickerDialogContent(
             TextButton(onClick = {
                 // Передаем выбранную дату только если она не null
                 datePickerState.selectedDateMillis?.let { onConfirm(it) }
-            }) { Text("ОК", color = MaterialTheme.colorScheme.onPrimaryContainer) } // 👈 Цвет кнопки
+            }) { Text(stringResource(R.string.ОК), color = MaterialTheme.colorScheme.onPrimaryContainer) } // 👈 Цвет кнопки
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена", color = MaterialTheme.colorScheme.onPrimary) } // 👈 Цвет кнопки
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.Отмена), color = MaterialTheme.colorScheme.onPrimary) } // 👈 Цвет кнопки
         },
         colors = dialogColors // Применяем все наши цвета
     ) {

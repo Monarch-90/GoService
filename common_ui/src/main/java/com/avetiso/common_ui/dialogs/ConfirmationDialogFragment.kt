@@ -7,6 +7,7 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import com.avetiso.common_ui.CommonConstants
+import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.DialogConfirmationBinding
 import com.avetiso.common_ui.dialogs.models.ConfirmationDialogPayload
 import com.avetiso.core.AppConstants
@@ -41,8 +42,8 @@ class ConfirmationDialogFragment : BaseDialogFragment<DialogConfirmationBinding>
             tvMessage.text = payload.message
 
             // Используем ресурсы, если текст не передан явно
-            btnPositive.text = payload.positiveText ?: "ОК"
-            btnNegative.text = payload.negativeText ?: "Отмена"
+            btnPositive.text = payload.positiveText ?: getString(R.string.ОК)
+            btnNegative.text = payload.negativeText ?: getString(R.string.Отмена)
         }
     }
 

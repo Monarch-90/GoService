@@ -94,7 +94,10 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     }
 
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.TIME_PICKER, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.TIME_PICKER,
+            viewLifecycleOwner
+        ) { _, bundle ->
             val hour = bundle.getInt(AppConstants.Result.RESULT_HOUR)
             val minute = bundle.getInt(AppConstants.Result.RESULT_MINUTE)
             val slotId = bundle.getLong(AppConstants.Result.TIME_RESULT_EXTRA_ID)
@@ -104,7 +107,10 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
             viewModel.saveTimeSlot(hour, minute, idToSend)
         }
 
-        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.DELETE_TIMESLOT, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.DELETE_TIMESLOT,
+            viewLifecycleOwner
+        ) { _, bundle ->
             if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
                 viewModel.onDeleteConfirmed()
             }
@@ -133,9 +139,15 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
                 launch {
                     viewModel.events.collect { event ->
-                        when(event) {
+                        when (event) {
                             is Step2Event.ShowToast -> {
-                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    event.message.asString(
+                                        requireContext()
+                                    ),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }

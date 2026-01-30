@@ -51,9 +51,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
-
     private var appointmentAdapter: AppointmentAdapter? = null
-
     private var actions: RecyclerViewActions<Appointment>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,12 +80,12 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 findNavController().navigate(action)
             },
             onDeleteClicked = { appointment ->
-                // ✅ 1. Передаем только ID (так как appointment - это UI модель)
+                // 1. Передаем только ID (так как appointment - это UI модель)
                 scheduleViewModel.onDeleteIconClicked(appointment.id)
 
-                // ✅ 2. Формируем текст.
+                // 2. Формируем текст.
                 // Внимание: в твоем маппере поле называется serviceNames (во множественном числе)
-                val messageText = "Удалить запись?"
+                val messageText = getString(R.string.Удалить_запись)
 
                 // 3. Показываем диалог
                 DeleteDialogFragment.newInstance(
@@ -113,7 +111,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 binding?.btnAddAppointment?.animate()
                     ?.scaleX(1f)
                     ?.scaleY(1f)
-                    ?.setDuration(200)
+                    ?.setDuration(200L)
                     ?.start()
             },
             triggerMode = TriggerMode.SWIPE_REVEAL
@@ -159,7 +157,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 findNavController().navigate(action)
             } else {
                 // Если дата не выбрана, показываем подсказку
-                Toast.makeText(requireContext(), "Пожалуйста, выберите день", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.Пожалуйста_выберите_день, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -173,13 +171,19 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private fun setupResultListeners() {
         // Ловим введенный текст
-        childFragmentManager.setFragmentResultListener(ScheduleConstants.Requests.INPUT_NOTE_KEY, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            ScheduleConstants.Requests.INPUT_NOTE_KEY,
+            viewLifecycleOwner
+        ) { _, bundle ->
             val text = bundle.getString(AppConstants.Result.RESULT_TEXT) ?: ""
             scheduleViewModel.onNoteDialogResult(text)
         }
 
         // Слушаем результат выбора даты
-        childFragmentManager.setFragmentResultListener(ScheduleConstants.Requests.RESCHEDULE_DATE_KEY, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            ScheduleConstants.Requests.RESCHEDULE_DATE_KEY,
+            viewLifecycleOwner
+        ) { _, bundle ->
             val selectedMillis = bundle.getLong(AppConstants.Result.RESULT_DATE)
             val appointmentId = bundle.getLong(AppConstants.Result.DATE_RESULT_EXTRA_ID)
 
@@ -245,7 +249,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                             is ScheduleState.Error -> {
                                 // Если ошибка - показываем Toast и сбрасываем состояние
                                 Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                                scheduleViewModel.resetScheduleState()
                             }
                             // В остальных случаях ничего не делаем
                             else -> {}
@@ -292,7 +295,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     private fun showRescheduleDatePicker(appointment: Appointment) {
         ComposeDatePickerDialogFragment.newInstance(
             requestKey = ScheduleConstants.Requests.RESCHEDULE_DATE_KEY,
-            title = "Выберите дату",
+            title = getString(R.string.Выберите_дату),
             extraId = appointment.id // Передаем ID записи на хранение в диалог
         ).show(childFragmentManager, ScheduleConstants.Tag.DATE_PICKER)
     }
@@ -304,7 +307,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         InputDialogFragment.newInstance(
             requestKey = ScheduleConstants.Requests.INPUT_NOTE_KEY,
             title = getString(com.avetiso.core.R.string.Примечание),
-            hint = getString(com.avetiso.core.R.string.Введите_текст),
+            hint = getString(R.string.Введите_текст),
             initialValue = appointment.note,
             isMultiline = true, // Включаем многострочный режим
             allowEmpty = true,

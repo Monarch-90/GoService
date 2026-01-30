@@ -11,7 +11,9 @@ import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
 import com.avetiso.core.model.AppointmentStatus
 import com.avetiso.core.model.ServiceSnapshot
+import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.ScheduleConstants
+import com.avetiso.feature_schedule.add_appointment.mapper.AppointmentPriceMapper
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +29,7 @@ import kotlinx.coroutines.launch
 class AddAppointmentViewModel @Inject constructor(
     private val appointmentDao: AppointmentDao,
     private val savedStateHandle: SavedStateHandle,
+    private val uiMapper: AppointmentPriceMapper,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddAppointmentState())
@@ -170,7 +173,8 @@ class AddAppointmentViewModel @Inject constructor(
 
             // 1. Проверяем на дубликат с помощью новой чистой функции
             if (isDuplicate(client, services, timeSlots)) {
-                _navigationChannel.send(NavigationEvent.ShowToast("Такая запись уже существует на эту дату"))
+                val errorMessage = uiMapper.getDuplicateErrorString()
+                _navigationChannel.send(NavigationEvent.ShowToast(errorMessage))
                 return@launch
             }
 

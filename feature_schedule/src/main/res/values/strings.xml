@@ -5,10 +5,70 @@
     <string name="add_appointment_step_2_title">Выбор времени</string>
     <string name="add_appointment_step_3_title">Выбор клиента</string>
 
+<!--    Статусы-->
     <string name="status_active">Активна</string>
     <string name="status_completed">Исполнена</string>
     <string name="status_cancelled">Отмена</string>
     <string name="status_rescheduled">Перенос</string>
     <string name="status_no_show">Неявка</string>
     <string name="status_unknown">Неизвестно</string>
+
+<!--    feature_schedule_code-->
+    <string name="Удалить_запись">Удалить запись?</string>
+    <string name="Введите_текст">Введите текст</string>
+    <string name="Выберите_дату">Выберите дату</string>
+    <string name="Пожалуйста_выберите_день">Пожалуйста, выберите день</string>
+    <string name="Такая_запись_уже_существует_на_эту_дату">Такая запись уже существует на эту дату</string>
+    <string name="от_">от\u0020</string>
+    <string name="Такая_категория_уже_существует">Такая категория уже существует</string>
+    <string name="Редактировать_категорию">Редактировать категорию</string>
+    <string name="Новая_категория">Новая категория</string>
+    <string name="Название_категории">Название категории</string>
+    <string name="Такая_услуга_уже_существует">Такая услуга уже существует</string>
+    <string name="Выбрать_категорию">Выбрать категорию</string>
+    <string name="Выберите_категорию">Выберите категорию</string>
+    <string name="Редактировать_услугу">Редактировать услугу</string>
+    <string name="Название_не_может_быть_пустым">Название не может быть пустым</string>
+    <string name="Укажите_цену">Укажите цену</string>
+    <string name="Укажите_продолжительность">Укажите продолжительность</string>
+    <string name="Выберите_продолжительность">Выберите продолжительность</string>
+    <string name="Такой_слот_уже_существует">Такой слот уже существует</string>
+    <string name="Запись_успешно_создана">Запись успешно создана</string>
+
+    <string name="Сохранить">Сохранить</string>
+    <string name="Наименование_услуги">Наименование услуги</string>
+    <string name="Категория">Категория</string>
+    <string name="Стоимость">Стоимость</string>
+    <string name="от">от</string>
+    <string name="Сумма">Сумма</string>
+    <string name="Продолжительность">Продолжительность</string>
+
+    <string name="Предыдущий_месяц">Предыдущий месяц</string>
+    <string name="Следующий_месяц">Следующий месяц</string>
+    <string name="ПН">ПН</string>
+    <string name="ВТ">ВТ</string>
+    <string name="СР">СР</string>
+    <string name="ЧТ">ЧТ</string>
+    <string name="ПТ">ПТ</string>
+    <string name="СБ">СБ</string>
+    <string name="ВС">ВС</string>
+    <string name="Добавить_запись">Добавить запись</string>
+
+    <string name="Поиск_категории">Поиск категории</string>
+    <string name="Добавить_категорию">Добавить категорию</string>
+
+    <string name="Поиск_услуги">Поиск услуги</string>
+    <string name="Добавить_услугу">Добавить услугу</string>
+
+    <string name="Добавить_слот">Добавить слот</string>
+
+    <string name="Cтатус_записи">Cтатус записи</string>
+
+    <string name="Услуги">Услуги</string>
+    <string name="Время">Время</string>
+    <string name="Клиент">Клиент</string>
+
+    <string name="Новая_услуга">Новая услуга</string>
+
+    <string name="Выбор_категории">Выбор категории</string>
 </resources>

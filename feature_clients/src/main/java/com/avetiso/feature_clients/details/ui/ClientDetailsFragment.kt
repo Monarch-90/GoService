@@ -105,8 +105,11 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
 
                         is ClientDetailsEvent.DeleteClient -> {
                             // 1. Показываем сообщение пользователю
-                            android.widget.Toast.makeText(requireContext(), "Клиент удален", android.widget.Toast.LENGTH_SHORT)
-                                .show()
+                            android.widget.Toast.makeText(
+                                requireContext(),
+                                getString(R.string.Клиент_удален),
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
                             // 2. Закрываем экран
                             findNavController().navigateUp()
                         }
@@ -163,7 +166,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
             // ✅ 1. СКИДКА
             if (client.discount > 0) {
                 addDetailField(
-                    label = "Личная скидка", // Более понятное название
+                    label = getString(R.string.Личная_скидка), // Более понятное название
                     value = "${client.discount}%",
                     iconResId = com.avetiso.core.R.drawable.ic_percent
                 )
@@ -172,7 +175,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
             // ✅ 2. ИСТОЧНИК
             if (client.source.isNotBlank()) {
                 addDetailField(
-                    label = "Источник привлечения",
+                    label = getString(R.string.Источник_привлечения),
                     value = client.source,
                     iconResId = com.avetiso.core.R.drawable.ic_label // Создай или используй существующую
                 )
@@ -192,7 +195,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
             // ✅ 4. ПРИМЕЧАНИЕ
             if (client.note.isNotBlank()) {
                 addDetailField(
-                    label = "Примечание",
+                    label = getString(com.avetiso.core.R.string.Примечание),
                     value = client.note,
                     iconResId = com.avetiso.core.R.drawable.ic_description // Создай или используй
                 )

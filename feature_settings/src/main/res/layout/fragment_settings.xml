@@ -28,7 +28,7 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Основные"
+            android:text="@string/Основные"
             android:textColor="@color/custom_main"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -49,14 +49,14 @@
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Валюта по умолчанию"
+                    android:text="@string/Валюта_по_умолчанию"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="16sp" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Будет выбрана при создании услуги"
+                    android:text="@string/Будет_выбрана_при_создании_услуги"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -68,7 +68,5 @@
                 android:minWidth="100dp" />
 
         </LinearLayout>
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

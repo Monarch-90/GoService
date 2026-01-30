@@ -24,7 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Previous Month"
+                android:contentDescription="@string/Предыдущий_месяц"
                 android:padding="8dp"
                 android:src="@drawable/ic_chevron_left" />
 
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Next Month"
+                android:contentDescription="@string/Следующий_месяц"
                 android:padding="8dp"
                 android:src="@drawable/ic_chevron_right" />
 
@@ -61,7 +61,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="ПН" />
+            android:text="@string/ПН" />
 
         <View
             android:layout_width="1dp"
@@ -72,7 +72,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="ВТ" />
+            android:text="@string/ВТ" />
 
         <View
             android:layout_width="1dp"
@@ -83,7 +83,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="СР" />
+            android:text="@string/СР" />
 
         <View
             android:layout_width="1dp"
@@ -94,7 +94,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="ЧТ" />
+            android:text="@string/ЧТ" />
 
         <View
             android:layout_width="1dp"
@@ -105,7 +105,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="ПТ" />
+            android:text="@string/ПТ" />
 
         <View
             android:layout_width="1dp"
@@ -116,7 +116,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="СБ" />
+            android:text="@string/СБ" />
 
         <View
             android:layout_width="1dp"
@@ -127,7 +127,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="ВС" />
+            android:text="@string/ВС" />
 
         <View
             android:layout_width="1dp"
@@ -180,7 +180,7 @@
         android:layout_height="50dp"
         android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Add Appointment"
+        android:contentDescription="@string/Добавить_запись"
         android:src="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

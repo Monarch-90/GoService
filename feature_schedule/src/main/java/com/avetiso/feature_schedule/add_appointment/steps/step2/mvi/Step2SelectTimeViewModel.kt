@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
+import com.avetiso.core.model.UiText
+import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,7 +44,12 @@ class Step2SelectTimeViewModel @Inject constructor(
 
             if (isDuplicate) {
                 // Текст "Такой слот..." вынеси в ресурсы позже
-                _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
+                _eventChannel.send(
+                    Step2Event.ShowToast(
+                        UiText.StringResource(R.string.Такой_слот_уже_существует
+                        )
+                    )
+                )
             } else {
                 // Room сам разберется: если id=0 -> INSERT, если id>0 -> UPDATE (при OnConflictStrategy.REPLACE)
                 timeSlotDao.insertTimeSlot(TimeSlotEntity(id = id, startTimeMinutes = totalMinutes))

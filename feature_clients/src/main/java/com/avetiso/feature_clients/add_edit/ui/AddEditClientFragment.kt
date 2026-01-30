@@ -57,7 +57,13 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
                     viewModel.events.collect { event ->
                         when (event) {
                             is AddEditClientEvent.ShowToast -> {
-                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    event.message.asString(
+                                        requireContext()
+                                    ),
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
 
                             is AddEditClientEvent.NavigateBackWithResult -> {
@@ -77,7 +83,11 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
     private fun render(state: AddEditClientState) {
         val currentBinding = binding ?: return
 
-        currentBinding.toolbar.title = if (state.isEditing) "Редактировать клиента" else "Новый клиент"
+        currentBinding.toolbar.title = if (state.isEditing) {
+            getString(R.string.Редактировать_клиента)
+        } else {
+            getString(R.string.Новый_клиент)
+        }
 
         // Функция-помощник для обновления текста без "дёрганья" курсора
         fun updateTextIfChanged(editText: EditText, newText: String) {
@@ -174,7 +184,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         currentBinding.btnSave.setOnClickListener {
             // Валидация UI перед отправкой в VM (для красивой ошибки на поле)
             if (currentBinding.inputEditTextName.text.isNullOrBlank()) {
-                currentBinding.inputLayoutName.error = "Имя не может быть пустым"
+                currentBinding.inputLayoutName.error = getString(R.string.Имя_не_может_быть_пустым)
             } else {
                 currentBinding.inputLayoutName.error = null
                 viewModel.onSaveClicked()
@@ -199,11 +209,11 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         val state = viewModel.state.value
 
         val usedNames = mutableListOf(
-            getString(com.avetiso.core.R.string.Имя_клиента),
-            getString(com.avetiso.core.R.string.Номер_телефона),
-            getString(com.avetiso.core.R.string.Инстаграм),
-            getString(com.avetiso.core.R.string.Источник_привлечения),
-            getString(com.avetiso.core.R.string.Личная_скидка),
+            getString(R.string.Имя_клиента),
+            getString(R.string.Номер_телефона),
+            getString(R.string.Инстаграм),
+            getString(R.string.Источник_привлечения),
+            getString(R.string.Личная_скидка_процент),
             getString(com.avetiso.core.R.string.Примечание),
         )
 
@@ -212,8 +222,8 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
         InputDialogFragment.newInstance(
             requestKey = ClientsConstants.Requests.INPUT_FIELD,
-            title = getString(com.avetiso.core.R.string.Новое_поле),
-            hint = getString(com.avetiso.core.R.string.Название_поля),
+            title = getString(R.string.Новое_поле),
+            hint = getString(R.string.Название_поля),
             forbiddenValues = usedNames,
         ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }

@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toDrawable
@@ -29,6 +30,7 @@ import androidx.fragment.app.setFragmentResult
 import com.avetiso.common_ui.CommonConstants
 import com.avetiso.core.AppConstants
 import com.chargemap.compose.numberpicker.NumberPicker
+import com.avetiso.common_ui.R
 
 class ComposeTimePickerDialogFragment : DialogFragment() {
 
@@ -146,7 +148,7 @@ private fun TimePickerDialogContent(
                 )
             }
         },
-        confirmButton = { TextButton(onClick = { onConfirm(selectedHour, selectedMinute) }) { Text("ОК") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Отмена") } }
+        confirmButton = { TextButton(onClick = { onConfirm(selectedHour, selectedMinute) }) { Text(stringResource(R.string.ОК)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.Отмена)) } }
     )
 }

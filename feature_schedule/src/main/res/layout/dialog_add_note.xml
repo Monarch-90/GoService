@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -11,10 +12,10 @@
         android:gravity="start"
         android:paddingHorizontal="24dp"
         android:paddingTop="10dp"
-        android:text="Примечание"
         android:textColor="@color/custom_black_white"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:text="Примечание" />
 
     <ScrollView
         android:id="@+id/scroll_view"
@@ -31,12 +32,12 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:gravity="top"
-            android:hint="Введите примечание"
             android:inputType="textMultiLine|textCapSentences"
             android:lineSpacingExtra="4dp"
             android:paddingHorizontal="10dp"
             android:paddingVertical="5dp"
-            android:textCursorDrawable="@null" />
+            android:textCursorDrawable="@null"
+            tools:hint="Введите примечание" />
     </ScrollView>
 
     <LinearLayout
@@ -50,16 +51,16 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Отмена"
-            android:textColor="@color/grey" />
+            android:textColor="@color/grey"
+            tools:text="Отмена" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_positive"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ОК"
-            android:textColor="@color/dark_grey" />
+            android:textColor="@color/dark_grey"
+            tools:text="ОК" />
     </LinearLayout>
 
 </LinearLayout>

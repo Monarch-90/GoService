@@ -27,7 +27,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Удалить поле"
+        android:contentDescription="@string/Удалить_поле"
         android:src="@drawable/ic_close"
         app:layout_constraintBottom_toBottomOf="@id/il_custom_field"
         app:layout_constraintEnd_toEndOf="parent"

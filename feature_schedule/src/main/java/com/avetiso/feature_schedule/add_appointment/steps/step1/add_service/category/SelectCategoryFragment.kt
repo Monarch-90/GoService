@@ -47,12 +47,18 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
     // Обработка результата ввода
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.INPUT_CATEGORY, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.INPUT_CATEGORY,
+            viewLifecycleOwner
+        ) { _, bundle ->
             val text = bundle.getString(AppConstants.Result.RESULT_TEXT) ?: return@setFragmentResultListener
             handleCategoryInput(text)
         }
 
-        childFragmentManager.setFragmentResultListener(AppointmentConstants.Request.DELETE_CATEGORY, viewLifecycleOwner) { _, bundle ->
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.DELETE_CATEGORY,
+            viewLifecycleOwner
+        ) { _, bundle ->
             if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
                 viewModel.onDeleteConfirmed()
             }
@@ -64,7 +70,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         val hasDuplicate = viewModel.isDuplicate(name)
 
         if (hasDuplicate) {
-            Toast.makeText(requireContext(), "Такая категория уже существует", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.Такая_категория_уже_существует, Toast.LENGTH_SHORT).show()
         } else {
             // Просто передаем данные. ViewModel сама знает, редактируем мы или создаем.
             viewModel.onCategoryNameInput(name)
@@ -153,6 +159,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     }
 
     private fun showCategoryInputDialog(category: CategoryEntity? = null) {
+        val context = binding?.root?.context
         val isEditMode = category != null
 
         // СООБЩАЕМ VIEWMODEL О НАМЕРЕНИИ
@@ -162,13 +169,18 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             viewModel.onAddCategoryClicked()
         }
 
-        val title = if (isEditMode) "Редактировать категорию" else "Новая категория"
+        val title = if (isEditMode) {
+            context?.getString(R.string.Редактировать_категорию).toString()
+        } else {
+            context?.getString(R.string.Новая_категория).toString()
+        }
+
         val initialValue = category?.name ?: ""
 
         InputDialogFragment.newInstance(
             requestKey = AppointmentConstants.Request.INPUT_CATEGORY,
             title = title,
-            hint = "Название категории",
+            hint = context?.getString(R.string.Название_категории).toString(),
             initialValue = initialValue
         ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }

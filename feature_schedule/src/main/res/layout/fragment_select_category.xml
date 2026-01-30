@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_close"
-            app:title="Выбор категории" />
+            app:title="@string/Выбор_категории" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/surface_color"
-                android:hint="Поиск категории"
+                android:hint="@string/Поиск_категории"
                 android:paddingStart="36dp"
                 android:textCursorDrawable="@null"
                 tools:ignore="RtlSymmetry" />
@@ -59,7 +59,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Добавить категорию"
+        android:contentDescription="@string/Добавить_категорию"
         app:srcCompat="@drawable/ic_add"
         app:tint="@color/custom_main" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

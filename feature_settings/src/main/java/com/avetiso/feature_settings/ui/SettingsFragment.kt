@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
 import com.avetiso.core.AppConstants
 import com.avetiso.core.model.AppCurrency
@@ -34,6 +35,16 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         setupResultListeners() // Регистрируем. ОТВЕТЫ: Входящие данные (что мне возвращают другие)
         observeState()
+        setupToolbar()
+    }
+
+    private fun setupToolbar() {
+        // Обработка нажатия на стрелку "Назад"
+        binding?.toolbar?.setNavigationOnClickListener {
+            // Возвращается на предыдущий экран
+            findNavController().navigateUp()
+
+        }
     }
 
     private fun setupResultListeners() {

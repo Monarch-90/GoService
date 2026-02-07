@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(), DrawerController {
                     }
                     // 2. Закрываем шторку
                     binding?.drawerLayout?.closeDrawer(GravityCompat.START)
-                    true
+                    false
                 }
 
                 R.id.nav_about -> {
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), DrawerController {
                     // Пока просто закроем шторку и покажем Тост
                     android.widget.Toast.makeText(this, "О приложении", android.widget.Toast.LENGTH_SHORT).show()
                     binding?.drawerLayout?.closeDrawer(GravityCompat.START)
-                    true
+                    false
                 }
 
                 else -> false

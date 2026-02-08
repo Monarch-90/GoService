@@ -3,11 +3,6 @@
         <item
             android:id="@+id/settingsFragment"
             android:icon="@drawable/ic_settings"
-            android:title="Настройки" />
-
-        <item
-            android:id="@+id/nav_about"
-            android:icon="@drawable/ic_info"
-            android:title="О приложении" />
+            android:title="@string/Настройки" />
     </group>
 </menu>

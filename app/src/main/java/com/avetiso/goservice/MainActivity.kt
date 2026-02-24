@@ -8,18 +8,20 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.avetiso.goservice.databinding.ActivityMainBinding
-import com.avetiso.navigation.DrawerController
+import com.avetiso.navigation.controllers.SidebarController
+import com.avetiso.navigation.routers.SidebarNavigator
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), DrawerController {
-
+class MainActivity : AppCompatActivity(), SidebarController {
     private var binding: ActivityMainBinding? = null
     private var navController: NavController? = null
+    @Inject
+    lateinit var sidebarNavigator: SidebarNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -30,49 +32,46 @@ class MainActivity : AppCompatActivity(), DrawerController {
 
         setContentView(activityBinding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(activityBinding.root) { view, insets ->
+        setupWindowInsets(activityBinding)
+        setupNavigation(activityBinding)
+        setupSideMenu(activityBinding)
+    }
+
+    private fun setupWindowInsets(binding: ActivityMainBinding) {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            activityBinding.navHostFragment.updatePadding(top = systemBars.top)
-            activityBinding.bottomNavView.updatePadding(bottom = systemBars.bottom)
+            binding.navHostFragment.updatePadding(top = systemBars.top)
+            binding.bottomNavView.updatePadding(bottom = systemBars.bottom)
             insets
         }
+    }
 
+    private fun setupNavigation(binding: ActivityMainBinding) {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        if (navController != null) {
-            activityBinding.bottomNavView.setupWithNavController(navController!!)
+        navController?.let {
+            binding.bottomNavView.setupWithNavController(it)
         }
+    }
 
-        // НАСТРОЙКА БОКОВОГО МЕНЮ (РУЧНАЯ ОБРАБОТКА)
-        binding?.sideNavView?.setNavigationItemSelectedListener { menuItem ->
+    private fun setupSideMenu(binding: ActivityMainBinding) {
+        binding.sideNavView.setNavigationItemSelectedListener { menuItem ->
+            val controller = navController ?: return@setNavigationItemSelectedListener false
+
             when (menuItem.itemId) {
-                R.id.settingsFragment -> {
-                    // 1. Пытаемся найти экшен или назначение
-                    try {
-                        // Опции для очистки стека, чтобы не плодить фрагменты настроек
-                        val navOptions = NavOptions.Builder()
-                            .setLaunchSingleTop(true)
-                            .build()
-
-                        navController?.navigate(R.id.settingsFragment, null, navOptions)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                    // 2. Закрываем шторку
-                    binding?.drawerLayout?.closeDrawer(GravityCompat.START)
-                    false
+                // Используем ID из menu_sidebar (проверь, что в xml меню id называются именно так)
+                R.id.nav_settings -> {
+                    sidebarNavigator.navigateToSettings(controller)
+                    closeSideDrawer()
+                    true
                 }
-
                 R.id.nav_about -> {
-                    // Тут позже сделаем диалог "О приложении"
-                    // Пока просто закроем шторку и покажем Тост
-                    android.widget.Toast.makeText(this, "О приложении", android.widget.Toast.LENGTH_SHORT).show()
-                    binding?.drawerLayout?.closeDrawer(GravityCompat.START)
-                    false
+                    sidebarNavigator.navigateToAbout(controller)
+                    closeSideDrawer()
+                    true
                 }
-
                 else -> false
             }
         }

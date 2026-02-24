@@ -26,6 +26,9 @@ object AppConstants {
     object DeepLinks {
         const val CLIENTS_ADD = "goservice://clients/add"
         const val CLIENTS_EDIT = "goservice://clients/edit/"
+        const val SIDEBAR_SETTINGS = "goservice://sidebar/settings"
+        const val SIDEBAR_ABOUT = "goservice://sidebar/about"
+        const val SCHEDULE_MAIN = "goservice://schedule/main"
     }
 
     // Ключи результатов (Result Keys) внутри Bundle

@@ -28,7 +28,7 @@ import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
-import com.avetiso.navigation.DrawerController
+import com.avetiso.navigation.controllers.SidebarController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
@@ -44,8 +44,8 @@ import java.util.Locale
 @AndroidEntryPoint
 class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
-    private var binding: FragmentScheduleBinding? = null
-
+    private var _binding: FragmentScheduleBinding? = null
+    private val binding get() = _binding!!
     private val calendarViewModel: CalendarViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
 
@@ -56,94 +56,95 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentScheduleBinding.bind(view)
+        _binding = FragmentScheduleBinding.bind(view)
 
-        val currentBinding = binding ?: return
-
-        val adapter = AppointmentAdapter(
-            onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
-            onNoteClicked = { appointment -> showNoteDialog(appointment) }
-        ).also { appointmentAdapter = it }
-
-        currentBinding.rvAppointments.adapter = adapter
-
-        actions = RecyclerViewActions(
-            fragment = this,
-            recyclerView = currentBinding.rvAppointments,
-            adapter = adapter,
-            getItemId = { it.id },
-            onEdit = { appointment ->
-                val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
-                    selectedDate = calendarViewModel.state.value.selectedDate.toString(),
-                    appointmentId = appointment.id // Передаем ID для режима редактирования
-                )
-                findNavController().navigate(action)
-            },
-            onDeleteClicked = { appointment ->
-                // 1. Передаем только ID (так как appointment - это UI модель)
-                scheduleViewModel.onDeleteIconClicked(appointment.id)
-
-                // 2. Формируем текст.
-                // Внимание: в твоем маппере поле называется serviceNames (во множественном числе)
-                val messageText = getString(R.string.Удалить_запись)
-
-                // 3. Показываем диалог
-                DeleteDialogFragment.newInstance(
-                    requestKey = ScheduleConstants.Requests.APPOINTMENT_DELETE,
-                    message = getString(com.avetiso.core.R.string.delete_dialog_message, messageText)
-                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
-            },
-            onItemClick = { /* TODO: Логика клика, если нужна */ },
-            onActionsShown = {
-                // Когда действия показаны - плавно прячем кнопку "+"
-                binding?.btnAddAppointment?.animate()
-                    ?.scaleX(0f)
-                    ?.scaleY(0f)
-                    ?.setDuration(200)
-                    ?.withEndAction {
-                        binding?.btnAddAppointment?.visibility = View.INVISIBLE
-                    }
-                    ?.start()
-            },
-            onActionsDismissed = {
-                // Когда действия закрыты - плавно показываем кнопку "+"
-                binding?.btnAddAppointment?.visibility = View.VISIBLE
-                binding?.btnAddAppointment?.animate()
-                    ?.scaleX(1f)
-                    ?.scaleY(1f)
-                    ?.setDuration(200L)
-                    ?.start()
-            },
-            triggerMode = TriggerMode.SWIPE_REVEAL
-        )
-        adapter.actions = actions
-
-        // Инициализируем и настраиваем календарь
-        calendarManager = CalendarManager(
-            calendarView = currentBinding.calendarView,
-            viewModel = calendarViewModel,
-            context = requireContext()
-        ).also { it.setupCalendar(calendarViewModel.state.value.visibleMonth) }
-
+        setupAdapter()
+        setupCalendar()
         setupClickListeners()
         setupResultListeners()
         observeViewModel()
     }
 
-    private fun setupClickListeners() {
-        val currentBinding = binding ?: return
+    private fun setupAdapter() {
+        val adapter = AppointmentAdapter(
+            onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
+            onNoteClicked = { appointment -> showNoteDialog(appointment) }
+        ).also { appointmentAdapter = it }
 
-        currentBinding.btnNextMonth.setOnClickListener {
-            currentBinding.calendarView.findFirstVisibleMonth()?.let {
-                currentBinding.calendarView.smoothScrollToMonth(it.yearMonth.nextMonth)
+        binding.rvAppointments.adapter = adapter
+
+        actions = RecyclerViewActions(
+            fragment = this,
+            recyclerView = binding.rvAppointments,
+            adapter = adapter,
+            getItemId = { it.id },
+            onEdit = { appointment ->
+                val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
+                    selectedDate = calendarViewModel.state.value.selectedDate.toString(),
+                    appointmentId = appointment.id
+                )
+                findNavController().navigate(action)
+            },
+            onDeleteClicked = { appointment ->
+                scheduleViewModel.onDeleteIconClicked(appointment.id)
+                val messageText = getString(R.string.Удалить_запись)
+                DeleteDialogFragment.newInstance(
+                    requestKey = ScheduleConstants.Requests.APPOINTMENT_DELETE,
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, messageText)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
+            },
+            onItemClick = { /* TODO: Логика клика */ },
+            onActionsShown = {
+                android.util.Log.d("ScheduleDebug", "onActionsShown - скрываем btnAddAppointment")
+
+                binding.btnAddAppointment.animate()
+                    .scaleX(0f)
+                    .scaleY(0f)
+                    .setDuration(200)
+                    .withEndAction {
+                        // Проверяем binding перед обращением в callback анимации
+                        _binding?.btnAddAppointment?.visibility = View.INVISIBLE
+                    }
+                    .start()
+            },
+            onActionsDismissed = {
+                android.util.Log.d("ScheduleDebug", "onActionsDismissed - показываем btnAddAppointment")
+
+                binding.btnAddAppointment.visibility = View.VISIBLE
+                binding.btnAddAppointment.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(200L)
+                    .withEndAction(null)
+                    .start()
+            },
+            triggerMode = TriggerMode.SWIPE_REVEAL
+        )
+        adapter.actions = actions
+    }
+
+    private fun setupCalendar() {
+        calendarManager = CalendarManager(
+            calendarView = binding.calendarView,
+            viewModel = calendarViewModel,
+            context = requireContext()
+        ).also { it.setupCalendar(calendarViewModel.state.value.visibleMonth) }
+    }
+
+    private fun setupClickListeners() {
+        binding.btnNextMonth.setOnClickListener {
+            binding.calendarView.findFirstVisibleMonth()?.let {
+                binding.calendarView.smoothScrollToMonth(it.yearMonth.nextMonth)
             }
         }
-        currentBinding.btnPreviousMonth.setOnClickListener {
-            currentBinding.calendarView.findFirstVisibleMonth()?.let {
-                currentBinding.calendarView.smoothScrollToMonth(it.yearMonth.previousMonth)
+        binding.btnPreviousMonth.setOnClickListener {
+            binding.calendarView.findFirstVisibleMonth()?.let {
+                binding.calendarView.smoothScrollToMonth(it.yearMonth.previousMonth)
             }
         }
-        currentBinding.btnAddAppointment.setOnClickListener {
+        binding.btnAddAppointment.setOnClickListener {
+            android.util.Log.d("ScheduleDebug", "btnAddAppointment clicked! Visibility = ${binding.btnAddAppointment.visibility}")
+
             // Получаем выбранную дату из ViewModel календаря
             val selectedDate = calendarViewModel.state.value.selectedDate
 
@@ -161,13 +162,12 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             }
         }
 
-        currentBinding.toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             // Мы проверяем: "Является ли родительская Activity контроллером шторки?"
             // Если да — вызываем метод. Если нет — ничего не делаем (безопасно).
-            (requireActivity() as? DrawerController)?.openSideDrawer()
+            (requireActivity() as? SidebarController)?.openSideDrawer()
         }
     }
-
 
     private fun setupResultListeners() {
         // Ловим введенный текст
@@ -216,6 +216,9 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 launch {
                     var previousSelectedDate: LocalDate? = null
                     calendarViewModel.state.collect { state ->
+
+                        android.util.Log.d("ScheduleDebug", "calendar state collected: new_date=${state.selectedDate}, prev_date=$previousSelectedDate")
+
                         if (previousSelectedDate != null && previousSelectedDate != state.selectedDate) {
                             // 1. СНАЧАЛА закрываем открытую запись.
                             //    В этот момент RecyclerView еще показывает старый список.
@@ -242,7 +245,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                         when (state) {
                             is ScheduleState.Success -> {
                                 // Если успешно - закрываем диалог и сбрасываем состояние
-
                                 scheduleViewModel.resetScheduleState()
                             }
 
@@ -265,7 +267,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             Locale.forLanguageTag("ru")
         ).replaceFirstChar { it.uppercase() }
         val yearTitle = yearMonth.year.toString()
-        binding?.textMonthTitle?.text = "$monthTitle $yearTitle"
+        binding.textMonthTitle.text = "$monthTitle $yearTitle"
     }
 
     private fun showStatusSelectionDialog(appointment: Appointment) {
@@ -315,8 +317,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     override fun onDestroyView() {
-        binding?.rvAppointments?.adapter = null
-        binding = null
+        binding.rvAppointments.adapter = null
+        _binding = null
         calendarManager = null // Очищаем ссылку на менеджер
         appointmentAdapter = null
         actions = null

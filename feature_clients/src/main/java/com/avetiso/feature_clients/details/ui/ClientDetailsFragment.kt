@@ -21,7 +21,7 @@ import com.avetiso.feature_clients.databinding.ItemClientDetailFieldBinding
 import com.avetiso.feature_clients.details.mvi.ClientDetailsEvent
 import com.avetiso.feature_clients.details.mvi.ClientDetailsState
 import com.avetiso.feature_clients.details.mvi.ClientDetailsViewModel
-import com.avetiso.navigation.ClientsNavigator
+import com.avetiso.navigation.routers.ClientsNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

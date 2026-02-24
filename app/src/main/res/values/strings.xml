@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Go Service</string>
-    <string name="О_приложении">О приложении</string>
-    <string name="Настройки">Настройки</string>
+    <string name="Расписание">Расписание</string>
+    <string name="Клиенты">Клиенты</string>
+    <string name="Расходники">Расходники</string>
+    <string name="Окошки">Окошки</string>
 </resources>

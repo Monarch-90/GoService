@@ -2,7 +2,7 @@ package com.avetiso.feature_clients.selector
 
 import androidx.fragment.app.Fragment
 import com.avetiso.feature_clients.selector.ui.ClientSelectorFragment
-import com.avetiso.navigation.ClientSelectorProvider
+import com.avetiso.navigation.providers.ClientSelectorProvider
 import javax.inject.Inject
 
 /**

@@ -21,7 +21,7 @@ import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.adapter.ClientAdapter
 import com.avetiso.feature_clients.databinding.FragmentClientSelectorBinding
 import com.avetiso.feature_clients.selector.mvi.ClientSelectorViewModel
-import com.avetiso.navigation.ClientsNavigator
+import com.avetiso.navigation.routers.ClientsNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged

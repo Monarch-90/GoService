@@ -21,7 +21,7 @@ import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.mvi.NavigationEvent
 import com.avetiso.feature_schedule.databinding.FragmentAddAppointmentBinding
 import com.avetiso.feature_schedule.databinding.ViewStepperBinding
-import com.avetiso.navigation.ClientSelectorProvider
+import com.avetiso.navigation.providers.ClientSelectorProvider
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch

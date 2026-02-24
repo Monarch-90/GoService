@@ -3,7 +3,7 @@ package com.avetiso.goservice.navigation
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.avetiso.core.AppConstants
-import com.avetiso.navigation.ClientsNavigator
+import com.avetiso.navigation.routers.ClientsNavigator
 import javax.inject.Inject
 
 class ClientsNavigatorImpl @Inject constructor() : ClientsNavigator {

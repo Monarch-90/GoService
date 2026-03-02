@@ -11,18 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
+import com.avetiso.common_ui.CommonConstants
+import com.avetiso.core.AppConstants
+import com.avetiso.common_ui.R
 
 class ComposeDatePickerDialogFragment : DialogFragment() {
-
-    // Колбэк, который вернет выбранную дату в миллисекундах
-    var onDateSelected: ((Long) -> Unit)? = null
-    var onConfirmClicked: ((Long) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -34,7 +35,15 @@ class ComposeDatePickerDialogFragment : DialogFragment() {
                     title = requireArguments().getString(ARG_TITLE, ""),
                     initialDateMillis = requireArguments().getLong(ARG_INITIAL_DATE, System.currentTimeMillis()),
                     onConfirm = { selectedMillis ->
-                        onConfirmClicked?.invoke(selectedMillis)
+                        val requestKey = requireArguments().getString(ARG_REQUEST_KEY) ?: CommonConstants.Result.DATE_PICKER
+                        val extraId = requireArguments().getLong(ARG_EXTRA_ID, AppConstants.ID_NONE)
+
+                        // Возвращаем результат (Дата + ID записи)
+                        setFragmentResult(requestKey, bundleOf(
+                            AppConstants.Result.RESULT_DATE to selectedMillis,
+                            AppConstants.Result.DATE_RESULT_EXTRA_ID to extraId
+                        ))
+                        dismiss()
                     },
                     onDismiss = { dismiss() }
                 )
@@ -51,12 +60,21 @@ class ComposeDatePickerDialogFragment : DialogFragment() {
     companion object {
         private const val ARG_TITLE = "arg_title"
         private const val ARG_INITIAL_DATE = "arg_initial_date"
+        private const val ARG_REQUEST_KEY = "arg_request_key"
+        private const val ARG_EXTRA_ID = "arg_extra_id"
 
-        fun newInstance(title: String, initialDateMillis: Long? = null): ComposeDatePickerDialogFragment {
+        fun newInstance(
+            requestKey: String,
+            title: String,
+            initialDateMillis: Long? = null,
+            extraId: Long = AppConstants.ID_NONE // Передаем ID записи внутрь диалога
+        ): ComposeDatePickerDialogFragment {
             return ComposeDatePickerDialogFragment().apply {
                 arguments = bundleOf(
+                    ARG_REQUEST_KEY to requestKey,
                     ARG_TITLE to title,
-                    ARG_INITIAL_DATE to (initialDateMillis ?: System.currentTimeMillis())
+                    ARG_INITIAL_DATE to (initialDateMillis ?: System.currentTimeMillis()),
+                    ARG_EXTRA_ID to extraId
                 )
             }
         }
@@ -107,10 +125,10 @@ private fun DatePickerDialogContent(
             TextButton(onClick = {
                 // Передаем выбранную дату только если она не null
                 datePickerState.selectedDateMillis?.let { onConfirm(it) }
-            }) { Text("ОК", color = MaterialTheme.colorScheme.onPrimaryContainer) } // 👈 Цвет кнопки
+            }) { Text(stringResource(R.string.ОК), color = MaterialTheme.colorScheme.onPrimaryContainer) } // 👈 Цвет кнопки
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена", color = MaterialTheme.colorScheme.onPrimary) } // 👈 Цвет кнопки
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.Отмена), color = MaterialTheme.colorScheme.onPrimary) } // 👈 Цвет кнопки
         },
         colors = dialogColors // Применяем все наши цвета
     ) {

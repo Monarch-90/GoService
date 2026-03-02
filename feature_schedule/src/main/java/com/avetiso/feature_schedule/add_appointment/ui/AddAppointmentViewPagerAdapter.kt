@@ -19,7 +19,7 @@ class AddAppointmentViewPagerAdapter(
             0 -> Step1SelectServiceFragment()
             1 -> Step2SelectTimeFragment()
             2 -> clientSelectorFragmentFactory()
-            else -> throw IllegalStateException("Invalid position for ViewPager")
+            else -> throw IllegalStateException("Неверная позиция для ViewPager")
         }
     }
 }

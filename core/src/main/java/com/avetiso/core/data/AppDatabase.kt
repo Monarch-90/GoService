@@ -10,6 +10,8 @@ import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.entity.CategoryEntity
 import androidx.room.TypeConverters
+import com.avetiso.core.data.converters.AppointmentStatusConverter
+import com.avetiso.core.data.converters.MyTypeConverters
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
@@ -18,7 +20,10 @@ import com.avetiso.core.entity.TimeSlotEntity
     entities = [ServiceEntity::class, CategoryEntity::class, TimeSlotEntity::class, ClientEntity::class, AppointmentEntity::class],
     version = 1, exportSchema = true
 )
-@TypeConverters(MyTypeConverters::class)
+@TypeConverters(
+    MyTypeConverters::class,
+    AppointmentStatusConverter::class,
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun serviceDao(): ServiceDao
     abstract fun categoryDao(): CategoryDao

@@ -3,14 +3,17 @@ package com.avetiso.feature_schedule.add_appointment.mvi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.AppointmentDao
-import com.avetiso.core.data.dao.ClientDao
-import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
+import com.avetiso.core.model.AppointmentStatus
 import com.avetiso.core.model.ServiceSnapshot
+import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.ScheduleConstants
+import com.avetiso.feature_schedule.add_appointment.mapper.AppointmentPriceMapper
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,22 +28,22 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class AddAppointmentViewModel @Inject constructor(
     private val appointmentDao: AppointmentDao,
-    private val clientDao: ClientDao,
-    private val serviceDao: ServiceDao,
     private val savedStateHandle: SavedStateHandle,
+    private val uiMapper: AppointmentPriceMapper,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddAppointmentState())
     val state = _state.asStateFlow()
 
-    private var appointmentToEditId: Long = -1L
+    private var appointmentToEditId: Long = AppConstants.ID_NONE
 
     // канал для одноразовых событий навигации
     private val _navigationChannel = Channel<NavigationEvent>()
     val navigationEvents = _navigationChannel.receiveAsFlow()
 
     init {
-        appointmentToEditId = savedStateHandle.get<Long>("appointmentId") ?: -1L
+        appointmentToEditId =
+            savedStateHandle.get<Long>(ScheduleConstants.Args.APPOINTMENT_ID) ?: AppConstants.ID_NONE
     }
 
     fun handleEvent(event: AddAppointmentEvent) {
@@ -170,20 +173,26 @@ class AddAppointmentViewModel @Inject constructor(
 
             // 1. Проверяем на дубликат с помощью новой чистой функции
             if (isDuplicate(client, services, timeSlots)) {
-                _navigationChannel.send(NavigationEvent.ShowToast("Такая запись уже существует на эту дату"))
+                val errorMessage = uiMapper.getDuplicateErrorString()
+                _navigationChannel.send(NavigationEvent.ShowToast(errorMessage))
                 return@launch
             }
 
             // 2. Если все в порядке, создаем и сохраняем сущность
-            // Передаем старый статус в функцию создания
-            val appointmentToSave = if (appointmentToEditId != -1L) {
-                val originalStatus = appointmentDao.getAppointmentById(appointmentToEditId)?.status ?: "Активна"
-                createAppointmentEntity(client, services, originalStatus, timeSlots)
+            // 1. Определяем статус для сохранения
+            val statusToSave: AppointmentStatus = if (appointmentToEditId != AppConstants.ID_NONE) {
+                // Теперь dao возвращает Enum, нам не нужно гадать со строками
+                appointmentDao.getAppointmentById(appointmentToEditId)?.status
+                    ?: AppointmentStatus.ACTIVE
             } else {
-                createAppointmentEntity(client, services, "Активна", timeSlots)
+                // Для новой записи
+                AppointmentStatus.ACTIVE
             }
 
-            if (appointmentToEditId != -1L) {
+            // 2. Создаем сущность с правильным статусом
+            val appointmentToSave = createAppointmentEntity(client, services, statusToSave, timeSlots)
+
+            if (appointmentToEditId != AppConstants.ID_NONE) {
                 appointmentDao.updateAppointment(appointmentToSave)
             } else {
                 appointmentDao.insertAppointment(appointmentToSave)
@@ -199,23 +208,17 @@ class AddAppointmentViewModel @Inject constructor(
         services: Set<ServiceEntity>,
         timeSlots: Set<TimeSlotEntity>,
     ): Boolean {
-        val selectedDate: String = savedStateHandle["selectedDate"]
+        val selectedDate: String = savedStateHandle[ScheduleConstants.Args.SELECTED_DATE]
             ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
             ?: return true // Если дата неизвестна, считаем дубликатом для безопасности
 
         val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
-        val newServiceSnapshots = services.map {
-            ServiceSnapshot(
-                id = it.id, name = it.name, categoryName = it.categoryName,
-                isPriceFrom = it.isPriceFrom, price = it.price,
-                currency = it.currency, durationMinutes = it.durationMinutes
-            )
-        }.toSet()
+        val newServiceSnapshots = services.map { it.toSnapshot() }.toSet()
 
         val newTimeSlotIds = timeSlots.map { it.id }.sorted()
 
         for (existing in existingAppointments) {
-            if (appointmentToEditId != -1L && existing.id == appointmentToEditId) continue
+            if (appointmentToEditId != AppConstants.ID_NONE && existing.id == appointmentToEditId) continue
 
             val isTimeSlotSame = existing.timeSlotIds.sorted() == newTimeSlotIds
             val isClientSame = existing.clientName == client.name &&
@@ -236,28 +239,22 @@ class AddAppointmentViewModel @Inject constructor(
     private suspend fun createAppointmentEntity(
         client: ClientEntity,
         services: Set<ServiceEntity>,
-        status: String,
+        status: AppointmentStatus,
         timeSlots: Set<TimeSlotEntity>,
     ): AppointmentEntity {
-        val selectedDate: String = savedStateHandle["selectedDate"]
+        val selectedDate: String = savedStateHandle[ScheduleConstants.Args.SELECTED_DATE]
             ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
             ?: "" // Если дата пустая, это будет обработано дальше
 
         val totalDuration = services.sumOf { it.durationMinutes }
-        val serviceSnapshots = services.map {
-            ServiceSnapshot(
-                id = it.id, name = it.name, categoryName = it.categoryName,
-                isPriceFrom = it.isPriceFrom, price = it.price,
-                currency = it.currency, durationMinutes = it.durationMinutes
-            )
-        }
+        val serviceSnapshots = services.map { it.toSnapshot() }
         val servicesJson = Gson().toJson(serviceSnapshots)
 
         // НАХОДИМ САМОЕ РАННЕЕ ВРЕМЯ ИЗ ВСЕХ ВЫБРАННЫХ СЛОТОВ
         val earliestStartTime = timeSlots.minOfOrNull { it.startTimeMinutes } ?: 0
 
         return AppointmentEntity(
-            id = if (appointmentToEditId != -1L) appointmentToEditId else 0,
+            id = if (appointmentToEditId != AppConstants.ID_NONE) appointmentToEditId else 0,
             date = selectedDate,
             startTimeMinutes = earliestStartTime,
             timeSlotIds = timeSlots.map { it.id }.sorted(),
@@ -268,6 +265,18 @@ class AddAppointmentViewModel @Inject constructor(
             discountPercent = client.discount,
             status = status,
             servicesJson = servicesJson,
+        )
+    }
+
+    private fun ServiceEntity.toSnapshot(): ServiceSnapshot {
+        return ServiceSnapshot(
+            id = this.id,
+            name = this.name,
+            categoryName = this.categoryName,
+            isPriceFrom = this.isPriceFrom,
+            price = this.price,
+            currency = this.currency,
+            durationMinutes = this.durationMinutes,
         )
     }
 

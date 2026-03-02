@@ -1,6 +1,25 @@
 <resources>
     <string name="app_name">common_ui</string>
-    <string name="delete_dialog_message">\"%1$s\"</string>
-    <string name="action_cancel">Отмена</string>
-    <string name="action_delete">Удалить</string>
+
+    <string name="Изменение_настроек">Изменение настроек</string>
+    <string name="Установить_название">Установить %1$s?</string>
+    <string name="Да">Да</string>
+    <string name="Нет">Нет</string>
+
+    <string name="Поле_не_может_быть_пустым">Поле не может быть пустым</string>
+    <string name="Такое_поле_уже_существует">Такое поле уже существует</string>
+
+    <string name="Удаление">Удаление</string>
+
+    <string name="Отмена">Отмена</string>
+    <string name="ОК">ОК</string>
+
+    <string name="Отмена_dialog">Отмена</string>
+    <string name="Удалить_dialog">Удалить</string>
+
+    <string name="Отмена_dialog_input">Отмена</string>
+    <string name="Сохранить_dialog_input">Сохранить</string>
+
+    <string name="Редактировать_action_icons">Редактировать</string>
+    <string name="Удалить_action_icons">Удалить</string>
 </resources>

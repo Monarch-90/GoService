@@ -2,8 +2,9 @@ package com.avetiso.core.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.avetiso.core.AppConstants
 
-@Entity(tableName = "categories")
+@Entity(tableName = AppConstants.Data.TABLE_CATEGORIES)
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

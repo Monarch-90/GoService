@@ -3,8 +3,12 @@ package com.avetiso.feature_clients.add_edit.mvi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
+import com.avetiso.core.model.UiText
+import com.avetiso.feature_clients.ClientsConstants
+import com.avetiso.feature_clients.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,72 +30,158 @@ class AddEditClientViewModel @Inject constructor(
     private val _eventChannel = Channel<AddEditClientEvent>()
     val events = _eventChannel.receiveAsFlow()
 
-    private val message = "Этот клиент уже добавлен"
-
     init {
         // Получаем клиента для редактирования из аргументов навигации
-        val clientId: Long = savedStateHandle.get<Long>("clientId") ?: -1L
+        val clientId: Long = savedStateHandle.get<Long>(ClientsConstants.Args.CLIENT_ID) ?: AppConstants.ID_NONE
 
-        if (clientId != -1L) {
-            // Если это не новый клиент, запускаем загрузку из БД
-            viewModelScope.launch {
-                val client = clientDao.getClientById(clientId)
-                if (client != null) {
-                    _state.update { it.copy(client = client, isEditing = true) }
-                }
-            }
+        if (clientId != AppConstants.ID_NONE) {
+            loadClient(clientId)
         }
     }
 
-    fun saveClient(client: ClientEntity) {
+    fun onSaveClicked() {
+        val currentState = _state.value
+        val name = currentState.nameInput.trim()
+        val prefix = AppConstants.Format.INSTAGRAM_PREFIX
+
+        if (name.isBlank()) {
+            // Можно добавить событие валидации, если нужно подсветить поле
+            return
+        }
+
+        val phone = currentState.phoneInput.trim()
+        val rawInstagram = currentState.instagramInput.trim()
+        val finalInstagram = if (rawInstagram.isNotEmpty()) "$prefix$rawInstagram" else ""
+
+        val clientToSave = ClientEntity(
+            id = currentState.originalClient?.id ?: 0L,
+            name = name,
+            phoneNumber = phone,
+            instagram = finalInstagram,
+            source = currentState.sourceInput.trim(),
+            discount = currentState.discountInput.toIntOrNull() ?: 0,
+            note = currentState.noteInput.trim(),
+            customFields = currentState.customFieldsInput
+        )
+
+        saveClientToDb(clientToSave)
+    }
+
+    private fun saveClientToDb(client: ClientEntity) {
         viewModelScope.launch {
-            val name = client.name.trim()
-            val phone = client.phoneNumber.trim()
-            val instagram = client.instagram.trim()
             val idToExclude = client.id
 
+            // Проверка на дубликаты (Ваша логика)
             val isDuplicate = when {
-                // Проверка 1: Имя + Телефон
-                name.isNotBlank() && phone.isNotBlank() &&
-                        clientDao.findByNameAndPhone(name, phone, idToExclude) != null -> true
+                client.name.isNotBlank() && client.phoneNumber.isNotBlank() &&
+                        clientDao.findByNameAndPhone(client.name, client.phoneNumber, idToExclude) != null -> true
 
-                // Проверка 2: Имя + Инстаграм
-                name.isNotBlank() && instagram.isNotBlank() &&
-                        clientDao.findByNameAndInstagram(name, instagram, idToExclude) != null -> true
+                client.name.isNotBlank() && client.instagram.isNotBlank() &&
+                        clientDao.findByNameAndInstagram(client.name, client.instagram, idToExclude) != null -> true
 
-                // Проверка 3: Телефон + Инстаграм
-                phone.isNotBlank() && instagram.isNotBlank() &&
-                        clientDao.findByPhoneAndInstagram(phone, instagram, idToExclude) != null -> true
+                client.phoneNumber.isNotBlank() && client.instagram.isNotBlank() &&
+                        clientDao.findByPhoneAndInstagram(client.phoneNumber, client.instagram, idToExclude) != null -> true
 
-                // Если ни одно из условий не сработало
                 else -> false
             }
 
             if (isDuplicate) {
-                _eventChannel.send(AddEditClientEvent.ShowToast(message))
+                _eventChannel.send(
+                    AddEditClientEvent.ShowToast(
+                        UiText.StringResource(
+                            R.string.Этот_клиент_уже_добавлен
+                        )
+                    )
+                )
                 return@launch
             }
 
-            // Если все проверки пройдены, сохраняем
             if (_state.value.isEditing) {
                 clientDao.updateClient(client)
             } else {
                 clientDao.insertClient(client)
             }
-            // Отправляем событие для навигации назад
             _eventChannel.send(AddEditClientEvent.NavigateBackWithResult)
         }
     }
 
-    fun handleViewEvent(event: AddEditClientEvent) {
-        when (event) {
-            is AddEditClientEvent.InitialDataSet -> {
-                _state.update { it.copy(isInitialDataSet = true) }
+    private fun loadClient(clientId: Long) {
+        _state.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            val client = clientDao.getClientById(clientId)
+            if (client != null) {
+                // Инициализируем поля ввода данными из БД
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isEditing = true,
+                        originalClient = client,
+                        nameInput = client.name,
+                        phoneInput = client.phoneNumber,
+                        instagramInput = client.instagram.removePrefix(AppConstants.Format.INSTAGRAM_PREFIX),
+                        sourceInput = client.source,
+                        discountInput = if (client.discount > 0) client.discount.toString() else "",
+                        noteInput = client.note,
+                        customFieldsInput = client.customFields
+                    )
+                }
+            } else {
+                _state.update { it.copy(isLoading = false) }
             }
-            // Другие события от View можно будет добавлять сюда
-            else -> {
-                // Игнорируем события, которые ViewModel сам отправляет (ShowToast и т.д.)
+        }
+    }
+
+    fun onNameChanged(text: String) {
+        _state.update { it.copy(nameInput = text) }
+    }
+
+    fun onPhoneChanged(text: String) {
+        _state.update { it.copy(phoneInput = text) }
+    }
+
+    fun onInstagramChanged(text: String) {
+        _state.update { it.copy(instagramInput = text) }
+    }
+
+    fun onSourceChanged(text: String) {
+        _state.update { it.copy(sourceInput = text) }
+    }
+
+    fun onDiscountChanged(text: String) {
+        _state.update { it.copy(discountInput = text) }
+    }
+
+    fun onNoteChanged(text: String) {
+        _state.update { it.copy(noteInput = text) }
+    }
+
+    // Добавление нового кастомного поля (пустое значение)
+    fun addCustomField(fieldName: String) {
+        _state.update {
+            val newMap = it.customFieldsInput.toMutableMap()
+            // Если поля еще нет, добавляем его
+            if (!newMap.containsKey(fieldName)) {
+                newMap[fieldName] = ""
             }
+            it.copy(customFieldsInput = newMap)
+        }
+    }
+
+    // Удаление кастомного поля
+    fun removeCustomField(fieldName: String) {
+        _state.update {
+            val newMap = it.customFieldsInput.toMutableMap()
+            newMap.remove(fieldName)
+            it.copy(customFieldsInput = newMap)
+        }
+    }
+
+    // Изменение текста в кастомном поле
+    fun onCustomFieldValueChanged(fieldName: String, value: String) {
+        _state.update {
+            val newMap = it.customFieldsInput.toMutableMap()
+            newMap[fieldName] = value
+            it.copy(customFieldsInput = newMap)
         }
     }
 }

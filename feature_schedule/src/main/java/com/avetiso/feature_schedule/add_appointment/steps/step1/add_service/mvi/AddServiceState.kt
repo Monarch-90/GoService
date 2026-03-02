@@ -5,4 +5,5 @@ data class AddServiceState(
     val selectedMinute: Int = 0,
     val isPriceFrom: Boolean = false,
     val selectedCurrency: String? = null,
+    val selectedCategoryName: String? = null,
 )

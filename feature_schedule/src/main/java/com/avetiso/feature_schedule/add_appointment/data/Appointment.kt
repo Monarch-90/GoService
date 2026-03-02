@@ -1,6 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.data
 
-import java.time.LocalTime
+import com.avetiso.core.model.AppointmentStatus
 
 data class Appointment(
     val id: Long,
@@ -10,6 +10,6 @@ data class Appointment(
     val clientName: String,
     val price: String,
     val hasDiscount: Boolean,
-    val status: String,
+    val status: AppointmentStatus,
     val note: String,
 )

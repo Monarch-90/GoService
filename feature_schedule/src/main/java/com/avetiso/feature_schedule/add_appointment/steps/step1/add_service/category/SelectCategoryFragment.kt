@@ -13,9 +13,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.common_ui.dialogs.InputDialogFragment
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.CategoryEntity
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.databinding.FragmentSelectCategoryBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -31,9 +34,6 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     private var actions: RecyclerViewActions<CategoryEntity>? = null
     private var categoryAdapter: CategoryAdapter? = null
 
-    // Запоминаем категорию, которую редактируем (null, если создаем новую)
-    private var pendingCategory: CategoryEntity? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSelectCategoryBinding.bind(view)
@@ -47,32 +47,34 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
     // Обработка результата ввода
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(INPUT_CATEGORY_KEY, viewLifecycleOwner) { _, bundle ->
-            val text = bundle.getString(InputDialogFragment.RESULT_TEXT) ?: return@setFragmentResultListener
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.INPUT_CATEGORY,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val text = bundle.getString(AppConstants.Result.RESULT_TEXT) ?: return@setFragmentResultListener
             handleCategoryInput(text)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.DELETE_CATEGORY,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
+            }
         }
     }
 
     private fun handleCategoryInput(name: String) {
-        val currentCategories = viewModel.categories.value
-        val isEditMode = pendingCategory != null
-
         // Проверка на дубликаты
-        val hasDuplicate = currentCategories.any {
-            // Если редактируем - исключаем саму себя из проверки
-            (if (isEditMode) it.id != pendingCategory?.id else true) &&
-                    it.name.equals(name, ignoreCase = true)
-        }
+        val hasDuplicate = viewModel.isDuplicate(name)
 
         if (hasDuplicate) {
-            Toast.makeText(requireContext(), "Такая категория уже существует", Toast.LENGTH_SHORT).show()
-            // Опционально: можно тут же снова открыть диалог с введенным текстом, но Toast обычно достаточно
+            Toast.makeText(requireContext(), R.string.Такая_категория_уже_существует, Toast.LENGTH_SHORT).show()
         } else {
-            viewModel.addOrUpdateCategory(name, pendingCategory?.id)
+            // Просто передаем данные. ViewModel сама знает, редактируем мы или создаем.
+            viewModel.onCategoryNameInput(name)
         }
-
-        // Сброс
-        pendingCategory = null
     }
 
     private fun setupRecyclerView() {
@@ -81,23 +83,30 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
 
         currentBinding.rvCategories.adapter = adapter
         currentBinding.rvCategories.layoutManager = LinearLayoutManager(requireContext())
+        currentBinding.rvCategories.itemAnimator = null
 
         actions = RecyclerViewActions(
             fragment = this,
             recyclerView = currentBinding.rvCategories,
             adapter = adapter,
             getItemId = { category -> category.id },
-            getItemName = { category -> category.name },
             onEdit = { category ->
                 showCategoryInputDialog(category)
             },
-            onDelete = { category ->
-                viewModel.deleteCategory(category)
+            onDeleteClicked = { category ->
+                // 1. Сохраняем состояние во ViewModel
+                viewModel.onDeleteIconClicked(category)
+
+                // 2. Показываем диалог
+                DeleteDialogFragment.newInstance(
+                    requestKey = AppointmentConstants.Request.DELETE_CATEGORY,
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, category.name)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
             },
             onItemClick = { category ->
                 setFragmentResult(
-                    "category_selection",
-                    bundleOf("selected_category_name" to category.name)
+                    AppointmentConstants.Request.SELECTION_CATEGORY,
+                    bundleOf(AppointmentConstants.Result.SELECTED_CATEGORY_NAME to category.name)
                 )
                 findNavController().navigateUp()
             }
@@ -120,7 +129,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
             if (actions?.activeItemId != null) {
                 actions?.dismissActions()
             } else {
-                showCategoryInputDialog()
+                showCategoryInputDialog(null)
             }
         }
     }
@@ -150,22 +159,30 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
     }
 
     private fun showCategoryInputDialog(category: CategoryEntity? = null) {
-        pendingCategory = category // Запоминаем для последующей обработки
+        val context = binding?.root?.context
         val isEditMode = category != null
 
-        val title = if (isEditMode) "Редактировать категорию" else "Новая категория"
+        // СООБЩАЕМ VIEWMODEL О НАМЕРЕНИИ
+        if (isEditMode) {
+            viewModel.onEditCategoryClicked(category!!)
+        } else {
+            viewModel.onAddCategoryClicked()
+        }
+
+        val title = if (isEditMode) {
+            context?.getString(R.string.Редактировать_категорию).toString()
+        } else {
+            context?.getString(R.string.Новая_категория).toString()
+        }
+
         val initialValue = category?.name ?: ""
 
         InputDialogFragment.newInstance(
-            requestKey = INPUT_CATEGORY_KEY,
+            requestKey = AppointmentConstants.Request.INPUT_CATEGORY,
             title = title,
-            hint = "Название категории",
+            hint = context?.getString(R.string.Название_категории).toString(),
             initialValue = initialValue
-        ).show(childFragmentManager, InputDialogFragment.TAG)
-    }
-
-    companion object {
-        private const val INPUT_CATEGORY_KEY = "input_category_request"
+        ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }
 
     override fun onDestroyView() {

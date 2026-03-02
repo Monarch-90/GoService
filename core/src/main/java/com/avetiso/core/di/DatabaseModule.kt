@@ -2,6 +2,7 @@ package com.avetiso.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.AppDatabase
 import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.data.dao.CategoryDao
@@ -25,7 +26,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "go_service_db"
+            AppConstants.Data.DATABASE_NAME
         ).build()
     }
 

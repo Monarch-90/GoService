@@ -32,20 +32,17 @@ class TapOutsideTouchListener<T>(
             if (activeViewHolder != null && position != null && position != RecyclerView.NO_POSITION) {
                 // Проверяем, был ли тап по кнопке редактирования
                 if (isTouchInView(activeViewHolder.editButton, e)) {
-                    Log.d("ACTION_DEBUG", "Нажата кнопка РЕДАКТИРОВАТЬ. Вызываем onEdit.")
                     onEdit(position)
                     return true // Событие обработано
                 }
                 // Проверяем, был ли тап по кнопке удаления
                 if (isTouchInView(activeViewHolder.deleteButton, e)) {
-                    Log.d("ACTION_DEBUG", "Нажата кнопка УДАЛИТЬ. Вызываем onDelete.")
                     onDelete(position)
                     return true // Событие обработано
                 }
             }
 
             // Если тап был не по кнопкам, вызываем закрытие
-            Log.d("ACTION_DEBUG", "Тап мимо кнопок. Вызываем onDismiss.")
             onDismiss()
             return true // Событие обработано
         }

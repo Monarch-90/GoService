@@ -2,8 +2,10 @@ package com.avetiso.core.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.avetiso.core.AppConstants
+import com.avetiso.core.model.AppointmentStatus
 
-@Entity(tableName = "appointments")
+@Entity(tableName = AppConstants.Data.TABLE_APPOINTMENTS)
 data class AppointmentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -16,7 +18,7 @@ data class AppointmentEntity(
     val clientPhoneNumber: String,
     val clientInstagram: String,
     val discountPercent: Int,
-    val status: String,
+    val status: AppointmentStatus,
 
     val servicesJson: String,
     val note: String = "", // Заметка к записи

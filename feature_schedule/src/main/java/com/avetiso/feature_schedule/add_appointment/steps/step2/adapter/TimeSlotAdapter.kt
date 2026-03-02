@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity
+import com.avetiso.feature_schedule.add_appointment.steps.step2.ui.formattedTime
 import com.avetiso.feature_schedule.databinding.ItemTimeSlotBinding
 import com.avetiso.core.R as CoreR
 
@@ -65,13 +67,11 @@ class TimeSlotAdapter :
 
         override fun toggleActions(show: Boolean) {
             binding.actionsLayout.root.isVisible = show
-            binding.tvTime.alpha = if (show) 0.2f else 1.0f
+            binding.tvTime.alpha = if (show) AppConstants.Ui.ALPHA_DIMMED else AppConstants.Ui.ALPHA_OPAQUE
         }
 
         fun bind(timeSlot: TimeSlotEntity, isSelected: Boolean) {
-            val hours = timeSlot.startTimeMinutes / 60
-            val minutes = timeSlot.startTimeMinutes % 60
-            binding.tvTime.text = String.format("%02d:%02d", hours, minutes)
+            binding.tvTime.text = timeSlot.formattedTime
 
             val context = binding.root.context
 

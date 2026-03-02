@@ -7,12 +7,12 @@ import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
@@ -21,7 +21,7 @@ import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.mvi.NavigationEvent
 import com.avetiso.feature_schedule.databinding.FragmentAddAppointmentBinding
 import com.avetiso.feature_schedule.databinding.ViewStepperBinding
-import com.avetiso.navigation.ClientSelectorProvider
+import com.avetiso.navigation.providers.ClientSelectorProvider
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
@@ -93,7 +93,11 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
                             is NavigationEvent.NavigateToSchedule -> {
                                 // Возвращаемся на экран расписания
                                 findNavController().navigateUp()
-                                Toast.makeText(requireContext(), "Запись успешно создана", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    context?.getString(R.string.Запись_успешно_создана),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is NavigationEvent.ShowToast -> {
@@ -151,10 +155,10 @@ class AddAppointmentFragment : Fragment(R.layout.fragment_add_appointment) {
     private fun setupFragmentResultListeners() {
         // Слушаем результат от экрана выбора клиента
         childFragmentManager.setFragmentResultListener(
-            "client_selection_request",
+            AppConstants.Requests.CLIENT_SELECT,
             viewLifecycleOwner // Using viewLifecycleOwner ensures the listener is automatically removed.
         ) { _, bundle ->
-            val client = BundleCompat.getParcelable(bundle, "selected_client", ClientEntity::class.java)
+            val client = BundleCompat.getParcelable(bundle, AppConstants.Result.SELECTED_CLIENT, ClientEntity::class.java)
             viewModel.handleEvent(AddAppointmentEvent.ClientSelected(client))
         }
     }

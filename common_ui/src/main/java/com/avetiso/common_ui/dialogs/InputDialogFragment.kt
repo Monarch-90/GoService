@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.setFragmentResult
+import com.avetiso.common_ui.CommonConstants
+import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.DialogInputBinding
+import com.avetiso.core.AppConstants
 
 class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
 
@@ -24,6 +27,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
         val requestKey = arguments?.getString(ARG_REQUEST_KEY) ?: ""
         val isMultiline = arguments?.getBoolean(ARG_IS_MULTILINE) ?: false
         val forbiddenValues = arguments?.getStringArrayList(ARG_FORBIDDEN_VALUES) ?: emptyList<String>()
+        val allowEmpty = arguments?.getBoolean(ARG_ALLOW_EMPTY) ?: false
 
         binding.tvTitle.text = title
         binding.inputLayout.hint = hint
@@ -51,16 +55,16 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
             val text = binding.inputEditText.text.toString().trim()
 
             when {
-                text.isBlank() -> {
-                    binding.inputLayout.error = "Поле не может быть пустым"
+                text.isBlank() && !allowEmpty -> {
+                    binding.inputLayout.error = getString(R.string.Поле_не_может_быть_пустым)
                 }
                 // ПРОВЕРКА НА ДУБЛИКАТ ВНУТРИ ДИАЛОГА
                 forbiddenValues.any { it.equals(text, ignoreCase = true) } -> {
-                    binding.inputLayout.error = "Такое поле уже существует"
+                    binding.inputLayout.error = getString(R.string.Такое_поле_уже_существует)
                 }
 
                 else -> {
-                    setFragmentResult(requestKey, bundleOf(RESULT_TEXT to text))
+                    setFragmentResult(requestKey, bundleOf(AppConstants.Result.RESULT_TEXT to text))
                     dismiss()
                 }
             }
@@ -68,15 +72,13 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
     }
 
     companion object {
-        const val TAG = "InputDialog"
-        const val RESULT_TEXT = "result_text"
-
         private const val ARG_REQUEST_KEY = "arg_request_key"
         private const val ARG_TITLE = "arg_title"
         private const val ARG_HINT = "arg_hint"
         private const val ARG_INITIAL_VALUE = "arg_initial_value"
         private const val ARG_IS_MULTILINE = "arg_is_multiline"
         private const val ARG_FORBIDDEN_VALUES = "arg_forbidden_values"
+        private const val ARG_ALLOW_EMPTY = "arg_allow_empty"
 
         fun newInstance(
             requestKey: String,
@@ -85,6 +87,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
             initialValue: String = "",
             isMultiline: Boolean = false,
             forbiddenValues: List<String> = emptyList(),
+            allowEmpty: Boolean = false,
         ): InputDialogFragment {
             return InputDialogFragment().apply {
                 arguments = bundleOf(
@@ -94,6 +97,7 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
                     ARG_INITIAL_VALUE to initialValue,
                     ARG_IS_MULTILINE to isMultiline,
                     ARG_FORBIDDEN_VALUES to ArrayList(forbiddenValues),
+                    ARG_ALLOW_EMPTY to allowEmpty,
                 )
             }
         }

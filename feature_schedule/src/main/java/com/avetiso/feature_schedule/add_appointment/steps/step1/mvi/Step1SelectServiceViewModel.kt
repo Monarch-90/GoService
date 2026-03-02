@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.entity.ServiceEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,13 +25,15 @@ class Step1SelectServiceViewModel @Inject constructor(
     private val _state = MutableStateFlow(Step1State())
     val state = _state.asStateFlow()
 
+    private var servicePendingDelete: ServiceEntity? = null
+
     init {
         // Мы "слушаем" изменения нашего состояния...
         state
             // ...нас интересует только изменение поля `searchQuery`...
             .map { it.searchQuery }
             // ...убираем слишком быстрые повторные запросы (например, при быстром наборе текста)...
-            .debounce(300L)
+            .debounce(AppConstants.Time.SEARCH_DEBOUNCE)
             // ...и для каждого нового запроса отменяем старый и выполняем новый.
             .flatMapLatest { query ->
                 if (query.isBlank()) {
@@ -68,9 +71,18 @@ class Step1SelectServiceViewModel @Inject constructor(
         }
     }
 
-    fun deleteService(service: ServiceEntity) {
+    // 1. Нажали на урну
+    fun onDeleteIconClicked(service: ServiceEntity) {
+        servicePendingDelete = service
+    }
+
+    // 2. Подтвердили в диалоге
+    fun onDeleteConfirmed() {
+        val service = servicePendingDelete ?: return
         viewModelScope.launch {
+            // Предполагается, что serviceDao у тебя есть в конструкторе
             serviceDao.deleteService(service)
         }
+        servicePendingDelete = null
     }
 }

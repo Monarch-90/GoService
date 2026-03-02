@@ -12,12 +12,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.core.AppConstants
+import com.avetiso.core.entity.ClientEntity
+import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.databinding.FragmentClientDetailsBinding
 import com.avetiso.feature_clients.databinding.ItemClientDetailFieldBinding
 import com.avetiso.feature_clients.details.mvi.ClientDetailsEvent
+import com.avetiso.feature_clients.details.mvi.ClientDetailsState
 import com.avetiso.feature_clients.details.mvi.ClientDetailsViewModel
-import com.avetiso.navigation.ClientsNavigator
+import com.avetiso.navigation.routers.ClientsNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -64,8 +68,11 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
     }
 
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(DELETE_REQUEST_KEY, viewLifecycleOwner) { _, bundle ->
-            val isConfirmed = bundle.getBoolean(DeleteDialogFragment.RESULT_CONFIRMED)
+        childFragmentManager.setFragmentResultListener(
+            ClientsConstants.Requests.CLIENT_DELETE,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val isConfirmed = bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)
             if (isConfirmed) {
                 viewModel.onDeleteClicked()
             }
@@ -87,111 +94,126 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
                     when (event) {
-                        is ClientDetailsEvent.EditClient -> {
-                            val clientId = viewModel.state.value.client?.id
-                            if (clientId != null) {
-                                clientsNavigator.navigateToAddEditClient(findNavController(), clientId)
-                            }
-                        }
-
-                        is ClientDetailsEvent.NavigateBack -> {
-                            findNavController().navigateUp()
-                        }
-
-                        is ClientDetailsEvent.DeleteClient -> {
-                            // 1. Показываем сообщение пользователю
-                            android.widget.Toast.makeText(requireContext(), "Клиент удален", android.widget.Toast.LENGTH_SHORT)
-                                .show()
-                            // 2. Закрываем экран
-                            findNavController().navigateUp()
-                        }
+                        is ClientDetailsEvent.EditClient -> handleEditEvent()
+                        is ClientDetailsEvent.NavigateBack -> findNavController().navigateUp()
+                        is ClientDetailsEvent.DeleteClient -> handleDeleteEvent()
                     }
                 }
             }
         }
     }
 
-    private fun render(state: com.avetiso.feature_clients.details.mvi.ClientDetailsState) {
-        val currentBinding = binding ?: return
-
-        currentBinding.progressBar.isVisible = state.isLoading
+    private fun render(state: ClientDetailsState) {
+        renderLoading(state.isLoading)
 
         state.client?.let { client ->
-            currentBinding.toolbar.title = ""
-            currentBinding.tvToolbarTitle.text = client.name
+            renderToolbar(client.name)
+            renderHeaderInfo(client)
+            renderDetailFields(client)
+        }
+    }
 
-            // ЛОГИКА ЗАДЕРЖКИ БЕГУЩЕЙ СТРОКИ
+    private fun renderLoading(isLoading: Boolean) {
+        binding?.progressBar?.isVisible = isLoading
+    }
 
-            // 1. Отменяем предыдущий таймер, если он был
-            marqueeJob?.cancel()
+    private fun renderToolbar(clientName: String) {
+        val currentBinding = binding ?: return
+        currentBinding.toolbar.title = ""
+        currentBinding.tvToolbarTitle.text = clientName
+        setupMarqueeEffect()
+    }
 
-            // 2. Сбрасываем выделение (останавливаем строку и возвращаем в начало)
-            currentBinding.tvToolbarTitle.isSelected = false
+    private fun renderHeaderInfo(client: ClientEntity) {
+        val currentBinding = binding ?: return
+        currentBinding.tvPhone.text = client.phoneNumber
 
-            // 3. Запускаем новый таймер
-            marqueeJob = viewLifecycleOwner.lifecycleScope.launch {
-                // Ждем 2 секунды (2000 миллисекунд)
-                delay(2000)
+        val formattedInstagram = formatInstagram(client.instagram)
+        currentBinding.tvInstagram.apply {
+            text = formattedInstagram
+            isVisible = formattedInstagram.isNotBlank()
+            paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        }
+    }
 
-                // Если фрагмент еще жив и binding не null — запускаем
-                if (isActive) {
-                    currentBinding.tvToolbarTitle.isSelected = true
-                }
-            }
+    private fun renderDetailFields(client: ClientEntity) {
+        val currentBinding = binding ?: return
+        currentBinding.infoContainer.removeAllViews()
 
-            currentBinding.tvPhone.text = client.phoneNumber
+        // 1. Скидка
+        if (client.discount > 0) {
+            addDetailField(
+                label = getString(R.string.Личная_скидка),
+                value = "${client.discount}%",
+                iconResId = com.avetiso.core.R.drawable.ic_percent
+            )
+        }
 
-            val formattedInstagram = when {
-                client.instagram.isBlank() -> ""
-                !client.instagram.startsWith("@") -> "@${client.instagram}"
-                else -> client.instagram
-            }
+        // 2. Источник привлечения
+        if (client.source.isNotBlank()) {
+            addDetailField(
+                label = getString(R.string.Источник_привлечения),
+                value = client.source,
+                iconResId = com.avetiso.core.R.drawable.ic_label
+            )
+        }
 
-            currentBinding.tvInstagram.text = formattedInstagram
-            currentBinding.tvInstagram.isVisible = formattedInstagram.isNotBlank()
-            currentBinding.tvInstagram.paintFlags = currentBinding.tvInstagram.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-
-            // Очищаем контейнер перед добавлением полей, чтобы не дублировать при обновлениях
-            currentBinding.infoContainer.removeAllViews()
-
-            // ✅ 1. СКИДКА
-            if (client.discount > 0) {
+        // 3. Кастомные поля
+        client.customFields.forEach { (label, value) ->
+            if (value.isNotBlank()) {
                 addDetailField(
-                    label = "Личная скидка", // Более понятное название
-                    value = "${client.discount}%",
-                    iconResId = com.avetiso.core.R.drawable.ic_percent
-                )
-            }
-
-            // ✅ 2. ИСТОЧНИК
-            if (client.source.isNotBlank()) {
-                addDetailField(
-                    label = "Источник привлечения",
-                    value = client.source,
-                    iconResId = com.avetiso.core.R.drawable.ic_label // Создай или используй существующую
-                )
-            }
-
-            // ✅ 3. КАСТОМНЫЕ ПОЛЯ
-            client.customFields.forEach { (label, value) ->
-                if (value.isNotBlank()) {
-                    addDetailField(
-                        label = label,
-                        value = value,
-                        iconResId = com.avetiso.core.R.drawable.ic_info // Универсальная иконка для кастомных полей
-                    )
-                }
-            }
-
-            // ✅ 4. ПРИМЕЧАНИЕ
-            if (client.note.isNotBlank()) {
-                addDetailField(
-                    label = "Примечание",
-                    value = client.note,
-                    iconResId = com.avetiso.core.R.drawable.ic_description // Создай или используй
+                    label = label,
+                    value = value,
+                    iconResId = com.avetiso.core.R.drawable.ic_info
                 )
             }
         }
+
+        // 4. Примечание
+        if (client.note.isNotBlank()) {
+            addDetailField(
+                label = getString(com.avetiso.core.R.string.Примечание),
+                value = client.note,
+                iconResId = com.avetiso.core.R.drawable.ic_description
+            )
+        }
+    }
+
+    private fun setupMarqueeEffect() {
+        val currentBinding = binding ?: return
+        marqueeJob?.cancel()
+        currentBinding.tvToolbarTitle.isSelected = false
+
+        marqueeJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(AppConstants.Ui.MARQUEE_START_DELAY)
+            if (isActive) {
+                currentBinding.tvToolbarTitle.isSelected = true
+            }
+        }
+    }
+
+    private fun formatInstagram(instagram: String): String {
+        val prefix = AppConstants.Format.INSTAGRAM_PREFIX
+        return when {
+            instagram.isBlank() -> ""
+            !instagram.startsWith(prefix) -> "$prefix$instagram"
+            else -> instagram
+        }
+    }
+
+    private fun handleEditEvent() {
+        viewModel.state.value.client?.id?.let { id ->
+            clientsNavigator.navigateToAddEditClient(findNavController(), id)
+        }
+    }
+
+    private fun handleDeleteEvent() {
+        android.widget.Toast.makeText(
+            requireContext(),
+            getString(R.string.Клиент_удален),
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+        findNavController().navigateUp()
     }
 
     private fun showDeleteConfirmationDialog() {
@@ -199,9 +221,9 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
 
         // Используем новый DeleteDialogFragment
         DeleteDialogFragment.newInstance(
-            requestKey = DELETE_REQUEST_KEY,
-            message = getString(com.avetiso.common_ui.R.string.delete_dialog_message, clientName)
-        ).show(childFragmentManager, DeleteDialogFragment.TAG)
+            requestKey = ClientsConstants.Requests.CLIENT_DELETE,
+            message = getString(com.avetiso.core.R.string.delete_dialog_message, clientName)
+        ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
     }
 
     private fun addDetailField(label: String, value: String, iconResId: Int) {
@@ -218,10 +240,6 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         fieldBinding.ivIcon.setImageResource(iconResId) // Устанавливаем иконку
 
         currentBinding.infoContainer.addView(fieldBinding.root)
-    }
-
-    companion object {
-        private const val DELETE_REQUEST_KEY = "delete_client_request" // ✅ Ключ
     }
 
     override fun onDestroyView() {

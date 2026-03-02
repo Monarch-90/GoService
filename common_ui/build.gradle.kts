@@ -58,3 +58,6 @@ dependencies {
     // RecyclerView
     implementation(libs.androidx.recyclerview)
 }
+
+// Parcelize
+apply(plugin = "kotlin-parcelize")

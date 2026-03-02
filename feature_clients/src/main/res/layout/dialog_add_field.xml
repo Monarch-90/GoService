@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -12,9 +13,9 @@
         android:layout_marginTop="12dp"
         android:gravity="start"
         android:paddingHorizontal="24dp"
-        android:text="Новое поле"
         android:textColor="@color/custom_black_white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        tools:text="Новое поле" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/il_field_name"
@@ -22,9 +23,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:hint="Название поля"
         android:paddingHorizontal="24dp"
-        app:cursorErrorColor="@color/error_ping">
+        app:cursorErrorColor="@color/error_ping"
+        tools:hint="Название поля">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/iet_field_name"
@@ -45,15 +46,15 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Отмена"
-            android:textColor="@color/grey" />
+            android:textColor="@color/grey"
+            tools:text="Отмена" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_positive"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ОК"
-            android:textColor="@color/grey" />
+            android:textColor="@color/grey"
+            tools:text="ОК" />
     </LinearLayout>
 </LinearLayout>

@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/surface_color"
-                android:hint="Поиск"
+                android:hint="@string/Поиск"
                 android:paddingStart="30dp"
                 android:textCursorDrawable="@null" />
 
@@ -55,9 +55,10 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="80dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Add Client"
+        android:contentDescription="@string/Добавить_клиента"
         android:src="@drawable/ic_add"
         app:tint="@color/custom_main" />
 

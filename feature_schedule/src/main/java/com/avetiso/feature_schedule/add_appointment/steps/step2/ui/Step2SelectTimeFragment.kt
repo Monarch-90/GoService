@@ -10,8 +10,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity
 import com.avetiso.feature_schedule.R
+import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentViewModel
 import com.avetiso.feature_schedule.add_appointment.steps.step2.adapter.TimeSlotAdapter
@@ -39,6 +42,7 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
         setupRecyclerView()
         setupClickListeners()
+        setupResultListeners()
         observeViewModels()
     }
 
@@ -61,13 +65,16 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
             adapter = adapter,
             // Все лямбды теперь получают на вход `TimeSlotEntity`
             getItemId = { entity -> entity.id },
-            getItemName = { entity ->
-                val hours = entity.startTimeMinutes / 60
-                val minutes = entity.startTimeMinutes % 60
-                String.format("%02d:%02d", hours, minutes)
-            },
             onEdit = { entity -> showTimePicker(timeSlotToEdit = entity) },
-            onDelete = { entity -> viewModel.deleteTimeSlot(entity) },
+            onDeleteClicked = { timeSlot ->
+                viewModel.onDeleteIconClicked(timeSlot)
+
+                DeleteDialogFragment.newInstance(
+                    requestKey = AppointmentConstants.Request.DELETE_TIMESLOT,
+                    // Используем ТУ ЖЕ логику, что и в адаптере
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, timeSlot.formattedTime)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
+            },
             onItemClick = { clickedEntity ->
                 parentViewModel.handleEvent(AddAppointmentEvent.TimeSlotClicked(clickedEntity))
             },
@@ -83,6 +90,30 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
         binding?.btnAddTimeSlot?.setOnClickListener {
             actions?.dismissActions()
             showTimePicker(timeSlotToEdit = null)
+        }
+    }
+
+    private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.TIME_PICKER,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val hour = bundle.getInt(AppConstants.Result.RESULT_HOUR)
+            val minute = bundle.getInt(AppConstants.Result.RESULT_MINUTE)
+            val slotId = bundle.getLong(AppConstants.Result.TIME_RESULT_EXTRA_ID)
+
+            val idToSend = if (slotId == AppConstants.ID_NONE) 0L else slotId
+
+            viewModel.saveTimeSlot(hour, minute, idToSend)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            AppointmentConstants.Request.DELETE_TIMESLOT,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
+            }
         }
     }
 
@@ -108,9 +139,15 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
                 launch {
                     viewModel.events.collect { event ->
-                        when(event) {
+                        when (event) {
                             is Step2Event.ShowToast -> {
-                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    event.message.asString(
+                                        requireContext()
+                                    ),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -126,41 +163,15 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
         val initialHour = timeSlotToEdit?.let { it.startTimeMinutes / 60 } ?: 0
         val initialMinute = timeSlotToEdit?.let { it.startTimeMinutes % 60 } ?: 0
 
-        val dialog = ComposeTimePickerDialogFragment.newInstance(
+        val extraId = timeSlotToEdit?.id ?: AppConstants.ID_NONE
+
+        ComposeTimePickerDialogFragment.newInstance(
+            requestKey = AppointmentConstants.Request.TIME_PICKER,
             title = title,
             initialHour = initialHour,
-            initialMinute = initialMinute
-        )
-
-        dialog.onConfirm = { hour, minute ->
-            val totalMinutes = hour * 60 + minute
-
-            // Определяем, существует ли уже такой слот
-            val isDuplicate = if (isEditing) {
-                // При редактировании ищем дубликат, исключая сам редактируемый слот
-                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != timeSlotToEdit!!.id }
-            } else {
-                // При добавлении ищем любой слот с таким же временем
-                viewModel.timeSlots.value.any { it.startTimeMinutes == totalMinutes }
-            }
-
-            if (isDuplicate) {
-                // Если дубликат найден, показываем Toast и возвращаем false
-                Toast.makeText(requireContext(), "Такой слот уже существует", Toast.LENGTH_SHORT).show()
-                false // <-- Говорим пикеру не закрываться
-            } else {
-                // Если дубликата нет, вызываем метод ViewModel
-                if (isEditing) {
-                    viewModel.updateTimeSlot(timeSlotToEdit!!.id, hour, minute)
-                } else {
-                    viewModel.addTimeSlot(hour, minute)
-                }
-                // и возвращаем true
-                true // <-- Говорим пикеру, что можно закрыться
-            }
-        }
-
-        dialog.show(childFragmentManager, "ComposePickerDialogFragment")
+            initialMinute = initialMinute,
+            extraId = extraId
+        ).show(childFragmentManager, AppointmentConstants.Tags.TIME_PICKER_DIALOG)
     }
 
     override fun onDestroyView() {

@@ -3,7 +3,10 @@ package com.avetiso.feature_schedule.add_appointment.steps.step2.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.TimeSlotDao
+import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
+import com.avetiso.core.model.UiText
+import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,36 +28,47 @@ class Step2SelectTimeViewModel @Inject constructor(
     private val _eventChannel = Channel<Step2Event>()
     val events = _eventChannel.receiveAsFlow()
 
-    fun addTimeSlot(hour: Int, minute: Int) {
+    private var timeSlotPendingDelete: TimeSlotEntity? = null
+
+    fun saveTimeSlot(hour: Int, minute: Int, id: Long = 0L) {
         viewModelScope.launch {
             val totalMinutes = hour * 60 + minute
-            val exists = timeSlots.value.any { it.startTimeMinutes == totalMinutes }
-            if (exists) {
-                // Отправляем событие, если слот существует
-                _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
+
+            // УМНАЯ ПРОВЕРКА:
+            // Ищем слот с таким же временем, у которого ID НЕ совпадает с текущим.
+            // 1. При добавлении (id=0): найдет любой слот с таким временем.
+            // 2. При обновлении (id=5): найдет чужой слот, но проигнорирует "самого себя".
+            val isDuplicate = timeSlots.value.any {
+                it.startTimeMinutes == totalMinutes && it.id != id
+            }
+
+            if (isDuplicate) {
+                // Текст "Такой слот..." вынеси в ресурсы позже
+                _eventChannel.send(
+                    Step2Event.ShowToast(
+                        UiText.StringResource(R.string.Такой_слот_уже_существует
+                        )
+                    )
+                )
             } else {
-                timeSlotDao.insertTimeSlot(TimeSlotEntity(startTimeMinutes = totalMinutes))
+                // Room сам разберется: если id=0 -> INSERT, если id>0 -> UPDATE (при OnConflictStrategy.REPLACE)
+                timeSlotDao.insertTimeSlot(TimeSlotEntity(id = id, startTimeMinutes = totalMinutes))
             }
         }
     }
 
-    fun updateTimeSlot(id: Long, hour: Int, minute: Int) {
-        viewModelScope.launch {
-            val totalMinutes = hour * 60 + minute
-            val exists = timeSlots.value.any { it.startTimeMinutes == totalMinutes && it.id != id }
-            if (exists) {
-                // Отправляем событие и здесь
-                _eventChannel.send(Step2Event.ShowToast("Такой слот уже существует"))
-            } else {
-                val updatedSlot = TimeSlotEntity(id = id, startTimeMinutes = totalMinutes)
-                timeSlotDao.insertTimeSlot(updatedSlot)
-            }
-        }
+    // 1. Нажали на урну
+    fun onDeleteIconClicked(timeSlot: TimeSlotEntity) {
+        timeSlotPendingDelete = timeSlot
     }
 
-    fun deleteTimeSlot(timeSlot: TimeSlotEntity) {
+    // 2. Подтвердили в диалоге
+    fun onDeleteConfirmed() {
+        val timeSlot = timeSlotPendingDelete ?: return
         viewModelScope.launch {
+            // Предполагается, что serviceDao у тебя есть в конструкторе
             timeSlotDao.deleteTimeSlot(timeSlot)
         }
+        timeSlotPendingDelete = null
     }
 }

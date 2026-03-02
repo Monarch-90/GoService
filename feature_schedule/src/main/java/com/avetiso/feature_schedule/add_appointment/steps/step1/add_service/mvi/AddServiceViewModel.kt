@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.core.entity.ServiceEntity
+import com.avetiso.core.model.AppCurrency
+import com.avetiso.core.model.UiText
+import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +32,7 @@ class AddServiceViewModel @Inject constructor(
 
     private val _eventChannel = Channel<AddServiceEvent>()
     val events = _eventChannel.receiveAsFlow()
+    private var pendingCurrencyForDefault: AppCurrency? = null
 
     init {
         // При старте загружаем валюту по умолчанию
@@ -60,29 +64,33 @@ class AddServiceViewModel @Inject constructor(
     }
 
     // Метод вызывается, когда пользователь меняет значение в спиннере
-    fun onCurrencySelectedInSpinner(newCurrency: String) {
+    fun onCurrencySelectedInSpinner(newCurrencyCode: String) {
 
         // Обновляем UI
-        _uiState.update { it.copy(selectedCurrency = newCurrency) }
+        _uiState.update { it.copy(selectedCurrency = newCurrencyCode) }
 
-        // ✅ Если валюта изменилась и это не инициализация (простая проверка),
+        // Если валюта изменилась и это не инициализация (простая проверка),
         // запускаем проверку, нужно ли показать диалог.
         // Нюанс: Спиннер вызывает onItemSelected даже при инициализации.
         // Чтобы избежать диалога при старте, можно проверить, отличается ли новая от сохраненной дефолтной.
 
         viewModelScope.launch {
-            val savedDefault = settingsRepository.defaultCurrency.first()
-            if (newCurrency != savedDefault) {
+            val savedDefaultCode = settingsRepository.defaultCurrency.first()
+            if (newCurrencyCode != savedDefaultCode) {
+
+                val currencyEnum = AppCurrency.fromCode(newCurrencyCode)
+                // Запоминаем внутри ViewModel
+                pendingCurrencyForDefault = currencyEnum
                 // Отправляем событие во фрагмент, чтобы показать диалог
-                _eventChannel.send(AddServiceEvent.AskToSetDefaultCurrency(newCurrency))
+                _eventChannel.send(AddServiceEvent.AskToSetDefaultCurrency(currencyEnum))
             }
         }
     }
 
     // Метод для сохранения новой дефолтной валюты
-    fun setNewDefaultCurrency(currency: String) {
+    fun setNewDefaultCurrency(currency: AppCurrency) {
         viewModelScope.launch {
-            settingsRepository.setDefaultCurrency(currency)
+            settingsRepository.setDefaultCurrency(currency.name)
         }
     }
 
@@ -101,7 +109,13 @@ class AddServiceViewModel @Inject constructor(
 
             // 2. Если дубликат найден, отправляем событие с ошибкой
             if (duplicate != null) {
-                _eventChannel.send(AddServiceEvent.ShowToast("Такая услуга уже существует"))
+                _eventChannel.send(
+                    AddServiceEvent.ShowToast(
+                        UiText.StringResource(
+                            R.string.Такая_услуга_уже_существует
+                        )
+                    )
+                )
                 return@launch
             }
 
@@ -113,5 +127,23 @@ class AddServiceViewModel @Inject constructor(
             }
             _eventChannel.send(AddServiceEvent.NavigateBackWithResult)
         }
+    }
+
+    // Вызывается фрагментом, когда пользователь нажал "ДА" в диалоге
+    fun onDefaultCurrencyConfirmed() {
+        val currency = pendingCurrencyForDefault
+        if (currency != null) {
+            setNewDefaultCurrency(currency)
+        }
+        pendingCurrencyForDefault = null
+    }
+
+    // Вызывается фрагментом, когда пользователь нажал "НЕТ" (опционально, для очистки)
+    fun onDefaultCurrencyDeclined() {
+        pendingCurrencyForDefault = null
+    }
+
+    fun setSelectedCategory(categoryName: String) {
+        _uiState.update { it.copy(selectedCategoryName = categoryName) }
     }
 }

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ClientEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -20,24 +21,24 @@ interface ClientDao {
     @Delete
     suspend fun deleteClient(client: ClientEntity)
 
-    @Query("SELECT * FROM clients ORDER BY name ASC")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " ORDER BY name ASC")
     fun getAllClients(): Flow<List<ClientEntity>>
 
-    @Query("SELECT * FROM clients WHERE name LIKE '%' || :query || '%' OR phoneNumber LIKE '%' || :query || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE name LIKE '%' || :query || '%' OR phoneNumber LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchClients(query: String): Flow<List<ClientEntity>>
 
-    @Query("SELECT * FROM clients WHERE name = :name AND phoneNumber = :phoneNumber AND id != :idToExclude LIMIT 1")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE name = :name AND phoneNumber = :phoneNumber AND id != :idToExclude LIMIT 1")
     suspend fun findByNameAndPhone(name: String, phoneNumber: String, idToExclude: Long): ClientEntity?
 
-    @Query("SELECT * FROM clients WHERE name = :name AND instagram = :instagram AND id != :idToExclude LIMIT 1")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE name = :name AND instagram = :instagram AND id != :idToExclude LIMIT 1")
     suspend fun findByNameAndInstagram(name: String, instagram: String, idToExclude: Long): ClientEntity?
 
-    @Query("SELECT * FROM clients WHERE phoneNumber = :phoneNumber AND instagram = :instagram AND id != :idToExclude LIMIT 1")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE phoneNumber = :phoneNumber AND instagram = :instagram AND id != :idToExclude LIMIT 1")
     suspend fun findByPhoneAndInstagram(phoneNumber: String, instagram: String, idToExclude: Long): ClientEntity?
 
-    @Query("SELECT * FROM clients WHERE id = :id")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE id = :id")
     suspend fun getClientById(id: Long): ClientEntity?
 
-    @Query("SELECT * FROM clients WHERE id = :id")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE id = :id")
     fun getClientFlowById(id: Long): Flow<ClientEntity?>
 }

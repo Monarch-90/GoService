@@ -2,6 +2,7 @@ package com.avetiso.feature_clients.selector.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,9 +22,12 @@ class ClientSelectorViewModel @Inject constructor(
     private val _state = MutableStateFlow(ClientSelectorState())
     val state = _state.asStateFlow()
 
+    // ✅ State: кого хотим удалить
+    private var clientPendingDelete: ClientEntity? = null
+
     // Этот Flow будет переизлучать список клиентов при изменении searchQuery
     val clients = _state
-        .debounce(300)
+        .debounce(AppConstants.Time.SEARCH_DEBOUNCE)
         .flatMapLatest { state ->
             if (state.searchQuery.isBlank()) {
                 clientDao.getAllClients()
@@ -47,13 +51,17 @@ class ClientSelectorViewModel @Inject constructor(
         _state.update { it.copy(selectedClient = null) }
     }
 
-    fun deleteClient(client: ClientEntity) {
+    // 1. Фрагмент говорит: нажали иконку удаления
+    fun onDeleteIconClicked(client: ClientEntity) {
+        clientPendingDelete = client
+    }
+
+    // 2. Фрагмент говорит: пользователь нажал "Да"
+    fun onDeleteConfirmed() {
+        val client = clientPendingDelete ?: return
         viewModelScope.launch {
-            // Если удаляем выбранного клиента, сбрасываем выбор
-            if (_state.value.selectedClient == client) {
-                _state.update { it.copy(selectedClient = null) }
-            }
             clientDao.deleteClient(client)
         }
+        clientPendingDelete = null
     }
 }

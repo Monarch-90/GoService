@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.feature_clients.databinding.ItemClientBinding
 
@@ -89,7 +90,7 @@ class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(
         // Полностью повторяем логику из первого шага
         override fun toggleActions(show: Boolean) {
             actionsContainer.isVisible = show
-            binding.llClientItemContainer.alpha = if (show) 0.2f else 1.0f
+            binding.llClientItemContainer.alpha = if (show) AppConstants.Ui.ALPHA_DIMMED else AppConstants.Ui.ALPHA_OPAQUE
 
             if (show) {
                 binding.viewSelectedCheck.isVisible = false

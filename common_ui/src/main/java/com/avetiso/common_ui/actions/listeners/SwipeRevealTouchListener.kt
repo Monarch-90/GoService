@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.ISwipeableHolder
+import com.avetiso.core.AppConstants
 import kotlin.math.abs
 
 class SwipeRevealTouchListener<T>(
@@ -15,7 +16,7 @@ class SwipeRevealTouchListener<T>(
     private val adapter: ListAdapter<T, *>,      // <- Принимаем универсальный ListAdapter
     private val getItemId: (T) -> Any,           // <- Принимаем лямбду для получения ID
     private val onActionsRevealed: (Int) -> Unit,
-    private val onDismiss: () -> Unit
+    private val onDismiss: () -> Unit,
 ) : RecyclerView.OnItemTouchListener {
 
     private val touchSlop = ViewConfiguration.get(recyclerView.context).scaledTouchSlop
@@ -124,6 +125,8 @@ class SwipeRevealTouchListener<T>(
     }
 
     private fun animateSwipe(view: View, targetX: Float) {
-        ObjectAnimator.ofFloat(view, "translationX", targetX).setDuration(250).start()
+        ObjectAnimator.ofFloat(view, View.TRANSLATION_X, targetX)
+            .setDuration(AppConstants.Time.SWIPE_REMOVE)
+            .start()
     }
 }

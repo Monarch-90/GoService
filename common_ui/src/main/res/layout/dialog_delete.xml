@@ -37,7 +37,7 @@
             android:background="@drawable/corners_btn"
             android:backgroundTint="@color/surface_color"
             android:gravity="center"
-            android:text="Отмена"
+            android:text="@string/Отмена_dialog"
             android:textAllCaps="false"
             android:textColor="@color/custom_black_white"
             android:textSize="16sp" />
@@ -50,7 +50,7 @@
             android:background="@drawable/corners_btn"
             android:backgroundTint="@color/surface_color"
             android:gravity="center"
-            android:text="Удалить"
+            android:text="@string/Удалить_dialog"
             android:textAllCaps="false"
             android:textColor="@color/red"
             android:textSize="16sp" />

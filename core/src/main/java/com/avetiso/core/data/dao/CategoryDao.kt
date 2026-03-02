@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.CategoryEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -13,10 +14,10 @@ interface CategoryDao {
     @Insert
     suspend fun insertCategory(category: CategoryEntity)
 
-    @Query("SELECT * FROM categories ORDER BY name ASC")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CATEGORIES + " ORDER BY name ASC")
     fun getAllCategories(): Flow<List<CategoryEntity>>
 
-    @Query("SELECT * FROM categories WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_CATEGORIES + " WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchCategories(query: String): Flow<List<CategoryEntity>>
 
     @Delete

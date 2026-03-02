@@ -9,6 +9,9 @@
         android:name="com.avetiso.feature_schedule.ui.ScheduleFragment"
         android:label="fragment_schedule"
         tools:layout="@layout/fragment_schedule">
+
+        <deepLink app:uri="goservice://schedule/main" />
+
         <action
             android:id="@+id/action_scheduleFragment_to_addAppointmentFragment"
             app:destination="@id/addAppointmentFragment" />

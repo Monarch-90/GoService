@@ -13,12 +13,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
+import com.avetiso.common_ui.dialogs.DeleteDialogFragment
+import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ClientEntity
+import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.adapter.ClientAdapter
 import com.avetiso.feature_clients.databinding.FragmentClientSelectorBinding
 import com.avetiso.feature_clients.selector.mvi.ClientSelectorViewModel
-import com.avetiso.navigation.ClientsNavigator
+import com.avetiso.navigation.routers.ClientsNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -45,8 +48,17 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
         setupListeners()
         observeState()
 
-        setFragmentResultListener("client_updated_request") { _, _ ->
+        setFragmentResultListener(ClientsConstants.Requests.CLIENT_UPDATED) { _, _ ->
             viewModel.onSearchQueryChanged(viewModel.state.value.searchQuery)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            ClientsConstants.Requests.CLIENT_DELETE_FROM_SELECTOR,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            if (bundle.getBoolean(AppConstants.Result.DELETE_CONFIRMED)) {
+                viewModel.onDeleteConfirmed()
+            }
         }
     }
 
@@ -63,20 +75,29 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
             recyclerView = currentBinding.rvClients,
             adapter = adapter,
             getItemId = { client -> client.id },
-            getItemName = { client -> client.name },
             onEdit = { client ->
                 // Навигация на экран редактирования
                 clientsNavigator.navigateToAddEditClient(findNavController(), client.id)
             },
-            onDelete = { client ->
-                viewModel.deleteClient(client)
+            onDeleteClicked = { client ->
+                // Сначала сохраняем состояние в ViewModel!
+                viewModel.onDeleteIconClicked(client)
+
+                // Потом показываем диалог
+                DeleteDialogFragment.newInstance(
+                    requestKey = ClientsConstants.Requests.CLIENT_DELETE_FROM_SELECTOR,
+                    message = getString(com.avetiso.core.R.string.delete_dialog_message, client.name)
+                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
             },
             onItemClick = { client ->
                 viewModel.onClientSelected(client)
             },
             onActionsShown = {
                 viewModel.clearClientSelection()
-                setFragmentResult("client_selection_request", bundleOf("selected_client" to null))
+                setFragmentResult(
+                    AppConstants.Requests.CLIENT_SELECT,
+                    bundleOf(AppConstants.Result.SELECTED_CLIENT to null)
+                )
             }
         )
         // Передаем actions в адаптер
@@ -109,7 +130,10 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
                             // 1. Обновляем UI (подсветка)
                             clientAdapter?.updateSelection(selectedClient) // Безопасный вызов
                             // 2. Отправляем результат родителю
-                            setFragmentResult("client_selection_request", bundleOf("selected_client" to selectedClient))
+                            setFragmentResult(
+                                AppConstants.Requests.CLIENT_SELECT,
+                                bundleOf(AppConstants.Result.SELECTED_CLIENT to selectedClient)
+                            )
                         }
                 }
             }

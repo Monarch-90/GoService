@@ -56,6 +56,7 @@ object AppConstants {
     object Time {
         const val SEARCH_DEBOUNCE = 300L
         const val SWIPE_REMOVE = 250L
+        const val KEY_PENDING_DESTINATION = "key_pending_destination"
     }
 
     // UI: Анимации, прозрачность, задержки визуальных эффектов

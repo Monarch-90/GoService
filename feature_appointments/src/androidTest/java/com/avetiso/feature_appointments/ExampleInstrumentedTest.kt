@@ -1,4 +1,4 @@
-package com.avetiso.feature_supplies
+package com.avetiso.feature_appointments
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -1,4 +1,4 @@
-package com.avetiso.feature_supplies
+package com.avetiso.feature_appointments
 
 import org.junit.Test
 

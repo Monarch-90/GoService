@@ -10,7 +10,7 @@
     <item
         android:id="@+id/supplies_nav_graph"
         android:icon="@drawable/ic_supplies"
-        android:title="@string/Расходники" />
+        android:title="@string/Записи" />
     <item
         android:id="@+id/windows_nav_graph"
         android:icon="@drawable/ic_windows"

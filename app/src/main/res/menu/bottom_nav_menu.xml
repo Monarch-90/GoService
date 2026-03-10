@@ -4,12 +4,12 @@
         android:icon="@drawable/ic_schedule"
         android:title="@string/Расписание" />
     <item
-        android:icon="@drawable/ic_clients"
-        android:title="@string/Клиенты" />
-    <item
         android:icon="@drawable/ic_appointment"
         android:title="@string/Записи" />
     <item
+        android:icon="@drawable/ic_clients"
+        android:title="@string/Клиенты" />
+    <item
         android:icon="@drawable/ic_statistics"
-        android:title="@string/Окошки" />
+        android:title="@string/Статистика" />
 </menu>

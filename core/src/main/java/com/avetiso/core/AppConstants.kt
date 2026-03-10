@@ -10,6 +10,7 @@ object AppConstants {
         const val TABLE_CLIENTS = "clients"
         const val TABLE_SERVICES = "services"
         const val TABLE_TIMESLOT = "time_slots"
+        const val DATA_STORE_NAME = "settings"
     }
 
     // Форматирование строк и префиксы
@@ -52,6 +53,13 @@ object AppConstants {
     object Requests {
         const val CLIENT_SELECT = "client_selection_request"
         const val CHANGE_CURRENCY = "change_currency_request"
+        const val ADD_CUSTOM_CURRENCY = "add_custom_currency_request"
+        const val DELETE_CUSTOM_CURRENCY = "delete_custom_currency_request"
+    }
+
+    object Preferences {
+        const val KEY_DEFAULT_CURRENCY = "default_currency"
+        const val KEY_CUSTOM_CURRENCIES = "custom_currencies"
     }
 
     // Временные интервалы и тайм-ауты

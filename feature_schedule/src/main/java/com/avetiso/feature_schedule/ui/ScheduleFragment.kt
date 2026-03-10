@@ -1,7 +1,6 @@
 package com.avetiso.feature_schedule.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -12,27 +11,26 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.actions.TriggerMode
-import com.avetiso.common_ui.compose_picker.ComposeDatePickerDialogFragment
-import com.avetiso.common_ui.dialogs.DeleteDialogFragment
-import com.avetiso.common_ui.dialogs.InputDialogFragment
+import com.avetiso.common_ui.appointments.showAppointmentDeleteDialog
+import com.avetiso.common_ui.appointments.showAppointmentNoteDialog
+import com.avetiso.common_ui.appointments.showAppointmentStatusDialog
 import com.avetiso.core.AppConstants
+import com.avetiso.core.entity.ui.Appointment
 import com.avetiso.core.model.AppointmentStatus
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.ScheduleConstants
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
-import com.avetiso.feature_schedule.add_appointment.data.Appointment
-import com.avetiso.feature_schedule.add_appointment.ui.getStatusByIndex
-import com.avetiso.feature_schedule.add_appointment.ui.getStatusLabelsArray
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
 import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
 import com.avetiso.navigation.controllers.SidebarController
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.avetiso.navigation.routers.ScheduleNavigator
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -44,6 +42,8 @@ import java.util.Locale
 @AndroidEntryPoint
 class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
+    @Inject
+    lateinit var scheduleNavigator: ScheduleNavigator
     private var _binding: FragmentScheduleBinding? = null
     private val binding get() = _binding!!
     private val calendarViewModel: CalendarViewModel by viewModels()
@@ -67,8 +67,22 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private fun setupAdapter() {
         val adapter = AppointmentAdapter(
-            onStatusClicked = { appointment -> showStatusSelectionDialog(appointment) },
-            onNoteClicked = { appointment -> showNoteDialog(appointment) }
+            onStatusClicked = { appointment ->
+                showAppointmentStatusDialog(
+                    appointment = appointment,
+                    rescheduleRequestKey = ScheduleConstants.Requests.RESCHEDULE_DATE_KEY,
+                    onStatusSelected = { status ->
+                        scheduleViewModel.updateAppointmentStatus(appointment.id, status)
+                    }
+                )
+            },
+            onNoteClicked = { appointment ->
+                scheduleViewModel.onEditNoteClicked(appointment.id)
+                showAppointmentNoteDialog(
+                    currentNote = appointment.note,
+                    requestKey = ScheduleConstants.Requests.INPUT_NOTE_KEY
+                )
+            }
         ).also { appointmentAdapter = it }
 
         binding.rvAppointments.adapter = adapter
@@ -79,19 +93,16 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             adapter = adapter,
             getItemId = { it.id },
             onEdit = { appointment ->
-                val action = ScheduleFragmentDirections.actionScheduleFragmentToAddAppointmentFragment(
-                    selectedDate = calendarViewModel.state.value.selectedDate.toString(),
-                    appointmentId = appointment.id
+                scheduleNavigator.navigateToAddEditAppointment(
+                    navController = findNavController(),
+                    appointmentId = appointment.id,
+                    selectedDate = calendarViewModel.state.value.selectedDate?.toString()
                 )
-                findNavController().navigate(action)
             },
             onDeleteClicked = { appointment ->
                 scheduleViewModel.onDeleteIconClicked(appointment.id)
-                val messageText = getString(R.string.Удалить_запись)
-                DeleteDialogFragment.newInstance(
-                    requestKey = ScheduleConstants.Requests.APPOINTMENT_DELETE,
-                    message = getString(com.avetiso.core.R.string.delete_dialog_message, messageText)
-                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
+                // Вызываем общий диалог
+                showAppointmentDeleteDialog(ScheduleConstants.Requests.APPOINTMENT_DELETE)
             },
             onItemClick = { /* TODO: Логика клика */ },
             onActionsShown = {
@@ -217,7 +228,10 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                     var previousSelectedDate: LocalDate? = null
                     calendarViewModel.state.collect { state ->
 
-                        android.util.Log.d("ScheduleDebug", "calendar state collected: new_date=${state.selectedDate}, prev_date=$previousSelectedDate")
+                        android.util.Log.d(
+                            "ScheduleDebug",
+                            "calendar state collected: new_date=${state.selectedDate}, prev_date=$previousSelectedDate"
+                        )
 
                         if (previousSelectedDate != null && previousSelectedDate != state.selectedDate) {
                             // 1. СНАЧАЛА закрываем открытую запись.
@@ -250,7 +264,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
                             is ScheduleState.Error -> {
                                 // Если ошибка - показываем Toast и сбрасываем состояние
-                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                Toast.makeText(requireContext(), getString(state.messageResId), Toast.LENGTH_LONG).show()
                             }
                             // В остальных случаях ничего не делаем
                             else -> {}
@@ -268,52 +282,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         ).replaceFirstChar { it.uppercase() }
         val yearTitle = yearMonth.year.toString()
         binding.textMonthTitle.text = "$monthTitle $yearTitle"
-    }
-
-    private fun showStatusSelectionDialog(appointment: Appointment) {
-        val statuses = requireContext().getStatusLabelsArray()
-
-        val customTitleView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.status_dialog_title, null)
-
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setCustomTitle(customTitleView)
-            .setItems(statuses) { _, which ->
-                val selectedStatus = getStatusByIndex(which)
-                if (selectedStatus == AppointmentStatus.RESCHEDULED) {
-                    showRescheduleDatePicker(appointment)
-                } else {
-                    scheduleViewModel.updateAppointmentStatus(appointment.id, selectedStatus)
-                }
-            }
-            .create()
-
-        dialog.setOnShowListener {
-            dialog.window?.setBackgroundDrawableResource(com.avetiso.core.R.drawable.dialog_box_corners)
-        }
-        dialog.show()
-    }
-
-    private fun showRescheduleDatePicker(appointment: Appointment) {
-        ComposeDatePickerDialogFragment.newInstance(
-            requestKey = ScheduleConstants.Requests.RESCHEDULE_DATE_KEY,
-            title = getString(R.string.Выберите_дату),
-            extraId = appointment.id // Передаем ID записи на хранение в диалог
-        ).show(childFragmentManager, ScheduleConstants.Tag.DATE_PICKER)
-    }
-
-    private fun showNoteDialog(appointment: Appointment) {
-        // Запоминаем ID записи, чтобы обновить её при получении результата
-        scheduleViewModel.onEditNoteClicked(appointment.id)
-
-        InputDialogFragment.newInstance(
-            requestKey = ScheduleConstants.Requests.INPUT_NOTE_KEY,
-            title = getString(com.avetiso.core.R.string.Примечание),
-            hint = getString(R.string.Введите_текст),
-            initialValue = appointment.note,
-            isMultiline = true, // Включаем многострочный режим
-            allowEmpty = true,
-        ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }
 
     override fun onDestroyView() {

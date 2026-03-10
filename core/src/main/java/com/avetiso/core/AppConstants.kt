@@ -16,6 +16,7 @@ object AppConstants {
     object Format {
         const val INSTAGRAM_PREFIX = "@"
         const val FULL_DATE_FORMAT = "yyyy-MM-dd"
+        const val DATE_FORMAT_HEADER = "d MMMM yyyy"
         const val DATE_FORMAT_YEAR_MONTH = "yyyy-MM"
         const val TIME_HH_MM = "%02d:%02d"
         const val PRICE_2_DECIMALS = "%.2f"
@@ -29,6 +30,7 @@ object AppConstants {
         const val SIDEBAR_SETTINGS = "goservice://sidebar/settings"
         const val SIDEBAR_ABOUT = "goservice://sidebar/about"
         const val SCHEDULE_MAIN = "goservice://schedule/main"
+        const val SCHEDULE_ADD_EDIT = "goservice://schedule/add_edit"
     }
 
     // Ключи результатов (Result Keys) внутри Bundle
@@ -67,6 +69,10 @@ object AppConstants {
         // Задержка перед запуском бегущей строки (Marquee)
         const val MARQUEE_START_DELAY = 2000L
         const val SNACKBAR_LONG_DURATION = 5000L
+    }
+
+    object Tag {
+        const val DATE_PICKER = "DATE_PICKER"
     }
 
     const val ID_NONE = -1L

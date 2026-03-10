@@ -13,6 +13,7 @@ import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity
+import com.avetiso.core.utils.formattedTime
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.add_appointment.mvi.AddAppointmentEvent

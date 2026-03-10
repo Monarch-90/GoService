@@ -15,4 +15,10 @@
     <string name="от_">от\u0020</string>
 
     <string name="Поиск">Поиск</string>
+
+    <string name="add_custom_currency">Добавить</string>
+    <string name="add_currency_title">Добавить валюту</string>
+    <string name="add_currency_hint">GEL</string>
+    <string name="remove_custom_currency">Удалить</string>
+    <string name="select_currency_to_delete">Выберите валюту для удаления</string>
 </resources>

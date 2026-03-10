@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">common_ui</string>
 
-    <string name="Изменение_настроек">Изменение настроек</string>
+    <string name="Валюта_по_умолчанию">Валюта по умолчанию</string>
     <string name="Установить_название">Установить %1$s?</string>
     <string name="Да">Да</string>
     <string name="Нет">Нет</string>

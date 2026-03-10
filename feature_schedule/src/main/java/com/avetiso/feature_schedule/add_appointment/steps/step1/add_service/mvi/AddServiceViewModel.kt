@@ -2,26 +2,31 @@ package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.core.entity.ServiceEntity
-import com.avetiso.core.model.AppCurrency
+import com.avetiso.core.model.CurrencyListItem
 import com.avetiso.core.model.UiText
+import com.avetiso.core.usecase.GetCurrencyListUseCase
 import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.receiveAsFlow
 
 @HiltViewModel
 class AddServiceViewModel @Inject constructor(
     private val serviceDao: ServiceDao,
     private val settingsRepository: SettingsRepository,
+    getCurrencyListUseCase: GetCurrencyListUseCase,
 ) : ViewModel() {
 
     // Приватный MutableStateFlow для хранения и изменения состояния
@@ -30,67 +35,109 @@ class AddServiceViewModel @Inject constructor(
     // Публичный StateFlow только для чтения из UI
     val uiState = _uiState.asStateFlow()
 
-    private val _eventChannel = Channel<AddServiceEvent>()
-    val events = _eventChannel.receiveAsFlow()
-    private var pendingCurrencyForDefault: AppCurrency? = null
+    private val _events = Channel<AddServiceEvent>()
+    val events = _events.receiveAsFlow()
+
+    // Дефолтная валюта, чтобы выбрать её при первом открытии
+    val defaultCurrency = settingsRepository.defaultCurrency
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(AppConstants.Ui.SNACKBAR_LONG_DURATION),
+            null
+        )
+
+    // Реактивный список для адаптера
+    val currencyList = getCurrencyListUseCase()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(AppConstants.Ui.SNACKBAR_LONG_DURATION),
+            emptyList()
+        )
+    private var selectedCurrencyCode: String? = null
 
     init {
         // При старте загружаем валюту по умолчанию
         viewModelScope.launch {
-            val defaultCurrency = settingsRepository.defaultCurrency.first()
-            _uiState.update { it.copy(selectedCurrency = defaultCurrency) }
+            val defaultCurrencyCode = settingsRepository.defaultCurrency.first()
+            _uiState.update { it.copy(selectedCurrency = defaultCurrencyCode) }
+            selectedCurrencyCode = defaultCurrencyCode
         }
     }
 
     // Метод для обновления продолжительности
     fun setDuration(hour: Int, minute: Int) {
-        _uiState.update { currentState ->
-            currentState.copy(selectedHour = hour, selectedMinute = minute)
-        }
+        _uiState.update { it.copy(selectedHour = hour, selectedMinute = minute) }
     }
 
     // Метод для обновления флага "цена от"
     fun setPriceFrom(isFrom: Boolean) {
-        _uiState.update { currentState ->
-            currentState.copy(isPriceFrom = isFrom)
-        }
+        _uiState.update { it.copy(isPriceFrom = isFrom) }
     }
 
     // Метод для обновления валюты
     fun setCurrency(currency: String?) {
-        _uiState.update { currentState ->
-            currentState.copy(selectedCurrency = currency)
-        }
+        _uiState.update { it.copy(selectedCurrency = currency) }
     }
 
-    // Метод вызывается, когда пользователь меняет значение в спиннере
-    fun onCurrencySelectedInSpinner(newCurrencyCode: String) {
+    fun setSelectedCategory(categoryName: String) {
+        _uiState.update { it.copy(selectedCategoryName = categoryName) }
+    }
 
-        // Обновляем UI
-        _uiState.update { it.copy(selectedCurrency = newCurrencyCode) }
+    fun onCurrencyItemSelected(item: CurrencyListItem) {
+        when (item) {
+            is CurrencyListItem.ActionAdd -> {
+                viewModelScope.launch {
+                    // Откатываем визуал на предыдущую выбранную валюту
+                    _events.send(AddServiceEvent.RestoreCurrencySelection(selectedCurrencyCode ?: defaultCurrency.value))
+                    _events.send(AddServiceEvent.ShowAddCurrencyDialog)
+                }
+            }
+            is CurrencyListItem.ActionDelete -> {
+                viewModelScope.launch {
+                    // 1. Откатываем визуал спиннера назад
+                    _events.send(AddServiceEvent.RestoreCurrencySelection(selectedCurrencyCode ?: defaultCurrency.value))
+                    // 2. Берем список кастомных валют и кидаем эвент на открытие диалога
+                    val customCurrencies = settingsRepository.customCurrencies.first().toTypedArray()
+                    _events.send(AddServiceEvent.ShowDeleteCurrencyDialog(customCurrencies))
+                }
+            }
+            is CurrencyListItem.Currency -> {
+                val newCurrencyCode = item.code
+                selectedCurrencyCode = newCurrencyCode
+                _uiState.update { it.copy(selectedCurrency = newCurrencyCode) }
 
-        // Если валюта изменилась и это не инициализация (простая проверка),
-        // запускаем проверку, нужно ли показать диалог.
-        // Нюанс: Спиннер вызывает onItemSelected даже при инициализации.
-        // Чтобы избежать диалога при старте, можно проверить, отличается ли новая от сохраненной дефолтной.
-
-        viewModelScope.launch {
-            val savedDefaultCode = settingsRepository.defaultCurrency.first()
-            if (newCurrencyCode != savedDefaultCode) {
-
-                val currencyEnum = AppCurrency.fromCode(newCurrencyCode)
-                // Запоминаем внутри ViewModel
-                pendingCurrencyForDefault = currencyEnum
-                // Отправляем событие во фрагмент, чтобы показать диалог
-                _eventChannel.send(AddServiceEvent.AskToSetDefaultCurrency(currencyEnum))
+                viewModelScope.launch {
+                    val savedDefaultCode = settingsRepository.defaultCurrency.first()
+                    // Если выбрали новую валюту, предлагаем сделать её дефолтной
+                    if (newCurrencyCode != savedDefaultCode) {
+                        // Обрати внимание: теперь передаем String, а не Enum
+                        _events.send(AddServiceEvent.AskToSetDefaultCurrency(newCurrencyCode))
+                    }
+                }
             }
         }
     }
 
     // Метод для сохранения новой дефолтной валюты
-    fun setNewDefaultCurrency(currency: AppCurrency) {
+    fun setNewDefaultCurrency(currencyCode: String) {
         viewModelScope.launch {
-            settingsRepository.setDefaultCurrency(currency.name)
+            settingsRepository.setDefaultCurrency(currencyCode)
+        }
+    }
+
+    fun onDefaultCurrencyConfirmed() {
+        selectedCurrencyCode?.let { setNewDefaultCurrency(it) }
+    }
+
+    fun onDefaultCurrencyDeclined() {
+        // Ничего не делаем, просто оставляем текущую валюту только для этой услуги
+    }
+
+    fun saveCustomCurrency(currency: String) {
+        val cleanCurrency = currency.trim().uppercase()
+
+        viewModelScope.launch {
+            settingsRepository.addCustomCurrency(cleanCurrency)
         }
     }
 
@@ -109,7 +156,7 @@ class AddServiceViewModel @Inject constructor(
 
             // 2. Если дубликат найден, отправляем событие с ошибкой
             if (duplicate != null) {
-                _eventChannel.send(
+                _events.send(
                     AddServiceEvent.ShowToast(
                         UiText.StringResource(
                             R.string.Такая_услуга_уже_существует
@@ -125,25 +172,21 @@ class AddServiceViewModel @Inject constructor(
             } else {
                 serviceDao.updateService(service)
             }
-            _eventChannel.send(AddServiceEvent.NavigateBackWithResult)
+            _events.send(AddServiceEvent.NavigateBackWithResult)
         }
     }
 
-    // Вызывается фрагментом, когда пользователь нажал "ДА" в диалоге
-    fun onDefaultCurrencyConfirmed() {
-        val currency = pendingCurrencyForDefault
-        if (currency != null) {
-            setNewDefaultCurrency(currency)
+    fun deleteCustomCurrency(currency: String) {
+        viewModelScope.launch {
+            settingsRepository.removeCustomCurrency(currency)
+
+            // Если мы удалили ту валюту, которая сейчас была выбрана в форме,
+            // безопасно откатываемся на дефолтную, чтобы форма не сломалась
+            if (selectedCurrencyCode == currency) {
+                val fallbackCurrency = settingsRepository.defaultCurrency.first()
+                selectedCurrencyCode = fallbackCurrency
+                _uiState.update { it.copy(selectedCurrency = fallbackCurrency) }
+            }
         }
-        pendingCurrencyForDefault = null
-    }
-
-    // Вызывается фрагментом, когда пользователь нажал "НЕТ" (опционально, для очистки)
-    fun onDefaultCurrencyDeclined() {
-        pendingCurrencyForDefault = null
-    }
-
-    fun setSelectedCategory(categoryName: String) {
-        _uiState.update { it.copy(selectedCategoryName = categoryName) }
     }
 }

@@ -15,23 +15,28 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
+import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
+import com.avetiso.common_ui.dialogs.models.showDeleteCustomCurrencyDialog
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
-import com.avetiso.core.model.AppCurrency
+import com.avetiso.core.model.CurrencyListItem
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddServiceBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
-    private var binding: FragmentAddServiceBinding? = null
+    private var _binding: FragmentAddServiceBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: AddServiceViewModel by viewModels()
+    private var currentCurrencyItems: List<CurrencyListItem> = emptyList()
 
     // Получаем аргументы, переданные через Safe Args
     private val args: AddServiceFragmentArgs by navArgs()
@@ -40,15 +45,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     // ФЛАГ, чтобы отследить первую загрузку
     private var isInitialDataLoaded = false
 
-    // ФЛАГ: Чтобы отличать программную установку от клика пользователя
-    private var isUserAction = false
-
-    // Флаг, чтобы настроить спиннер только один раз при получении данных
-    private var isSpinnerSetup = false
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentAddServiceBinding.bind(view)
+        _binding = FragmentAddServiceBinding.bind(view)
 
         // Проверяем, пришел ли объект для редактирования
         serviceToEdit = args.serviceToEdit
@@ -59,23 +58,33 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             isInitialDataLoaded = true // Ставим флаг, что данные загружены
         }
 
-        binding?.btnSave?.setOnClickListener {
+        binding.btnSave.setOnClickListener {
             saveService()
         }
 
         setupResultListeners() // Регистрируем. ОТВЕТЫ: Входящие данные (что мне возвращают другие)
         setupFields()
-        observeUi()
+        observeState()
     }
 
     private fun setupResultListeners() {
-        // Слушатель для диалога валюты
+        // 1. Слушатель для добавления НОВОЙ валюты
+        childFragmentManager.setFragmentResultListener(
+            AppConstants.Requests.ADD_CUSTOM_CURRENCY,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val newCurrency = bundle.getString(AppConstants.Result.RESULT_TEXT)
+            if (!newCurrency.isNullOrBlank()) {
+                viewModel.saveCustomCurrency(newCurrency)
+            }
+        }
+
+        // 2. Слушатель для сохранения валюты ПО УМОЛЧАНИЮ
         childFragmentManager.setFragmentResultListener(
             AppointmentConstants.Request.SET_DEFAULT_CURRENCY,
             viewLifecycleOwner
         ) { _, bundle ->
             val isConfirmed = bundle.getBoolean(AppConstants.Result.RESULT_CONFIRMED)
-
             if (isConfirmed) {
                 viewModel.onDefaultCurrencyConfirmed()
             } else {
@@ -83,7 +92,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
         }
 
-        // Слушаем результат с экрана выбора категории
+        // 3. Слушатель для выбора КАТЕГОРИИ
         setFragmentResultListener(AppointmentConstants.Request.SELECTION_CATEGORY) { _, bundle ->
             val selectedCategoryName = bundle.getString(AppointmentConstants.Result.SELECTED_CATEGORY_NAME)
             if (selectedCategoryName != null) {
@@ -91,7 +100,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
         }
 
-        // Слушатель для времени (продолжительность)
+        // 4. Слушатель для ПРОДОЛЖИТЕЛЬНОСТИ
         childFragmentManager.setFragmentResultListener(
             AppointmentConstants.Request.DURATION_PICKER,
             viewLifecycleOwner
@@ -104,30 +113,44 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
     }
 
-    private fun observeUi() {
+    private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Подписка на состояние (для обновления текста продолжительности и т.д.)
+
+                // Подписка на основное состояние (UI State)
                 launch {
                     viewModel.uiState.collect { state ->
                         updateDurationText(state.selectedHour, state.selectedMinute)
                         if (state.isPriceFrom) {
-                            binding?.toggleBtnPriceFrom?.check(R.id.btn_price_from)
+                            binding.toggleBtnPriceFrom.check(R.id.btn_price_from)
                         } else {
-                            binding?.toggleBtnPriceFrom?.uncheck(R.id.btn_price_from)
-                        }
-
-                        // Инициализируем спиннер только когда получили валюту из БД (не null)
-                        // и только если еще не инициализировали
-                        if (state.selectedCurrency != null && !isSpinnerSetup) {
-                            setupCurrencySpinner(state.selectedCurrency)
-                            isSpinnerSetup = true
+                            binding.toggleBtnPriceFrom.uncheck(R.id.btn_price_from)
                         }
 
                         if (state.selectedCategoryName != null) {
-                            binding?.textCategory?.text = state.selectedCategoryName
+                            binding.textCategory.text = state.selectedCategoryName
                         } else {
-                            binding?.textCategory?.text = context?.getString(R.string.Выбрать_категорию)
+                            binding.textCategory.text = context?.getString(R.string.Выбрать_категорию)
+                        }
+                    }
+                }
+
+                // 1. Слушаем список валют
+                launch {
+                    viewModel.currencyList.collect { list ->
+                        if (list.isNotEmpty()) {
+                            currentCurrencyItems = list
+                            updateCurrencySpinnerAdapter(list)
+                        }
+                    }
+                }
+
+                // 2. Слушаем дефолтную валюту (для первичной установки)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        // Автоматически выбираем валюту, если она загружена
+                        if (state.selectedCurrency != null) {
+                            setCurrencySpinnerSelection(state.selectedCurrency)
                         }
                     }
                 }
@@ -157,9 +180,21 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
                             is AddServiceEvent.AskToSetDefaultCurrency -> {
                                 showChangeCurrencyDialog(
-                                    currencyName = event.currency.name,
+                                    currencyName = event.currencyCode,
                                     requestKey = AppointmentConstants.Request.SET_DEFAULT_CURRENCY,
                                 )
+                            }
+
+                            is AddServiceEvent.ShowAddCurrencyDialog -> {
+                                showAddCurrencyDialog()
+                            }
+
+                            is AddServiceEvent.RestoreCurrencySelection -> {
+                                setCurrencySpinnerSelection(event.previousCurrencyCode)
+                            }
+
+                            is AddServiceEvent.ShowDeleteCurrencyDialog -> {
+                                showDeleteCurrencyDialog(event.currencies)
                             }
                         }
                     }
@@ -168,19 +203,104 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         }
     }
 
+    private fun updateCurrencySpinnerAdapter(list: List<CurrencyListItem>) {
+        val labels = list.map { item ->
+            when (item) {
+                is CurrencyListItem.ActionAdd -> item.label
+                is CurrencyListItem.ActionDelete -> item.label
+                is CurrencyListItem.Currency -> item.code
+            }
+        }
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        // 1. Отключаем слушатель перед манипуляциями
+        binding.spinnerCurrency.onItemSelectedListener = null
+
+        // 2. Устанавливаем адаптер
+        binding.spinnerCurrency.adapter = adapter
+
+        // 3. Ищем позицию текущей выбранной валюты
+        val currentCurrency = viewModel.uiState.value.selectedCurrency
+        var position = list.indexOfFirst { it is CurrencyListItem.Currency && it.code == currentCurrency }
+
+        // ЗАЩИТА ОТ СБРОСА: Если валюты больше нет в списке (она была удалена),
+        // мы принудительно ищем первую НАСТОЯЩУЮ валюту (обычно это GEL на 1 позиции)
+        if (position == -1) {
+            position = list.indexOfFirst { it is CurrencyListItem.Currency }
+        }
+
+        // Ставим правильный выбор
+        if (position >= 0) {
+            binding.spinnerCurrency.setSelection(position, false)
+        }
+
+        // 4. Возвращаем слушатель
+        binding.spinnerCurrency.post {
+            binding.spinnerCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (currentCurrencyItems.isNotEmpty()) {
+                        viewModel.onCurrencyItemSelected(currentCurrencyItems[position])
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+    }
+
+    private fun setCurrencySpinnerSelection(currencyCode: String?) {
+        if (currencyCode == null || currentCurrencyItems.isEmpty()) return
+
+        val position = currentCurrencyItems.indexOfFirst { it is CurrencyListItem.Currency && it.code == currencyCode }
+
+        if (position >= 0 && binding.spinnerCurrency.selectedItemPosition != position) {
+            // При программном переключении валюты мы тоже временно снимаем слушатель,
+            // чтобы ViewModel не получала ложных эвентов
+            binding.spinnerCurrency.post {
+                val listener = binding.spinnerCurrency.onItemSelectedListener
+                binding.spinnerCurrency.onItemSelectedListener = null
+
+                binding.spinnerCurrency.setSelection(position, false)
+
+                binding.spinnerCurrency.post {
+                    binding.spinnerCurrency.onItemSelectedListener = listener
+                }
+            }
+        }
+    }
+
+    private fun showAddCurrencyDialog() {
+        val forbiddenValues = currentCurrencyItems.mapNotNull { if (it is CurrencyListItem.Currency) it.code else null }
+
+        InputDialogFragment.newInstance(
+            requestKey = AppConstants.Requests.ADD_CUSTOM_CURRENCY,
+            title = getString(com.avetiso.core.R.string.add_currency_title),
+            hint = getString(com.avetiso.core.R.string.add_currency_hint),
+            forbiddenValues = forbiddenValues,
+            allowEmpty = false
+        ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
+    }
+
+    private fun showDeleteCurrencyDialog(currencies: Array<String>) {
+        showDeleteCustomCurrencyDialog(currencies) { currencyToDelete ->
+            viewModel.deleteCustomCurrency(currencyToDelete)
+        }
+    }
+
     private fun setupInputFields() {
         // Для текстовых полей используем TextWatcher
-        binding?.ietName?.addTextChangedListener {
+        binding.ietName.addTextChangedListener {
             // Как только пользователь начинает печатать, убираем ошибку
-            binding?.ilName?.error = null
+            binding.ilName.error = null
         }
-        binding?.ietPrice?.addTextChangedListener {
-            binding?.ilPrice?.error = null
+        binding.ietPrice.addTextChangedListener {
+            binding.ilPrice.error = null
         }
     }
 
     private fun setupFields() {
-        binding?.toolbar?.setNavigationOnClickListener { findNavController().navigateUp() }
+        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
 
         setupInputFields()
         setupDurationPicker()
@@ -189,9 +309,9 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun populateFieldsForEdit(service: ServiceEntity) {
-        binding?.toolbar?.title = context?.getString(R.string.Редактировать_услугу)
-        binding?.ietName?.setText(service.name)
-        binding?.ietPrice?.setText(service.price.toString())
+        binding.toolbar.title = context?.getString(R.string.Редактировать_услугу)
+        binding.ietName.setText(service.name)
+        binding.ietPrice.setText(service.price.toString())
 
 
         // Обновляем состояние в ViewModel, чтобы все работало корректно
@@ -207,8 +327,8 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun saveService() {
-        val name = binding?.ietName?.text?.toString()
-        val priceStr = binding?.ietPrice?.text?.toString()
+        val name = binding.ietName.text?.toString()
+        val priceStr = binding.ietPrice.text?.toString()
 
         // Получаем актуальное состояние прямо из ViewModel
         val currentState = viewModel.uiState.value
@@ -222,12 +342,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
 
         when {
             name.isNullOrBlank() -> {
-                binding?.ilName?.error = context?.getString(R.string.Название_не_может_быть_пустым)
+                binding.ilName.error = context?.getString(R.string.Название_не_может_быть_пустым)
             }
 
             category.isNullOrBlank() || category == defaultCategoryText -> {
                 // Применяем красную рамку к TextView
-                binding?.textCategory?.setBackgroundResource(R.drawable.error_border)
+                binding.textCategory.setBackgroundResource(R.drawable.error_border)
                 // Можно также показать короткое сообщение
                 Toast.makeText(
                     requireContext(),
@@ -237,11 +357,11 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
 
             priceStr.isNullOrBlank() -> {
-                binding?.ilPrice?.error = context?.getString(R.string.Укажите_цену)
+                binding.ilPrice.error = context?.getString(R.string.Укажите_цену)
             }
 
             totalMinutes == 0 -> {
-                binding?.textDuration?.setBackgroundResource(R.drawable.error_border)
+                binding.textDuration.setBackgroundResource(R.drawable.error_border)
                 Toast.makeText(
                     requireContext(),
                     context?.getString(
@@ -270,7 +390,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun setupDurationPicker() {
-        binding?.textDuration?.setOnClickListener {
+        binding.textDuration.setOnClickListener {
 
             val currentState = viewModel.uiState.value
             showDurationPickerDialog(currentState.selectedHour, currentState.selectedMinute)
@@ -288,65 +408,27 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun setupCategoryPicker() {
-        binding?.textCategory?.setOnClickListener {
+        binding.textCategory.setOnClickListener {
             // Сбрасываем фон ПЕРЕД переходом на другой экран
-            binding?.textCategory?.background = null
+            binding.textCategory.background = null
 
             findNavController().navigate(R.id.action_addServiceFragment_to_selectCategoryFragment)
         }
     }
 
     private fun setupPriceToggle() {
-        binding?.toggleBtnPriceFrom?.addOnButtonCheckedListener { _, _, isChecked ->
+        binding.toggleBtnPriceFrom.addOnButtonCheckedListener { _, _, isChecked ->
             // Сообщаем ViewModel об изменении
             viewModel.setPriceFrom(isChecked)
         }
     }
 
-    private fun setupCurrencySpinner(selectedCurrency: String) {
-        val currencies = AppCurrency.getCodesList()
-
-        // Позже мы добавим сюда логику "избранных" валют
-
-        val adapter =
-            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencies)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        binding?.spinnerCurrency?.adapter = adapter
-
-        // 1. Устанавливаем начальное значение (из ViewModel) БЕЗ вызова слушателя
-        val initialIndex = currencies.indexOf(selectedCurrency)
-        if (initialIndex >= 0) {
-            binding?.spinnerCurrency?.setSelection(initialIndex, false)
-        }
-
-        // 2. Настраиваем слушатель с проверкой флага
-        binding?.spinnerCurrency?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                // Реагируем ТОЛЬКО если это действие пользователя
-                if (isUserAction) {
-                    viewModel.onCurrencySelectedInSpinner(currencies[position])
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        // 3. Активируем флаг с задержкой (через post),
-        // чтобы пропустить автоматические вызовы при инициализации layout
-        binding?.spinnerCurrency?.post {
-            isUserAction = true
-        }
-    }
-
     private fun updateDurationText(hour: Int, minute: Int) {
-        binding?.textDuration?.text = String.format(AppConstants.Format.DURATION, hour, minute)
+        binding.textDuration.text = String.format(AppConstants.Format.DURATION, hour, minute)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding = null
-        isSpinnerSetup = false
-        isUserAction = false
+        _binding = null
     }
 }

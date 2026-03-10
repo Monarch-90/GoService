@@ -1,4 +1,4 @@
-package com.avetiso.feature_sidebar.ui
+package com.avetiso.feature_sidebar.about
 
 import android.os.Bundle
 import android.view.View

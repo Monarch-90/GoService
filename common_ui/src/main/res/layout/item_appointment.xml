@@ -8,7 +8,6 @@
     android:layout_marginBottom="8dp">
 
     <include
-        android:id="@+id/actions_container"
         layout="@layout/view_action_icons"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -47,7 +46,6 @@
             tools:text="Активно" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -109,7 +107,6 @@
             tools:text="Маникюр с покрытием" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
@@ -119,7 +116,6 @@
             tools:text="от 150.0 USD\n1.0 BTC" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/note_icon_container"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -129,7 +125,6 @@
             app:layout_constraintTop_toBottomOf="@+id/chip_status">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_empty_note"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="40dp"
@@ -140,7 +135,6 @@
                 app:tint="@color/silver_dark" />
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_filled_note"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="40dp"

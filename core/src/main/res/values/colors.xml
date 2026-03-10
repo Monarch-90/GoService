@@ -11,11 +11,9 @@
     <color name="orange_coral">#FF9500</color>
     <color name="main_dark">#435E6F</color>
     <color name="blue_grey">#546E7A</color>
-    <color name="teal">#008080</color>
     <color name="green">#4CAF50</color>
 
     <color name="custom_main">#5A7E94</color>
-    <color name="black_white_invert">#FFFFFF</color>
     <color name="background_color">#FFFFFFFF</color>
     <color name="custom_dialog_background">#E2E2E2</color>
     <color name="surface_color">#E0E0E0</color>

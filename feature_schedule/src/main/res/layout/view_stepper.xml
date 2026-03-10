@@ -8,21 +8,18 @@
     tools:style="@style/StepperLine">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/step1_text"
         style="@style/StepperText"
         android:text="@string/Услуги" />
 
     <View style="@style/StepperLine" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/step2_text"
         style="@style/StepperText"
         android:text="@string/Время" />
 
     <View style="@style/StepperLine" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/step3_text"
         style="@style/StepperText"
         android:text="@string/Клиент" />
 

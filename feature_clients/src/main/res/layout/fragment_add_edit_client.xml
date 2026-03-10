@@ -18,7 +18,6 @@
             tools:title="Новый клиент">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/btn_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
@@ -43,7 +42,6 @@
             android:padding="16dp">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_field"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,7 +50,6 @@
                 android:text="@string/Добавить_поле" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,14 +57,12 @@
                 android:hint="@string/Имя_клиента">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName|textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_phone"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -75,14 +70,12 @@
                 android:hint="@string/Номер_телефона">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="phone" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_instagram"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -91,13 +84,11 @@
                 app:prefixText="@">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_instagram"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_source"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,14 +96,12 @@
                 android:hint="@string/Источник_привлечения">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_source"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text|textCapSentences" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_discount"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -120,20 +109,17 @@
                 android:hint="@string/Личная_скидка_процент">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_discount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout
-                android:id="@+id/custom_fields_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_note"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,7 +127,6 @@
                 android:hint="@string/Примечание">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_edit_text_note"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"

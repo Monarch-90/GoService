@@ -25,7 +25,6 @@
             android:paddingHorizontal="16dp">
 
             <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/et_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/surface_color"
@@ -44,7 +43,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_appointments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"

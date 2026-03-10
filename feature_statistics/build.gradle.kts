@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.avetiso.feature_windows"
+    namespace = "com.avetiso.feature_statistics"
     compileSdk = 36
 
     defaultConfig {

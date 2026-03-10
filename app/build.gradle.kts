@@ -52,7 +52,6 @@ dependencies {
     implementation(project(":feature_schedule"))
     implementation(project(":feature_clients"))
     implementation(project(":feature_appointments"))
-    implementation(project(":feature_windows"))
     implementation(project(":navigation"))
     implementation(project(":feature_sidebar"))
 

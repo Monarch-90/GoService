@@ -14,8 +14,4 @@ internal object ScheduleConstants {
         const val INPUT_NOTE_KEY = "input_note_request"
         const val RESCHEDULE_DATE_KEY = "reschedule_date_request"
     }
-
-    object Tag {
-        const val DATE_PICKER = "DATE_PICKER"
-    }
 }

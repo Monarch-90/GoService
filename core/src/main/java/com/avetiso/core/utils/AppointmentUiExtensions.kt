@@ -1,9 +1,8 @@
-package com.avetiso.feature_schedule.add_appointment.ui
+package com.avetiso.core.utils
 
 import android.content.Context
 import com.avetiso.core.model.AppointmentStatus
-import com.avetiso.feature_schedule.R
-import com.avetiso.core.R as CoreR
+import com.avetiso.core.R
 
 /**
  * Превращает Enum статус в ID строки (из strings.xml).
@@ -24,11 +23,11 @@ fun AppointmentStatus.toStatusLabelRes(): Int {
  */
 fun AppointmentStatus.toStatusColorRes(): Int {
     return when (this) {
-        AppointmentStatus.ACTIVE -> CoreR.color.green
-        AppointmentStatus.COMPLETED -> CoreR.color.main_dark
-        AppointmentStatus.CANCELLED -> CoreR.color.grey
-        AppointmentStatus.RESCHEDULED -> CoreR.color.orange_coral
-        AppointmentStatus.NO_SHOW -> CoreR.color.red
+        AppointmentStatus.ACTIVE -> R.color.green
+        AppointmentStatus.COMPLETED -> R.color.main_dark
+        AppointmentStatus.CANCELLED -> R.color.grey
+        AppointmentStatus.RESCHEDULED -> R.color.orange_coral
+        AppointmentStatus.NO_SHOW -> R.color.red
     }
 }
 

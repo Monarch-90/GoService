@@ -12,7 +12,7 @@ import com.avetiso.common_ui.actions.listeners.TapOutsideTouchListener
 class RecyclerViewActions<T : Any>(
     private val fragment: Fragment,
     private val recyclerView: RecyclerView,
-    private val adapter: ListAdapter<T, out ActionsViewHolder>,
+    private val adapter: ListAdapter<T, out RecyclerView.ViewHolder>,
     val getItemId: (T) -> Any,
     private val onEdit: (T) -> Unit,
     private val onDeleteClicked: (T) -> Unit,

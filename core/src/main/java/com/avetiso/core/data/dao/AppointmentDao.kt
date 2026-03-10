@@ -15,6 +15,9 @@ interface AppointmentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAppointment(appointment: AppointmentEntity)
 
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " ORDER BY date ASC, startTimeMinutes ASC")
+    fun getAllAppointments(): Flow<List<AppointmentEntity>>
+
     @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date = :date ORDER BY startTimeMinutes ASC")
     fun getAppointmentsForDate(date: String): Flow<List<AppointmentEntity>>
 

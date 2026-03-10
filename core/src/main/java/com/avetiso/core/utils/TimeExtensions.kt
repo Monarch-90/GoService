@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.steps.step2.ui
+package com.avetiso.core.utils
 
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity

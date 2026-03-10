@@ -10,7 +10,6 @@ import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
-import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.databinding.ItemAvailableServiceBinding
 
 class AvailableServiceAdapter :
@@ -73,7 +72,7 @@ class AvailableServiceAdapter :
 
             // Цена
             val pricePrefix = if (service.isPriceFrom) {
-                context.getString(R.string.от_)
+                context.getString(com.avetiso.core.R.string.от_)
             } else {
                 ""
             }

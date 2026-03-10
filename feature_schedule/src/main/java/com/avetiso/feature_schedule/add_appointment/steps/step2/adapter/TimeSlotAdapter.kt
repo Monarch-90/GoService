@@ -11,7 +11,7 @@ import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity
-import com.avetiso.feature_schedule.add_appointment.steps.step2.ui.formattedTime
+import com.avetiso.core.utils.formattedTime
 import com.avetiso.feature_schedule.databinding.ItemTimeSlotBinding
 import com.avetiso.core.R as CoreR
 

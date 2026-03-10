@@ -32,6 +32,8 @@
             android:name="selectedDate"
             app:argType="string" />
 
+        <deepLink app:uri="goservice://schedule/add_edit?appointmentId={appointmentId}&amp;selectedDate={selectedDate}" />
+
         <action
             android:id="@+id/action_addAppointmentFragment_to_addServiceFragment"
             app:destination="@id/addServiceFragment">

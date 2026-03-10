@@ -6,5 +6,6 @@
 
     <include app:graph="@navigation/schedule_nav_graph" />
     <include app:graph="@navigation/clients_nav_graph" />
+    <include app:graph="@navigation/appointments_nav_graph" />
     <include app:graph="@navigation/nav_sidebar" />
 </navigation>

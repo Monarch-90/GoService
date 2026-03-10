@@ -11,9 +11,8 @@ import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
 import com.avetiso.core.model.AppointmentStatus
 import com.avetiso.core.model.ServiceSnapshot
-import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.ScheduleConstants
-import com.avetiso.feature_schedule.add_appointment.mapper.AppointmentPriceMapper
+import com.avetiso.core.mapper.AppointmentPriceMapper
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -208,13 +207,17 @@ class AddAppointmentViewModel @Inject constructor(
         services: Set<ServiceEntity>,
         timeSlots: Set<TimeSlotEntity>,
     ): Boolean {
-        val selectedDate: String = savedStateHandle[ScheduleConstants.Args.SELECTED_DATE]
-            ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
-            ?: return true // Если дата неизвестна, считаем дубликатом для безопасности
+        val argDate = savedStateHandle.get<String>(ScheduleConstants.Args.SELECTED_DATE)
+
+        // БЕЗОПАСНОЕ ПОЛУЧЕНИЕ ДАТЫ: Если дата из навигатора пустая, берем оригинал из БД
+        val selectedDate = if (argDate.isNullOrBlank()) {
+            appointmentDao.getAppointmentById(appointmentToEditId)?.date ?: return true
+        } else {
+            argDate
+        }
 
         val existingAppointments = appointmentDao.getAppointmentsForDateSync(selectedDate)
         val newServiceSnapshots = services.map { it.toSnapshot() }.toSet()
-
         val newTimeSlotIds = timeSlots.map { it.id }.sorted()
 
         for (existing in existingAppointments) {
@@ -242,15 +245,22 @@ class AddAppointmentViewModel @Inject constructor(
         status: AppointmentStatus,
         timeSlots: Set<TimeSlotEntity>,
     ): AppointmentEntity {
-        val selectedDate: String = savedStateHandle[ScheduleConstants.Args.SELECTED_DATE]
-            ?: appointmentDao.getAppointmentById(appointmentToEditId)?.date
-            ?: "" // Если дата пустая, это будет обработано дальше
+        // Достаем оригинальную запись (чтобы не потерять дату и заметку при редактировании)
+        val existingAppointment = if (appointmentToEditId != AppConstants.ID_NONE) {
+            appointmentDao.getAppointmentById(appointmentToEditId)
+        } else null
+
+        val argDate = savedStateHandle.get<String>(ScheduleConstants.Args.SELECTED_DATE)
+        val selectedDate = if (argDate.isNullOrBlank()) {
+            existingAppointment?.date ?: ""
+        } else {
+            argDate
+        }
 
         val totalDuration = services.sumOf { it.durationMinutes }
         val serviceSnapshots = services.map { it.toSnapshot() }
         val servicesJson = Gson().toJson(serviceSnapshots)
 
-        // НАХОДИМ САМОЕ РАННЕЕ ВРЕМЯ ИЗ ВСЕХ ВЫБРАННЫХ СЛОТОВ
         val earliestStartTime = timeSlots.minOfOrNull { it.startTimeMinutes } ?: 0
 
         return AppointmentEntity(
@@ -265,6 +275,8 @@ class AddAppointmentViewModel @Inject constructor(
             discountPercent = client.discount,
             status = status,
             servicesJson = servicesJson,
+            // ВАЖНО: сохраняем существующую заметку, чтобы она не стерлась при редактировании
+            note = existingAppointment?.note ?: ""
         )
     }
 

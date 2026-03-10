@@ -8,7 +8,7 @@
         android:icon="@drawable/ic_clients"
         android:title="@string/Клиенты" />
     <item
-        android:id="@+id/supplies_nav_graph"
+        android:id="@+id/appointments_nav_graph"
         android:icon="@drawable/ic_supplies"
         android:title="@string/Записи" />
     <item

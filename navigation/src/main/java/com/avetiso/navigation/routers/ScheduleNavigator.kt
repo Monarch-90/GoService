@@ -8,4 +8,7 @@ import androidx.navigation.NavController
  */
 interface ScheduleNavigator {
     fun navigateToSchedule(navController: NavController)
+
+    // Единый контракт для перехода на создание/редактирование записи из любого модуля
+    fun navigateToAddEditAppointment(navController: NavController, appointmentId: Long, selectedDate: String?)
 }

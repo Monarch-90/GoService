@@ -1,9 +1,9 @@
-package com.avetiso.feature_schedule.add_appointment.mapper
+package com.avetiso.core.mapper
 
 import android.content.Context
 import com.avetiso.core.AppConstants
+import com.avetiso.core.R
 import com.avetiso.core.model.CurrencyTotal
-import com.avetiso.feature_schedule.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

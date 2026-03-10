@@ -1,4 +1,4 @@
-package com.avetiso.feature_schedule.add_appointment.data
+package com.avetiso.core.entity.ui
 
 import com.avetiso.core.model.AppointmentStatus
 

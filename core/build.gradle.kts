@@ -16,6 +16,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        isCoreLibraryDesugaringEnabled = true
     }
 
     buildFeatures {
@@ -54,6 +56,9 @@ dependencies {
 
     // Data store
     implementation(libs.androidx.datastore.preferences)
+
+    // Desugar (десахаризация)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 
 // Parcelize

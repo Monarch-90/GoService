@@ -22,4 +22,10 @@
 
     <string name="Редактировать_action_icons">Редактировать</string>
     <string name="Удалить_action_icons">Удалить</string>
+
+    <string name="Cтатус_записи">Cтатус записи</string>
+
+    <string name="Удалить_запись">Удалить запись?</string>
+    <string name="Введите_текст">Введите текст</string>
+    <string name="Выберите_дату">Выберите дату</string>
 </resources>

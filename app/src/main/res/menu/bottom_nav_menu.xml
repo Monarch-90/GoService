@@ -9,7 +9,7 @@
         android:title="@string/Клиенты" />
     <item
         android:id="@+id/appointments_nav_graph"
-        android:icon="@drawable/ic_supplies"
+        android:icon="@drawable/ic_appointment"
         android:title="@string/Записи" />
     <item
         android:id="@+id/windows_nav_graph"

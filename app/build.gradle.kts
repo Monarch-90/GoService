@@ -54,7 +54,6 @@ dependencies {
     implementation(project(":feature_appointments"))
     implementation(project(":navigation"))
     implementation(project(":feature_sidebar"))
-    implementation(project(":feature_statistics"))
 
     // Стандартные библиотеки AndroidX
     implementation(libs.androidx.core.ktx)

@@ -11,12 +11,14 @@
     android:paddingVertical="12dp">
 
     <View
+        android:id="@+id/view_selected_check"
         android:layout_width="3dp"
         android:layout_height="30dp"
         android:layout_marginEnd="10dp"
         android:background="@color/custom_main" />
 
     <LinearLayout
+        android:id="@+id/ll_client_item_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -59,5 +61,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
-    <include layout="@layout/view_action_icons" />
+    <include
+        android:id="@+id/actions_container"
+        layout="@layout/view_action_icons" />
 </LinearLayout>

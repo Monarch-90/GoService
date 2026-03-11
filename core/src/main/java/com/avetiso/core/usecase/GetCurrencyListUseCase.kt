@@ -3,8 +3,8 @@ package com.avetiso.core.usecase
 import android.content.Context
 import com.avetiso.core.R
 import com.avetiso.core.data.repository.SettingsRepository
-import com.avetiso.core.model.AppCurrency
-import com.avetiso.core.model.CurrencyListItem
+import com.avetiso.core.models.AppCurrency
+import com.avetiso.core.models.CurrencyListItem
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

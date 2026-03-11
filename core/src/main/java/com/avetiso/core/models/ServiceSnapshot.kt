@@ -1,4 +1,4 @@
-package com.avetiso.core.model
+package com.avetiso.core.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

@@ -12,7 +12,7 @@
         android:icon="@drawable/ic_clients"
         android:title="@string/Клиенты" />
     <item
-        android:id="@+id/windows_nav_graph"
+        android:id="@+id/statistics_nav_graph"
         android:icon="@drawable/ic_statistics"
         android:title="@string/Статистика" />
 </menu>

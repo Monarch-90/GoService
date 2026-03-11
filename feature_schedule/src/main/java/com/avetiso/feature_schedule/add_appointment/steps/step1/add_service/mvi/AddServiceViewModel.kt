@@ -6,8 +6,8 @@ import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ServiceDao
 import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.core.entity.ServiceEntity
-import com.avetiso.core.model.CurrencyListItem
-import com.avetiso.core.model.UiText
+import com.avetiso.core.models.CurrencyListItem
+import com.avetiso.core.models.UiText
 import com.avetiso.core.usecase.GetCurrencyListUseCase
 import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel

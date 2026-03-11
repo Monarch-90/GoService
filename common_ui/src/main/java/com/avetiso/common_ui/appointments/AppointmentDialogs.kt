@@ -8,7 +8,7 @@ import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ui.Appointment
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 import com.avetiso.core.utils.getStatusByIndex
 import com.avetiso.core.utils.getStatusLabelsArray
 import com.google.android.material.dialog.MaterialAlertDialogBuilder

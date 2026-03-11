@@ -1,7 +1,7 @@
 package com.avetiso.core.usecase
 
-import com.avetiso.core.model.CurrencyTotal
-import com.avetiso.core.model.ServiceSnapshot
+import com.avetiso.core.models.CurrencyTotal
+import com.avetiso.core.models.ServiceSnapshot
 import javax.inject.Inject
 
 class CalculateServicePriceUseCase @Inject constructor() {

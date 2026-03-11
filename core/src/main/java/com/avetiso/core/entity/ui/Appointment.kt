@@ -1,6 +1,6 @@
 package com.avetiso.core.entity.ui
 
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 
 data class Appointment(
     val id: Long,

@@ -1,4 +1,4 @@
-package com.avetiso.core.model
+package com.avetiso.core.models
 
 sealed interface CurrencyListItem {
     data class ActionAdd(val label: String) : CurrencyListItem

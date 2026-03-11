@@ -3,7 +3,7 @@ package com.avetiso.core.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.avetiso.core.AppConstants
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 
 @Entity(tableName = AppConstants.Data.TABLE_APPOINTMENTS)
 data class AppointmentEntity(

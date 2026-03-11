@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +16,6 @@ import com.avetiso.common_ui.appointments.showAppointmentDeleteDialog
 import com.avetiso.common_ui.appointments.showAppointmentNoteDialog
 import com.avetiso.common_ui.appointments.showAppointmentStatusDialog
 import com.avetiso.core.AppConstants
-import com.avetiso.core.entity.ui.Appointment
 import com.avetiso.feature_appointments.AppointmentsConstants
 import com.avetiso.feature_appointments.R
 import com.avetiso.feature_appointments.adapter.AppointmentsAdapter
@@ -137,7 +135,7 @@ class AppointmentsFragment : Fragment(R.layout.fragment_appointments) {
                 val sdf = SimpleDateFormat(AppConstants.Format.FULL_DATE_FORMAT, Locale.getDefault())
                 val newDate = sdf.format(Date(selectedMillis))
                 viewModel.processIntent(
-                    AppointmentsIntent.ChangeStatus(appointmentId, com.avetiso.core.model.AppointmentStatus.RESCHEDULED, newDate)
+                    AppointmentsIntent.ChangeStatus(appointmentId, com.avetiso.core.models.AppointmentStatus.RESCHEDULED, newDate)
                 )
             }
         }

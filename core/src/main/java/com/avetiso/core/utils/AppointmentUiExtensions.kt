@@ -1,7 +1,7 @@
 package com.avetiso.core.utils
 
 import android.content.Context
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 import com.avetiso.core.R
 
 /**

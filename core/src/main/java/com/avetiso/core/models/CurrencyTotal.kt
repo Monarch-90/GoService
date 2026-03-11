@@ -1,4 +1,4 @@
-package com.avetiso.core.model
+package com.avetiso.core.models
 
 data class CurrencyTotal(
     val currency: String,

@@ -2,7 +2,7 @@ package com.avetiso.core.action
 
 import com.avetiso.core.R
 import com.avetiso.core.data.dao.AppointmentDao
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

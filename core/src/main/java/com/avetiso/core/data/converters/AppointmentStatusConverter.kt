@@ -1,7 +1,7 @@
 package com.avetiso.core.data.converters
 
 import androidx.room.TypeConverter
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 
 class AppointmentStatusConverter {
 

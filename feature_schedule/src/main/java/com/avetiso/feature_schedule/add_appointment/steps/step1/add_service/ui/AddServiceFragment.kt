@@ -20,13 +20,12 @@ import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
 import com.avetiso.common_ui.dialogs.models.showDeleteCustomCurrencyDialog
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
-import com.avetiso.core.model.CurrencyListItem
+import com.avetiso.core.models.CurrencyListItem
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.add_appointment.AppointmentConstants
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceEvent
 import com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi.AddServiceViewModel
 import com.avetiso.feature_schedule.databinding.FragmentAddServiceBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

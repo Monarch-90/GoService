@@ -16,7 +16,7 @@ import com.avetiso.common_ui.appointments.showAppointmentNoteDialog
 import com.avetiso.common_ui.appointments.showAppointmentStatusDialog
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ui.Appointment
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.ScheduleConstants
 import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter

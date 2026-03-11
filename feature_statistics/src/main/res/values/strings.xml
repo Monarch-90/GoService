@@ -1,3 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">feature_statistics</string>
+
+    <string name="statistics_title">Сводка</string>
+
+    <string name="statistics_filter_today">Сегодня</string>
+    <string name="statistics_filter_week">Неделя</string>
+    <string name="statistics_filter_month">Этот месяц</string>
+    <string name="statistics_filter_custom">Выбрать даты</string>
+
+    <string name="statistics_finance_average_check">Средний чек: %1$s</string>
+    <string name="statistics_finance_services_count">Оказано услуг: %1$d</string>
+    <string name="statistics_finance_trend_positive">+%1$d%% к прошлому периоду</string>
+    <string name="statistics_finance_trend_negative">-%1$d%% к прошлому периоду</string>
+
+    <string name="statistics_inventory_warning_title">Заканчиваются материалы</string>
+    <string name="statistics_inventory_item_left">осталось: %1$d %2$s</string>
+    <string name="statistics_inventory_btn_see_all">Посмотреть всё</string>
+    <string name="statistics_inventory_btn_to_list">В список покупок</string>
+    <string name="statistics_inventory_list_item_format">- %1$s</string>
+
+    <string name="statistics_load_new_clients">Новых клиентов</string>
+    <string name="statistics_load_cancellations">Отмененных</string>
+    <string name="statistics_load_work_hours_value">%1$d ч</string>
+    <string name="statistics_load_work_hours">Часы работы</string>
+
+    <string name="statistics_action_free_slots">Свободные окна</string>
+    <string name="statistics_action_share_price">Поделиться прайсом</string>
+
+    <string name="statistics_error_generic">Произошла непредвиденная ошибка при загрузке статистики.</string>
 </resources>

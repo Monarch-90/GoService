@@ -1,4 +1,4 @@
-package com.avetiso.core.model
+package com.avetiso.core.models
 
 enum class AppointmentStatus(val key: String) {
     ACTIVE("status_active"),

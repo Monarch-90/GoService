@@ -3,7 +3,7 @@ package com.avetiso.core.mapper
 import com.avetiso.core.data.dao.TimeSlotDao
 import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.entity.ui.Appointment
-import com.avetiso.core.model.ServiceSnapshot
+import com.avetiso.core.models.ServiceSnapshot
 import com.avetiso.core.usecase.CalculateServicePriceUseCase
 import com.avetiso.core.utils.formattedTime
 import com.google.gson.Gson

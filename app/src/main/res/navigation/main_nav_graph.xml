@@ -5,7 +5,8 @@
     app:startDestination="@id/schedule_nav_graph">
 
     <include app:graph="@navigation/schedule_nav_graph" />
-    <include app:graph="@navigation/clients_nav_graph" />
     <include app:graph="@navigation/appointments_nav_graph" />
-    <include app:graph="@navigation/nav_sidebar" />
+    <include app:graph="@navigation/clients_nav_graph" />
+    <include app:graph="@navigation/statistics_nav_graph" />
+    <include app:graph="@navigation/sidebar_nav_graph" />
 </navigation>

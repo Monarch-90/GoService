@@ -1,4 +1,4 @@
-package com.avetiso.feature_statistics
+package com.avetiso.feature_windows
 
 import org.junit.Test
 

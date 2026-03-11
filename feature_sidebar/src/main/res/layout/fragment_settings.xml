@@ -64,6 +64,7 @@
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/spinner_default_currency"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="100dp" />

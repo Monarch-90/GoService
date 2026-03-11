@@ -1,0 +1,22 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml:2:1-7:12
+	package
+		INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml:2:11-69
+application
+ADDED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml:4:5-6:38
+	android:supportsRtl
+		ADDED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml:6:9-35
+	android:label
+		ADDED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml:5:9-41
+uses-sdk
+INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml
+INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/admin/StudioProjects/GoService/feature_windows/src/main/AndroidManifest.xml

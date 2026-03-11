@@ -10,12 +10,14 @@
     android:paddingVertical="12dp">
 
     <View
+        android:id="@+id/view_selected_check"
         android:layout_width="3dp"
         android:layout_height="50dp"
         android:layout_marginEnd="10dp"
         android:background="@color/custom_main" />
 
     <LinearLayout
+        android:id="@+id/ll_item_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -31,6 +33,7 @@
             tools:text="Маникюр с покрытием" />
 
         <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_service_category"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -39,6 +42,7 @@
             tools:text="Ногтевой сервис" />
 
         <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_service_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -48,5 +52,7 @@
             tools:text="от 1500 BYN • 1 ч 30 мин" />
     </LinearLayout>
 
-    <include layout="@layout/view_action_icons" />
+    <include
+        android:id="@+id/actions_container"
+        layout="@layout/view_action_icons" />
 </LinearLayout>

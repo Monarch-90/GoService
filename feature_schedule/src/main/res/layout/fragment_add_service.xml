@@ -18,6 +18,7 @@
             app:title="@string/Новая_услуга">
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/btn_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
@@ -42,6 +43,7 @@
             android:padding="16dp">
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/il_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,6 +51,7 @@
                 app:cursorErrorColor="@color/error_ping">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/iet_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences" />
@@ -62,6 +65,7 @@
                 android:text="@string/Категория" />
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_category"
                 style="@style/SelectableField"
                 tools:text="Выбрать категорию" />
 
@@ -78,6 +82,7 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/toggle_btn_price_from"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:selectionRequired="false"
@@ -92,6 +97,7 @@
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/il_price"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -101,12 +107,14 @@
                     app:cursorErrorColor="@color/error_ping">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/iet_price"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Spinner
+                    android:id="@+id/spinner_currency"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
@@ -121,6 +129,7 @@
                 android:text="@string/Продолжительность" />
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_duration"
                 style="@style/SelectableField"
                 tools:text="0 ч 00 мин" />
 

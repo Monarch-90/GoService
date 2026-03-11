@@ -8,6 +8,7 @@
     android:padding="8dp">
 
     <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_category_name"
         style="@style/textSize_16"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -17,6 +18,7 @@
         tools:text="Ресницы" />
 
     <include
+        android:id="@+id/actions_container"
         layout="@layout/view_action_icons"
         android:visibility="invisible"
         tools:visibility="visible" />

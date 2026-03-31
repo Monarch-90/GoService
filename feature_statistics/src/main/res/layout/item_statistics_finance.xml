@@ -18,6 +18,15 @@
         android:background="@drawable/bg_finance_gradient"
         android:padding="24dp">
 
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/spinner_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            android:minHeight="48dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_total_revenue"
             android:layout_width="match_parent"
@@ -26,7 +35,7 @@
             android:textColor="@color/white"
             android:textSize="32sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/spinner_currency"
             tools:text="125 000 GEL" />
 
         <LinearLayout
@@ -41,14 +50,14 @@
             app:layout_constraintTop_toBottomOf="@id/tv_total_revenue">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_trend_arrow"
+                android:id="@+id/iv_trend_icon"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_marginEnd="4dp"
                 tools:tint="@color/green" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_trend_percent"
+                android:id="@+id/tv_trend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
@@ -94,6 +103,5 @@
                 android:textSize="14sp"
                 tools:text="Оказано услуг: 42" />
         </LinearLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

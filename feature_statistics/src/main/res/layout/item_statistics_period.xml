@@ -9,9 +9,10 @@
     android:scrollbars="none">
 
     <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group_period"
+        android:id="@+id/cg_periods"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:checkedChip="@+id/chip_today"
         app:selectionRequired="true"
         app:singleLine="true"
         app:singleSelection="true">
@@ -45,4 +46,5 @@
             android:text="@string/statistics_filter_custom" />
 
     </com.google.android.material.chip.ChipGroup>
+
 </HorizontalScrollView>

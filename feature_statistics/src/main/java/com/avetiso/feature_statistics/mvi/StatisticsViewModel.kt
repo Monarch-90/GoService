@@ -2,149 +2,164 @@ package com.avetiso.feature_statistics.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.avetiso.feature_statistics.models.StatisticsListItem
+import com.avetiso.core.data.repository.SettingsRepository
+import com.avetiso.feature_statistics.R
 import com.avetiso.feature_statistics.models.TimePeriod
+import com.avetiso.feature_statistics.usecases.GenerateStatisticsTextUseCase
+import com.avetiso.feature_statistics.usecases.GetAvailableCurrenciesUseCase
+import com.avetiso.feature_statistics.usecases.GetFinanceSummaryUseCase
+import com.avetiso.feature_statistics.usecases.GetInventoryShortagesUseCase
+import com.avetiso.feature_statistics.usecases.GetWorkloadSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * MVI ViewModel для экрана статистики.
+ * Выступает как Presentation Layer: запрашивает чистые данные у UseCase-ов
+ * и адаптирует их для безопасного отображения в UI.
+ */
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    // TODO: Позже заинжектим здесь UseCase-ы для запросов к БД (AppointmentDao, ClientDao и т.д.)
+    private val getFinanceSummaryUseCase: GetFinanceSummaryUseCase,
+    private val getAvailableCurrenciesUseCase: GetAvailableCurrenciesUseCase,
+    private val getInventoryShortagesUseCase: GetInventoryShortagesUseCase,
+    private val getWorkloadSummaryUseCase: GetWorkloadSummaryUseCase,
+    private val generateTextUseCase: GenerateStatisticsTextUseCase,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(StatisticsState.initial())
-    val state = _state.asStateFlow()
+    private val _state = MutableStateFlow(StatisticsState())
+    val state: StateFlow<StatisticsState> = _state.asStateFlow()
 
-    private val _events = Channel<StatisticsEvent>(Channel.BUFFERED)
-    val events = _events.receiveAsFlow()
+    private val _event = Channel<StatisticsEvent>(Channel.BUFFERED)
+    val event = _event.receiveAsFlow()
 
     init {
-        // При запуске экрана сразу загружаем статистику за "Сегодня"
-        loadStatistics(TimePeriod.TODAY)
+        // При старте экрана: берем валюту по умолчанию, пишем в стейт, грузим "Сегодня"
+        viewModelScope.launch {
+            val defaultCurrency = settingsRepository.defaultCurrency.first()
+            _state.update { it.copy(selectedCurrency = defaultCurrency) }
+            handleSelectPeriod(TimePeriod.TODAY)
+        }
     }
 
     fun processIntent(intent: StatisticsIntent) {
         when (intent) {
-            is StatisticsIntent.ChangePeriod -> {
-                // Избегаем лишних запросов, если период не изменился
-                if (_state.value.selectedPeriod != intent.period) {
-                    loadStatistics(intent.period)
-                }
-            }
+            is OnScreenResumed -> handleScreenResumed()
 
-            is StatisticsIntent.OpenCustomDateSelector -> {
-                viewModelScope.launch {
-                    _events.send(StatisticsEvent.NavigateToCustomDateRangePicker)
-                }
-            }
+            is SelectPeriod -> handleSelectPeriod(intent.period)
+            is SelectCustomPeriod -> handleSelectCustomPeriod(intent.startDateTimestamp, intent.endDateTimestamp)
+            is SelectCurrency -> handleSelectCurrency(intent.currencyCode)
 
-            is StatisticsIntent.OnFinancialCardClicked -> {
-                viewModelScope.launch {
-                    _events.send(StatisticsEvent.NavigateToFinancialDetails)
-                }
-            }
+            is OnFinanceCardClicked -> sendEvent(NavigateToCompletedAppointments)
+            is OnWorkloadCardClicked -> sendEvent(NavigateToFrequentClients)
+            is OnInventorySeeAllClicked -> sendEvent(NavigateToInventory)
 
-            is StatisticsIntent.OnInventorySeeAllClicked -> {
-                viewModelScope.launch {
-                    _events.send(StatisticsEvent.NavigateToInventory)
-                }
-            }
-
-            is StatisticsIntent.OnInventoryCopyToClipboardClicked -> {
-                viewModelScope.launch {
-                    _events.send(StatisticsEvent.CopyToClipboard(generateInventoryTextForClipboard()))
-                }
-            }
-
-            is StatisticsIntent.OnClientsLoadClicked -> {
-                viewModelScope.launch {
-                    _events.send(StatisticsEvent.NavigateToClientsStats)
-                }
-            }
-
-            is StatisticsIntent.OnGenerateFreeSlotsClicked -> {
-                viewModelScope.launch {
-                    // TODO: Реализуем логику генерации текста свободных окон
-                }
-            }
-
-            is StatisticsIntent.OnSharePriceClicked -> {
-                viewModelScope.launch {
-                    // TODO: Реализуем логику генерации прайса-листа
-                }
-            }
+            is OnInventoryCopyToClipboardClicked -> handleCopyInventory()
+            is OnGenerateFreeWindowsClicked -> handleGenerateFreeWindows()
+            is OnSharePriceListClicked -> handleSharePriceList()
         }
     }
 
-    private fun loadStatistics(period: TimePeriod, customRange: String? = null) {
-        _state.update { it.copy(isLoading = true, selectedPeriod = period) }
+    private fun handleScreenResumed() {
+        loadDataForPeriod(
+            period = _state.value.selectedPeriod,
+            customStart = _state.value.customDateStart,
+            customEnd = _state.value.customDateEnd
+        )
+    }
+    private fun handleSelectCurrency(currencyCode: String) {
+        if (_state.value.selectedCurrency == currencyCode) return
 
+        _state.update { it.copy(selectedCurrency = currencyCode, isLoading = true) }
+        loadDataForPeriod(
+            period = _state.value.selectedPeriod,
+            customStart = _state.value.customDateStart,
+            customEnd = _state.value.customDateEnd
+        )
+    }
+
+    private fun handleSelectPeriod(period: TimePeriod) {
+        _state.update { it.copy(selectedPeriod = period, isLoading = true) }
+        loadDataForPeriod(period = period, customStart = null, customEnd = null)
+    }
+
+    private fun handleSelectCustomPeriod(start: Long, end: Long) {
+        _state.update {
+            it.copy(
+                selectedPeriod = TimePeriod.CUSTOM,
+                customDateStart = start,
+                customDateEnd = end,
+                isLoading = true
+            )
+        }
+        loadDataForPeriod(period = TimePeriod.CUSTOM, customStart = start, customEnd = end)
+    }
+
+    private fun loadDataForPeriod(period: TimePeriod, customStart: Long?, customEnd: Long?) {
         viewModelScope.launch {
-            // TODO: Здесь будет сбор данных из БД (combine flow из разных таблиц).
-            // Ниже временно формируем структуру из мок-данных для верстки и настройки адаптера.
+            val currentCurrency = _state.value.selectedCurrency ?: return@launch
 
-            val items = mutableListOf<StatisticsListItem>()
+            // 1. Получаем чистый список валют, в которых БЫЛИ доходы (Слой Domain)
+            val fetchedCurrencies = getAvailableCurrenciesUseCase.execute(period, customStart, customEnd)
 
-            // 1. Шапка (Выбор периода)
-            items.add(
-                StatisticsListItem.PeriodFilter(
-                    selectedPeriod = period,
-                    customDateRange = customRange
-                )
-            )
+            // 2. Логика Presentation: гарантируем, что текущая выбранная валюта
+            // всегда есть в списке для Спиннера, чтобы не сломать UI.
+            val displayCurrencies = if (fetchedCurrencies.contains(currentCurrency)) {
+                fetchedCurrencies
+            } else {
+                (fetchedCurrencies + currentCurrency).sorted()
+            }
 
-            // 2. Финансы
-            items.add(
-                StatisticsListItem.FinanceCard(
-                    totalRevenue = "125 000 GEL", // Валюту позже подтянем из SettingsRepository
-                    averageCheck = "2 500 GEL",
-                    servicesCount = 42,
-                    trendPercent = 15,
-                    isTrendPositive = true
-                )
-            )
+            // 3. Запрашиваем остальные данные (финансы считаются по текущей валюте)
+            val finance = getFinanceSummaryUseCase.execute(period, currentCurrency, customStart, customEnd)
+            val inventory = getInventoryShortagesUseCase.execute()
+            val workload = getWorkloadSummaryUseCase.execute(period, customStart, customEnd)
 
-            // 3. Склад (Добавляем в список ТОЛЬКО если есть что-то заканчивающееся)
-            // if (inventoryItems.isNotEmpty()) { ... }
-            items.add(
-                StatisticsListItem.InventoryWarning(
-                    items = listOf(
-                        StatisticsListItem.InventoryWarning.InventoryShortItem(1L, "Перчатки нитриловые", 1, "уп."),
-                        StatisticsListItem.InventoryWarning.InventoryShortItem(2L, "Краска Estel 5.0", 0, "шт.")
-                    )
-                )
-            )
-
-            // 4. Загруженность и клиенты
-            items.add(
-                StatisticsListItem.Workload(
-                    newClientsCount = 5,
-                    cancellationsCount = 2,
-                    totalWorkHours = 48
-                )
-            )
-
-            // 5. Быстрые действия
-            items.add(StatisticsListItem.QuickActions)
-
-            // Обновляем State
             _state.update {
                 it.copy(
                     isLoading = false,
-                    dashboardItems = items
+                    availableCurrencies = displayCurrencies,
+                    financeSummary = finance,
+                    inventoryShortages = inventory,
+                    workloadSummary = workload
                 )
             }
         }
     }
 
-    private fun generateInventoryTextForClipboard(): String {
-        // TODO: Генерация реального текста на основе БД
-        return "Заканчиваются материалы:\n- Перчатки нитриловые (остаток: 1 уп.)\n- Краска Estel 5.0 (остаток: 0 шт.)"
+    private fun handleCopyInventory() {
+        viewModelScope.launch {
+            val textToCopy = generateTextUseCase.generateInventoryShoppingList(state.value.inventoryShortages)
+            sendEvent(CopyToClipboard(textToCopy, R.string.success_copied_inventory))
+        }
+    }
+
+    private fun handleGenerateFreeWindows() {
+        viewModelScope.launch {
+            val textToCopy = generateTextUseCase.generateFreeWindows(state.value.selectedPeriod)
+            sendEvent(CopyToClipboard(textToCopy, R.string.success_copied_free_windows))
+        }
+    }
+
+    private fun handleSharePriceList() {
+        viewModelScope.launch {
+            val textToCopy = generateTextUseCase.generatePriceList()
+            sendEvent(CopyToClipboard(textToCopy, R.string.success_copied_price_list))
+        }
+    }
+
+    private fun sendEvent(event: StatisticsEvent) {
+        viewModelScope.launch {
+            _event.send(event)
+        }
     }
 }

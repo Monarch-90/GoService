@@ -1,39 +1,64 @@
 package com.avetiso.feature_statistics.models
 
-sealed interface StatisticsListItem {
+/**
+ * Базовый контракт для всех элементов главного списка экрана статистики.
+ * Строго плоская структура, никаких вложенных (nested) классов.
+ */
+sealed interface StatisticsListItem
 
-    data class PeriodFilter(
-        val selectedPeriod: TimePeriod,
-        val customDateRange: String? = null // Для отображения "12-18 марта", если выбран CUSTOM
-    ) : StatisticsListItem
+// --- UI-Модели (мапятся из Domain-моделей во Fragment/ViewModel) ---
 
-    data class FinanceCard(
-        val totalRevenue: String,    // Уже отформатированная строка с валютой
-        val averageCheck: String,    // Форматированная строка
-        val servicesCount: Int,
-        val trendPercent: Int,       // Например, 15
-        val isTrendPositive: Boolean // Влияет на цвет стрелочки (зеленая вверх/красная вниз)
-    ) : StatisticsListItem
+/**
+ * UI-модель: Шапка с выбором периода.
+ */
+data class PeriodFilterItem(
+    val selectedPeriod: TimePeriod,
+    val customDateRange: String? = null
+) : StatisticsListItem
 
-    data class InventoryWarning(
-        val items: List<InventoryShortItem>
-    ) : StatisticsListItem {
-        // Локальная модель только для этого виджета, чтобы не тащить целую Entity из БД
-        data class InventoryShortItem(
-            val id: Long,
-            val name: String,
-            val leftCount: Int,
-            val measureUnit: String // "шт.", "уп."
-        )
-    }
+/**
+ * UI-модель: Главная финансовая карточка.
+ * Деньги и чеки уже конвертированы в отформатированные строки для UI.
+ */
+data class FinanceCardItem(
+    val totalRevenue: String,
+    val averageCheck: String,
+    val servicesCount: Int,
+    val trendPercent: Int,
+    val isTrendPositive: Boolean,
 
-    data class Workload(
-        val newClientsCount: Int,
-        val cancellationsCount: Int,
-        val totalWorkHours: Int
-    ) : StatisticsListItem
+    // --- НОВОЕ: Мультивалютность ---
+    val selectedCurrency: String, // Текущая выбранная валюта (например, "GEL")
+    val availableCurrencies: List<String> // Список валют для спиннера (например, ["BTC", "GEL", "USD"])
+) : StatisticsListItem
 
-    // Поскольку кнопки быстрых действий статичны и не зависят от данных из БД,
-    // достаточно передать data object. Клики будут обрабатываться через делегат адаптера.
-    data object QuickActions : StatisticsListItem
-}
+/**
+ * UI-модель: Конкретный дефицитный материал.
+ */
+data class InventoryShortUIItem(
+    val id: Long,
+    val name: String,
+    val leftCount: Int,
+    val measureUnit: String
+)
+
+/**
+ * UI-модель: Карточка "Складской радар".
+ */
+data class InventoryWarningItem(
+    val items: List<InventoryShortUIItem>
+) : StatisticsListItem
+
+/**
+ * UI-модель: Карточка "Клиенты и Загруженность".
+ */
+data class WorkloadItem(
+    val newClientsCount: Int,
+    val cancellationsCount: Int,
+    val totalWorkHours: Int
+) : StatisticsListItem
+
+/**
+ * UI-модель: Блок быстрых действий (статичный, поэтому object).
+ */
+object QuickActionsItem : StatisticsListItem

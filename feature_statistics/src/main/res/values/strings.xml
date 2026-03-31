@@ -29,4 +29,20 @@
     <string name="statistics_action_share_price">Поделиться прайсом</string>
 
     <string name="statistics_error_generic">Произошла непредвиденная ошибка при загрузке статистики.</string>
+
+    <string name="success_copied_inventory">Список покупок скопирован</string>
+    <string name="success_copied_free_windows">Свободные окна скопированы</string>
+    <string name="success_copied_price_list">Прайс-лист скопирован</string>
+
+    <string name="empty_shopping_list">Список покупок пуст.</string>
+    <string name="shopping_list_header">🛒 Список покупок:</string>
+    <string name="shopping_list_item_format">%1$d. %2$s — осталось: %3$d %4$s</string>
+
+    <string name="free_windows_header">✨ Свободные окна:</string>
+    <string name="no_free_windows">Нет свободных окон на выбранный период.</string>
+    <string name="free_windows_item_format">• %1$s</string>
+
+    <string name="price_list_header">📋 Прайс-лист:</string>
+    <string name="empty_price_list">Прайс-лист пуст.</string>
+    <string name="price_list_item_format">%1$s — %2$s GEL</string>
 </resources>

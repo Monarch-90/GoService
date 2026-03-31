@@ -6,6 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginBottom="16dp"
+    android:clickable="true"
+    android:focusable="true"
     app:cardBackgroundColor="?attr/colorSurface"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
@@ -33,7 +35,7 @@
                 android:textSize="12sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_new_clients"
+                android:id="@+id/tv_new_clients_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -64,7 +66,7 @@
                 android:textSize="12sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_cancellations"
+                android:id="@+id/tv_cancellations_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"

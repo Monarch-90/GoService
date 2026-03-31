@@ -21,6 +21,12 @@ interface AppointmentDao {
     @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date = :date ORDER BY startTimeMinutes ASC")
     fun getAppointmentsForDate(date: String): Flow<List<AppointmentEntity>>
 
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC, startTimeMinutes ASC")
+    fun getAppointmentsBetweenDatesFlow(startDate: String, endDate: String): Flow<List<AppointmentEntity>>
+
+    @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE date BETWEEN :startDate AND :endDate")
+    suspend fun getAppointmentsBetweenDatesSync(startDate: String, endDate: String): List<AppointmentEntity>
+
     @Query("SELECT * FROM " + AppConstants.Data.TABLE_APPOINTMENTS + " WHERE id = :id")
     suspend fun getAppointmentById(id: Long): AppointmentEntity?
 

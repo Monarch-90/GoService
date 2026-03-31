@@ -1,98 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginBottom="16dp"
+    android:layout_marginVertical="8dp"
+    android:layout_marginBottom="32dp"
     android:baselineAligned="false"
-    android:orientation="horizontal"
-    tools:background="?attr/colorSurfaceVariant">
+    android:orientation="horizontal">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_free_slots"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_free_windows"
+        style="@style/Widget.MaterialComponents.Button.TonalButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="120dp"
         android:layout_marginEnd="8dp"
         android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        app:cardBackgroundColor="?attr/colorSurface"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="2dp"
-        app:strokeColor="@color/silver_dark"
-        app:strokeWidth="1dp">
+        app:cornerRadius="16dp"
+        android:text="@string/statistics_action_free_slots" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:padding="16dp"
-            app:layout_constraintDimensionRatio="1:1">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_slots_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_schedule"
-                app:tint="@color/custom_main" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/statistics_action_free_slots"
-                android:textColor="@color/custom_black_white"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_share_price"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_share_price"
+        style="@style/Widget.MaterialComponents.Button.TonalButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="120dp"
         android:layout_marginStart="8dp"
         android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        app:cardBackgroundColor="?attr/colorSurface"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="2dp"
-        app:strokeColor="@color/silver_dark"
-        app:strokeWidth="1dp">
+        app:cornerRadius="16dp"
+        android:text="@string/statistics_action_share_price" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:padding="16dp"
-            app:layout_constraintDimensionRatio="1:1">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_price_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_description"
-                app:tint="@color/custom_main" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/statistics_action_share_price"
-                android:textColor="@color/custom_black_white"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-</LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
+import com.avetiso.common_ui.compose_picker.managers.PickerResultManager
 import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
 import com.avetiso.common_ui.dialogs.models.showDeleteCustomCurrencyDialog
@@ -35,6 +36,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     private var _binding: FragmentAddServiceBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AddServiceViewModel by viewModels()
+    private var pickerResultManager: PickerResultManager? = null
     private var currentCurrencyItems: List<CurrencyListItem> = emptyList()
 
     // Получаем аргументы, переданные через Safe Args
@@ -48,6 +50,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAddServiceBinding.bind(view)
 
+        pickerResultManager = PickerResultManager(this)
         // Проверяем, пришел ли объект для редактирования
         serviceToEdit = args.serviceToEdit
 
@@ -67,7 +70,17 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     }
 
     private fun setupResultListeners() {
-        // 1. Слушатель для добавления НОВОЙ валюты
+        // 1. Слушатель для ПРОДОЛЖИТЕЛЬНОСТИ через наш новый менеджер.
+        // Обрати внимание: мы переопределяем requestKey на локальный (DURATION_PICKER),
+        // но парсинг Bundle происходит безопасно внутри менеджера.
+        pickerResultManager?.setupTimePickerListener(
+            requestKey = AppointmentConstants.Request.DURATION_PICKER
+        ) { hour, minute, _ ->
+            // Передаем данные во ViewModel (extraId игнорируем, он тут не нужен)
+            viewModel.setDuration(hour, minute)
+        }
+
+        // 2. Слушатель для добавления НОВОЙ валюты
         childFragmentManager.setFragmentResultListener(
             AppConstants.Requests.ADD_CUSTOM_CURRENCY,
             viewLifecycleOwner
@@ -78,7 +91,7 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
         }
 
-        // 2. Слушатель для сохранения валюты ПО УМОЛЧАНИЮ
+        // 3. Слушатель для сохранения валюты ПО УМОЛЧАНИЮ
         childFragmentManager.setFragmentResultListener(
             AppointmentConstants.Request.SET_DEFAULT_CURRENCY,
             viewLifecycleOwner
@@ -91,24 +104,12 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
             }
         }
 
-        // 3. Слушатель для выбора КАТЕГОРИИ
+        // 4. Слушатель для выбора КАТЕГОРИИ
         setFragmentResultListener(AppointmentConstants.Request.SELECTION_CATEGORY) { _, bundle ->
             val selectedCategoryName = bundle.getString(AppointmentConstants.Result.SELECTED_CATEGORY_NAME)
             if (selectedCategoryName != null) {
                 viewModel.setSelectedCategory(selectedCategoryName)
             }
-        }
-
-        // 4. Слушатель для ПРОДОЛЖИТЕЛЬНОСТИ
-        childFragmentManager.setFragmentResultListener(
-            AppointmentConstants.Request.DURATION_PICKER,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val hour = bundle.getInt(AppConstants.Result.RESULT_HOUR)
-            val minute = bundle.getInt(AppConstants.Result.RESULT_MINUTE)
-
-            // Передаем данные во ViewModel
-            viewModel.setDuration(hour, minute)
         }
     }
 
@@ -429,5 +430,6 @@ class AddServiceFragment : Fragment(R.layout.fragment_add_service) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        pickerResultManager = null
     }
 }

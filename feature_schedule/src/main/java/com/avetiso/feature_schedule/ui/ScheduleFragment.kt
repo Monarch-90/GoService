@@ -14,6 +14,7 @@ import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.common_ui.appointments.showAppointmentDeleteDialog
 import com.avetiso.common_ui.appointments.showAppointmentNoteDialog
 import com.avetiso.common_ui.appointments.showAppointmentStatusDialog
+import com.avetiso.common_ui.compose_picker.managers.PickerResultManager
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ui.Appointment
 import com.avetiso.core.models.AppointmentStatus
@@ -53,10 +54,13 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     private var calendarManager: CalendarManager? = null
     private var appointmentAdapter: AppointmentAdapter? = null
     private var actions: RecyclerViewActions<Appointment>? = null
+    private var pickerResultManager: PickerResultManager? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentScheduleBinding.bind(view)
+
+        pickerResultManager = PickerResultManager(this)
 
         setupAdapter()
         setupCalendar()
@@ -191,17 +195,14 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         }
 
         // Слушаем результат выбора даты
-        childFragmentManager.setFragmentResultListener(
-            ScheduleConstants.Requests.RESCHEDULE_DATE_KEY,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val selectedMillis = bundle.getLong(AppConstants.Result.RESULT_DATE)
-            val appointmentId = bundle.getLong(AppConstants.Result.DATE_RESULT_EXTRA_ID)
+        pickerResultManager?.setupDatePickerListener(
+            requestKey = ScheduleConstants.Requests.RESCHEDULE_DATE_KEY
+        ) { selectedDate, appointmentId ->
 
-            if (appointmentId != AppConstants.ID_NONE) {
+            if (appointmentId != AppConstants.ID_NONE && selectedDate != 0L) {
                 val sdf = SimpleDateFormat(AppConstants.Format.FULL_DATE_FORMAT, Locale.getDefault())
-                val newDate = sdf.format(Date(selectedMillis))
-                // ID пришел из диалога, всё надежно
+                val newDate = sdf.format(Date(selectedDate))
+
                 scheduleViewModel.updateAppointmentStatus(
                     appointmentId,
                     AppointmentStatus.RESCHEDULED,
@@ -289,6 +290,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
         _binding = null
         calendarManager = null // Очищаем ссылку на менеджер
         appointmentAdapter = null
+        pickerResultManager = null
         actions = null
         super.onDestroyView()
     }

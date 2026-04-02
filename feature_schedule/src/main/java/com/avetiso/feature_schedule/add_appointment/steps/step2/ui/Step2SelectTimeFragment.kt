@@ -8,8 +8,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.avetiso.common_ui.CommonConstants
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.compose_picker.ComposeTimePickerDialogFragment
+import com.avetiso.common_ui.compose_picker.managers.PickerResultManager
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.TimeSlotEntity
@@ -33,6 +35,7 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     private var timeSlotAdapter: TimeSlotAdapter? = null
 
     private var actions: RecyclerViewActions<TimeSlotEntity>? = null
+    private var pickerResultManager: PickerResultManager? = null
 
     private val viewModel: Step2SelectTimeViewModel by viewModels()
     private val parentViewModel: AddAppointmentViewModel by viewModels({ requireParentFragment() })
@@ -40,6 +43,8 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentStep2SelectTimeBinding.bind(view)
+
+        pickerResultManager = PickerResultManager(this)
 
         setupRecyclerView()
         setupClickListeners()
@@ -95,19 +100,15 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     }
 
     private fun setupResultListeners() {
-        childFragmentManager.setFragmentResultListener(
-            AppointmentConstants.Request.TIME_PICKER,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val hour = bundle.getInt(AppConstants.Result.RESULT_HOUR)
-            val minute = bundle.getInt(AppConstants.Result.RESULT_MINUTE)
-            val slotId = bundle.getLong(AppConstants.Result.TIME_RESULT_EXTRA_ID)
-
-            val idToSend = if (slotId == AppConstants.ID_NONE) 0L else slotId
-
+        // 1. Используем наш менеджер для элегантного перехвата данных пикера (строгая типизация, никакого парсинга)
+        pickerResultManager?.setupTimePickerListener(
+            requestKey = CommonConstants.Request.TIME_PICKER
+        ) { hour, minute, extraId ->
+            val idToSend = if (extraId == CommonConstants.Args.NO_ID) 0L else extraId
             viewModel.saveTimeSlot(hour, minute, idToSend)
         }
 
+        // 2. Диалог удаления оставляем на childFragmentManager, так как он привязан к локальному AppointmentConstants
         childFragmentManager.setFragmentResultListener(
             AppointmentConstants.Request.DELETE_TIMESLOT,
             viewLifecycleOwner
@@ -159,7 +160,10 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
 
     private fun showTimePicker(timeSlotToEdit: TimeSlotEntity?) {
         val isEditing = timeSlotToEdit != null
-        val title = if (isEditing) "Редактировать слот" else "Добавить слот"
+        val title = if (isEditing) {
+            getString(R.string.Редактировать_слот)
+        } else
+            getString(R.string.Добавить_слот)
 
         val initialHour = timeSlotToEdit?.let { it.startTimeMinutes / 60 } ?: 0
         val initialMinute = timeSlotToEdit?.let { it.startTimeMinutes % 60 } ?: 0
@@ -178,6 +182,7 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     override fun onDestroyView() {
         binding?.rvTimeSlots?.adapter = null
         timeSlotAdapter = null
+        pickerResultManager = null
         actions = null
         binding = null
         super.onDestroyView()

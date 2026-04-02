@@ -23,6 +23,7 @@ import com.avetiso.feature_statistics.models.QuickActionsItem
 import com.avetiso.feature_statistics.models.StatisticsListItem
 import com.avetiso.feature_statistics.models.TimePeriod
 import com.avetiso.feature_statistics.models.WorkloadItem
+import com.avetiso.feature_statistics.mvi.OnCustomDateClick
 import com.avetiso.feature_statistics.mvi.OnFinanceCardClicked
 import com.avetiso.feature_statistics.mvi.OnGenerateFreeWindowsClicked
 import com.avetiso.feature_statistics.mvi.OnInventoryCopyToClipboardClicked
@@ -104,14 +105,22 @@ class PeriodViewHolder(
     private val binding: ItemStatisticsPeriodBinding,
     private val onIntent: (StatisticsIntent) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
+
     fun bind(item: PeriodFilterItem) {
-        // Здесь должна быть логика визуального выделения Chip-а на основе item.selectedPeriod
-        // Отправка интентов при клике:
+        // 1. Строго синхронизируем UI с актуальным MVI-стейтом (решает проблему сброса визуала)
+        when (item.selectedPeriod) {
+            TimePeriod.TODAY -> binding.cgPeriods.check(binding.chipToday.id)
+            TimePeriod.WEEK -> binding.cgPeriods.check(binding.chipWeek.id)
+            TimePeriod.MONTH -> binding.cgPeriods.check(binding.chipMonth.id)
+            TimePeriod.CUSTOM -> binding.cgPeriods.check(binding.chipCustom.id)
+        }
+
+        // 2. Отправка интентов при явном клике пользователя
         binding.chipToday.setOnClickListener { onIntent(SelectPeriod(TimePeriod.TODAY)) }
         binding.chipWeek.setOnClickListener { onIntent(SelectPeriod(TimePeriod.WEEK)) }
         binding.chipMonth.setOnClickListener { onIntent(SelectPeriod(TimePeriod.MONTH)) }
         binding.chipCustom.setOnClickListener {
-            // Интент вызова DatePickerDialog будет обработан во ViewModel/Fragment
+            onIntent(OnCustomDateClick)
         }
     }
 }

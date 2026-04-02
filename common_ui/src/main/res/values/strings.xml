@@ -28,4 +28,7 @@
     <string name="Удалить_запись">Удалить запись?</string>
     <string name="Введите_текст">Введите текст</string>
     <string name="Выберите_дату">Выберите дату</string>
+
+    <string name="date_start">Начало</string>
+    <string name="date_end">Конец</string>
 </resources>

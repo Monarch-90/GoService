@@ -13,6 +13,9 @@ object NavigateToCompletedAppointments : StatisticsEvent
 object NavigateToInventory : StatisticsEvent
 object NavigateToFrequentClients : StatisticsEvent
 
+// --- Системные действия / UI Эффекты ---
+object ShowDateRangePicker : StatisticsEvent
+
 // --- Системные действия ---
 /**
  * Копирует текст в буфер обмена и показывает Toast об успешном копировании.

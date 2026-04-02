@@ -14,6 +14,7 @@ object OnScreenResumed : StatisticsIntent // НОВОЕ: Интент для т�
 // --- Шапка экрана: Фильтры ---
 data class SelectPeriod(val period: TimePeriod) : StatisticsIntent
 data class SelectCustomPeriod(val startDateTimestamp: Long, val endDateTimestamp: Long) : StatisticsIntent
+object OnCustomDateClick : StatisticsIntent
 
 // --- Виджет 1: Финансы ---
 object OnFinanceCardClicked : StatisticsIntent

@@ -23,5 +23,24 @@ internal object StatisticsConstants {
         const val MILLIS_IN_MONTH = 2592000000L
         const val CUSTOM_START = 0L
         const val MINUTE = 60
+
+        // Границы начала суток
+        const val HOUR_START = 0
+        const val MINUTE_START = 0
+        const val SECOND_START = 0
+        const val MILLISECOND_START = 0
+
+        // Границы конца суток
+        const val HOUR_END = 23
+        const val MINUTE_END = 59
+        const val SECOND_END = 59
+        const val MILLISECOND_END = 999
+
+        // Смещение для последних 7 календарных суток (сегодня + 6 предыдущих)
+        const val WEEK_OFFSET_DAYS = -6
+    }
+
+    object Request {
+        const val CUSTOM_PERIOD = "statistics_custom_period_request"
     }
 }

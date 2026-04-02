@@ -15,7 +15,9 @@ import com.avetiso.common_ui.actions.TriggerMode
 import com.avetiso.common_ui.appointments.showAppointmentDeleteDialog
 import com.avetiso.common_ui.appointments.showAppointmentNoteDialog
 import com.avetiso.common_ui.appointments.showAppointmentStatusDialog
+import com.avetiso.common_ui.compose_picker.managers.PickerResultManager
 import com.avetiso.core.AppConstants
+import com.avetiso.core.models.AppointmentStatus
 import com.avetiso.feature_appointments.AppointmentsConstants
 import com.avetiso.feature_appointments.R
 import com.avetiso.feature_appointments.adapter.AppointmentsAdapter
@@ -46,11 +48,15 @@ class AppointmentsFragment : Fragment(R.layout.fragment_appointments) {
     private var appointmentsAdapter: AppointmentsAdapter? = null
     private var actions: RecyclerViewActions<AppointmentsListItem>? = null
 
+    private var pickerResultManager: PickerResultManager? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         android.util.Log.d("AppTrace", "AppointmentsFragment: onViewCreated STARTED")
         _binding = FragmentAppointmentsBinding.bind(view)
+
+        pickerResultManager = PickerResultManager(this)
 
         setupRecyclerView()
         setupResultListeners()
@@ -125,17 +131,22 @@ class AppointmentsFragment : Fragment(R.layout.fragment_appointments) {
             }
         }
 
-        childFragmentManager.setFragmentResultListener(
-            AppointmentsConstants.Requests.RESCHEDULE_DATE_KEY,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val selectedMillis = bundle.getLong(AppConstants.Result.RESULT_DATE)
-            val appointmentId = bundle.getLong(AppConstants.Result.DATE_RESULT_EXTRA_ID)
-            if (appointmentId != AppConstants.ID_NONE) {
+        pickerResultManager?.setupDatePickerListener(
+            requestKey = AppointmentsConstants.Requests.RESCHEDULE_DATE_KEY
+        ) { selectedMillis, appointmentId ->
+
+            // Проверка на валидность ID и даты
+            if (selectedMillis != 0L && appointmentId != AppConstants.ID_NONE) {
                 val sdf = SimpleDateFormat(AppConstants.Format.FULL_DATE_FORMAT, Locale.getDefault())
                 val newDate = sdf.format(Date(selectedMillis))
+
+                // Отправляем MVI-интент на смену статуса с новой датой
                 viewModel.processIntent(
-                    AppointmentsIntent.ChangeStatus(appointmentId, com.avetiso.core.models.AppointmentStatus.RESCHEDULED, newDate)
+                    AppointmentsIntent.ChangeStatus(
+                        appointmentId = appointmentId,
+                        status = AppointmentStatus.RESCHEDULED,
+                        newDate = newDate
+                    )
                 )
             }
         }

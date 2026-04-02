@@ -57,6 +57,7 @@ class StatisticsViewModel @Inject constructor(
 
             is SelectPeriod -> handleSelectPeriod(intent.period)
             is SelectCustomPeriod -> handleSelectCustomPeriod(intent.startDateTimestamp, intent.endDateTimestamp)
+            is OnCustomDateClick -> sendEvent(ShowDateRangePicker)
             is SelectCurrency -> handleSelectCurrency(intent.currencyCode)
 
             is OnFinanceCardClicked -> sendEvent(NavigateToCompletedAppointments)

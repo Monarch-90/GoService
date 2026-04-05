@@ -41,11 +41,6 @@ object AppConstants {
         const val DELETE_CONFIRMED = "delete_confirmed"
         const val DELETE_DIALOG = "delete_dialog"
         const val INPUT_DIALOG = "input_dialog"
-        const val RESULT_DATE = "selected_date_millis"
-        const val DATE_RESULT_EXTRA_ID = "date_result_extra_id"
-        const val TIME_RESULT_EXTRA_ID = "time_result_extra_id"
-        const val RESULT_HOUR = "result_hour"
-        const val RESULT_MINUTE = "result_minute"
         const val RESULT_TEXT = "result_text"
 
     }
@@ -54,7 +49,6 @@ object AppConstants {
         const val CLIENT_SELECT = "client_selection_request"
         const val CHANGE_CURRENCY = "change_currency_request"
         const val ADD_CUSTOM_CURRENCY = "add_custom_currency_request"
-        const val DELETE_CUSTOM_CURRENCY = "delete_custom_currency_request"
     }
 
     object Preferences {
@@ -81,6 +75,11 @@ object AppConstants {
 
     object Tag {
         const val DATE_PICKER = "DATE_PICKER"
+    }
+
+    // Управление отображением виджетами в модуле статистики
+    object FeatureToggles {
+        const val IS_INVENTORY_WIDGET_ENABLED = false // Управление отображением виджета склада
     }
 
     const val ID_NONE = -1L

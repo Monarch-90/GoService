@@ -61,15 +61,17 @@ class StatisticsUiMapper @Inject constructor(
         }
 
         // 3. Складской радар (показываем ВСЕГДА)
-        val uiShortages = state.inventoryShortages.map { item ->
-            InventoryShortUIItem(
-                id = item.materialId,
-                name = item.name,
-                leftCount = item.remainingQuantity,
-                measureUnit = item.unitMeasure
-            )
+        if (com.avetiso.core.AppConstants.FeatureToggles.IS_INVENTORY_WIDGET_ENABLED) {
+            val uiShortages = state.inventoryShortages.map { item ->
+                InventoryShortUIItem(
+                    id = item.materialId,
+                    name = item.name,
+                    leftCount = item.remainingQuantity,
+                    measureUnit = item.unitMeasure
+                )
+            }
+            uiList.add(InventoryWarningItem(uiShortages))
         }
-        uiList.add(InventoryWarningItem(uiShortages))
 
         // 4. Клиенты и Загруженность
         state.workloadSummary?.let { workload ->

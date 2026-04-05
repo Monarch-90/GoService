@@ -42,10 +42,8 @@ class StatisticsFragment : Fragment(R.layout.fragment_statistics) {
     private val binding get() = _binding!!
 
     private val viewModel: StatisticsViewModel by viewModels()
-
     @Inject
     lateinit var uiMapper: StatisticsUiMapper
-
     private var pickerResultManager: PickerResultManager? = null
     private val adapter by lazy {
         // Вызов правильного метода processIntent из твоей ViewModel

@@ -49,6 +49,15 @@ class ComposeDateRangePickerDialogFragment : DialogFragment() {
         dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
     }
 
+    override fun onStart() {
+        super.onStart()
+        val displayMetrics = resources.displayMetrics
+        val width = (displayMetrics.widthPixels * 0.90).toInt() // 90% ширины (как в твоем BaseDialogFragment)
+        val height = (displayMetrics.heightPixels * 1) // 85% ВЫСОТЫ! Вот она, магия растягивания!
+
+        dialog?.window?.setLayout(width, height)
+    }
+
     companion object {
         fun newInstance(
             requestKey: String,

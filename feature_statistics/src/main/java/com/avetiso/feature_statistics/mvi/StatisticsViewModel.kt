@@ -140,21 +140,21 @@ class StatisticsViewModel @Inject constructor(
     private fun handleCopyInventory() {
         viewModelScope.launch {
             val textToCopy = generateTextUseCase.generateInventoryShoppingList(state.value.inventoryShortages)
-            sendEvent(CopyToClipboard(textToCopy, R.string.success_copied_inventory))
+            sendEvent(CopyToClipboard(textToCopy, R.string.Список_покупок_в_разработке))
         }
     }
 
     private fun handleGenerateFreeWindows() {
         viewModelScope.launch {
             val textToCopy = generateTextUseCase.generateFreeWindows(state.value.selectedPeriod)
-            sendEvent(CopyToClipboard(textToCopy, R.string.success_copied_free_windows))
+            sendEvent(CopyToClipboard(textToCopy, R.string.Свободные_окна_в_разработке))
         }
     }
 
     private fun handleSharePriceList() {
         viewModelScope.launch {
             val textToCopy = generateTextUseCase.generatePriceList()
-            sendEvent(CopyToClipboard(textToCopy, R.string.success_copied_price_list))
+            sendEvent(CopyToClipboard(textToCopy, R.string.Прайс_лист_в_разработке))
         }
     }
 

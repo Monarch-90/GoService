@@ -61,7 +61,8 @@ class AddEditClientViewModel @Inject constructor(
             source = currentState.sourceInput.trim(),
             discount = currentState.discountInput.toIntOrNull() ?: 0,
             note = currentState.noteInput.trim(),
-            customFields = currentState.customFieldsInput
+            customFields = currentState.customFieldsInput,
+            createdAt = currentState.originalClient?.createdAt ?: System.currentTimeMillis()
         )
 
         saveClientToDb(clientToSave)

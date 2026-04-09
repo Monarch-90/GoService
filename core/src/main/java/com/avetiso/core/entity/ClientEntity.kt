@@ -21,4 +21,5 @@ data class ClientEntity(
     val discount: Int = 0,   // Личная скидка в %
     val note: String = "",    // Примечание
     val customFields: Map<String, String> = emptyMap(), // Кастомное поле
+    val createdAt: Long = System.currentTimeMillis() // Дата создания профиля клиента
 ) : Parcelable

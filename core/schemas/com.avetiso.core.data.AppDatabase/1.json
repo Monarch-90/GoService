@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0e0649c87ec3d15ce2fe9ca16e2c1bcc",
+    "identityHash": "607490afdd1a0902e9cc295fd51919c2",
     "entities": [
       {
         "tableName": "services",
@@ -107,7 +107,7 @@
       },
       {
         "tableName": "clients",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, `instagram` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `socialLink` TEXT NOT NULL, `source` TEXT NOT NULL, `discount` INTEGER NOT NULL, `note` TEXT NOT NULL, `customFields` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, `instagram` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `socialLink` TEXT NOT NULL, `source` TEXT NOT NULL, `discount` INTEGER NOT NULL, `note` TEXT NOT NULL, `customFields` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -167,6 +167,12 @@
             "fieldPath": "customFields",
             "columnName": "customFields",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -264,7 +270,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0e0649c87ec3d15ce2fe9ca16e2c1bcc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '607490afdd1a0902e9cc295fd51919c2')"
     ]
   }
 }

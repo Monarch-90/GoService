@@ -98,22 +98,37 @@ class StatisticsRepositoryImpl @Inject constructor(
         return@withContext currencies
     }
 
+// --- ЗАГРУЖЕННОСТЬ И КЛИЕНТЫ ---
+
+    override suspend fun getCancellationsCountBetween(startTimestamp: Long, endTimestamp: Long): Int = withContext(Dispatchers.IO) {
+        val startDateStr = dbDateFormatter.format(Date(startTimestamp))
+        val endDateStr = dbDateFormatter.format(Date(endTimestamp))
+
+        val appointments = appointmentDao.getAppointmentsBetweenDatesSync(startDateStr, endDateStr)
+
+        return@withContext appointments.count { it.status == AppointmentStatus.CANCELLED }
+    }
+
+    override suspend fun getTotalWorkMinutesBetween(startTimestamp: Long, endTimestamp: Long): Int = withContext(Dispatchers.IO) {
+        val startDateStr = dbDateFormatter.format(Date(startTimestamp))
+        val endDateStr = dbDateFormatter.format(Date(endTimestamp))
+
+        val appointments = appointmentDao.getAppointmentsBetweenDatesSync(startDateStr, endDateStr)
+
+        // Время считаем с учетом количества выбранных слотов (по каждому слоту отрабатывается полное время услуги)
+        return@withContext appointments
+            .filter { it.status == AppointmentStatus.COMPLETED }
+            .sumOf { it.totalDurationMinutes * maxOf(1, it.timeSlotIds.size) }
+    }
+
+    override suspend fun getNewClientsCountBetween(startTimestamp: Long, endTimestamp: Long): Int = withContext(Dispatchers.IO) {
+        return@withContext clientDao.getNewClientsCount(startTimestamp, endTimestamp)
+    }
+
     // --- ОСТАЛЬНЫЕ МЕТОДЫ (пока заглушки, обновим в процессе) ---
 
     override suspend fun getLowStockMaterials(limit: Int): List<InventoryShortageItem> {
         return emptyList()
-    }
-
-    override suspend fun getNewClientsCountBetween(startTimestamp: Long, endTimestamp: Long): Int {
-        return 0
-    }
-
-    override suspend fun getCancellationsCountBetween(startTimestamp: Long, endTimestamp: Long): Int {
-        return 0
-    }
-
-    override suspend fun getTotalWorkMinutesBetween(startTimestamp: Long, endTimestamp: Long): Int {
-        return 0
     }
 
     override suspend fun getFreeTimeSlots(): List<String> {

@@ -79,7 +79,7 @@ object AppConstants {
 
     // Управление отображением виджетами в модуле статистики
     object FeatureToggles {
-        const val IS_INVENTORY_WIDGET_ENABLED = false // Управление отображением виджета склада
+        const val IS_INVENTORY_WIDGET_ENABLED = true // Управление отображением виджета склада
     }
 
     const val ID_NONE = -1L

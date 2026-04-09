@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">feature_statistics</string>
 
-    <string name="statistics_title">Сводка</string>
+    <string name="statistics_title">Статистика</string>
 
     <string name="statistics_filter_today">Сегодня</string>
     <string name="statistics_filter_week">Неделя</string>
-    <string name="statistics_filter_month">Этот месяц</string>
+    <string name="statistics_filter_month">30 дней</string>
     <string name="statistics_filter_custom">Выбрать даты</string>
 
     <string name="statistics_finance_average_check">Средний чек: %1$s</string>
@@ -30,9 +30,9 @@
 
     <string name="statistics_error_generic">Произошла непредвиденная ошибка при загрузке статистики.</string>
 
-    <string name="success_copied_inventory">Список покупок скопирован</string>
-    <string name="success_copied_free_windows">Свободные окна скопированы</string>
-    <string name="success_copied_price_list">Прайс-лист скопирован</string>
+    <string name="Список_покупок_в_разработке">В процессе разработки..</string>
+    <string name="Свободные_окна_в_разработке">В процессе разработки..</string>
+    <string name="Прайс_лист_в_разработке">В процессе разработки..</string>
 
     <string name="empty_shopping_list">Список покупок пуст.</string>
     <string name="shopping_list_header">🛒 Список покупок:</string>

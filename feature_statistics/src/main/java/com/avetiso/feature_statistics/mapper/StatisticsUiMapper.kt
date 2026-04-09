@@ -27,7 +27,8 @@ class StatisticsUiMapper @Inject constructor(
     // Используем обычный числовой форматер вместо валютного,
     // чтобы самостоятельно добавлять нужную валюту (GEL, USD) без жесткой привязки к рублю.
     private val numberFormatter = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
-        maximumFractionDigits = StatisticsConstants.Math.COUNT // Убираем копейки для красивого отображения на дашборде
+        minimumFractionDigits = StatisticsConstants.Math.RATIO
+        maximumFractionDigits = StatisticsConstants.Math.RATIO
     }
 
     /**

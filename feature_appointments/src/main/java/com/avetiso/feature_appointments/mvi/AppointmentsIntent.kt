@@ -1,6 +1,6 @@
 package com.avetiso.feature_appointments.mvi
 
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 
 sealed interface AppointmentsIntent {
     data class OnDeleteClicked(val appointmentId: Long) : AppointmentsIntent

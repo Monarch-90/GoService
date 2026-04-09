@@ -14,12 +14,11 @@ import com.avetiso.common_ui.dialogs.InputDialogFragment
 import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
 import com.avetiso.common_ui.dialogs.models.showDeleteCustomCurrencyDialog
 import com.avetiso.core.AppConstants
-import com.avetiso.core.model.CurrencyListItem
+import com.avetiso.core.models.CurrencyListItem
 import com.avetiso.feature_sidebar.R
 import com.avetiso.feature_sidebar.databinding.FragmentSettingsBinding
 import com.avetiso.feature_sidebar.settings.mvi.SettingsEvent
 import com.avetiso.feature_sidebar.settings.mvi.SettingsViewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

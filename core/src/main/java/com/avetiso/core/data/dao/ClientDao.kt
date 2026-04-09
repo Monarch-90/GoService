@@ -41,4 +41,7 @@ interface ClientDao {
 
     @Query("SELECT * FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE id = :id")
     fun getClientFlowById(id: Long): Flow<ClientEntity?>
+
+    @Query("SELECT COUNT(*) FROM " + AppConstants.Data.TABLE_CLIENTS + " WHERE createdAt BETWEEN :startTimestamp AND :endTimestamp")
+    suspend fun getNewClientsCount(startTimestamp: Long, endTimestamp: Long): Int
 }

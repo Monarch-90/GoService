@@ -7,9 +7,8 @@ import com.avetiso.core.action.AppointmentActionResult
 import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.entity.ui.Appointment
 import com.avetiso.core.mapper.AppointmentMapper
-import com.avetiso.core.model.AppointmentStatus
+import com.avetiso.core.models.AppointmentStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -9,8 +9,8 @@ import com.avetiso.core.entity.AppointmentEntity
 import com.avetiso.core.entity.ClientEntity
 import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
-import com.avetiso.core.model.AppointmentStatus
-import com.avetiso.core.model.ServiceSnapshot
+import com.avetiso.core.models.AppointmentStatus
+import com.avetiso.core.models.ServiceSnapshot
 import com.avetiso.feature_schedule.ScheduleConstants
 import com.avetiso.core.mapper.AppointmentPriceMapper
 import com.avetiso.feature_schedule.add_appointment.ui.ADD_APPOINTMENT_PAGE_COUNT

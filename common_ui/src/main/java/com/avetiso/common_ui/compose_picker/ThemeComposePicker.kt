@@ -1,6 +1,9 @@
 package com.avetiso.common_ui.compose_picker
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.DatePickerColors
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -49,5 +52,43 @@ fun ThemeComposePicker(
     MaterialTheme(
         colorScheme = colorScheme,
         content = content
+    )
+}
+
+/**
+ * Универсальные цвета для всех календарей (Single и Range).
+ * Строгое соблюдение DRY: настраиваем цвета в одном месте.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun getCustomDatePickerColors(): DatePickerColors {
+    return DatePickerDefaults.colors(
+        // Основной фон и шапка
+        containerColor = MaterialTheme.colorScheme.surface, // Фон всего диалога (#FF0F0F0F)
+        titleContentColor = MaterialTheme.colorScheme.primary, // Цвет заголовка ("Выберите дату")
+        headlineContentColor = MaterialTheme.colorScheme.primary, // Цвет подзаголовка ("Выбранная дата")
+        weekdayContentColor = MaterialTheme.colorScheme.onSecondary, // Цвет дней недели (Пн, Вт...)
+        dayContentColor = MaterialTheme.colorScheme.onSurface, // Цвет цифр
+
+        // Полоса переключения месяца/года
+        subheadContentColor = MaterialTheme.colorScheme.primary, // Цвет текста "Сентябрь 2025"
+        navigationContentColor = MaterialTheme.colorScheme.primary, // Цвет стрелок < >
+
+        // Окно выбора года
+        yearContentColor = MaterialTheme.colorScheme.onSurface, // цвет цифр года
+        selectedYearContainerColor = MaterialTheme.colorScheme.secondary, // Фон выделенного года (#435E6F)
+        selectedYearContentColor = MaterialTheme.colorScheme.onSurfaceVariant, // цвет цифры выделенного года
+
+        // Цвет выделенной даты
+        selectedDayContainerColor = MaterialTheme.colorScheme.secondary, // (#435E6F)
+        selectedDayContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+        // Цвет кольца вокруг сегодняшней даты
+        todayDateBorderColor = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.5f), // Сделаем полупрозрачным
+        todayContentColor = MaterialTheme.colorScheme.onSurface,
+
+        // Дополнительные цвета для диапазона (DateRangePicker)
+        dayInSelectionRangeContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+        dayInSelectionRangeContentColor = MaterialTheme.colorScheme.onSurface
     )
 }

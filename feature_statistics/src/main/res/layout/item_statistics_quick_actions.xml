@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    android:layout_marginBottom="32dp"
+    android:baselineAligned="false"
+    android:orientation="horizontal">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_free_windows"
+        style="@style/Widget.MaterialComponents.Button.TonalButton"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        app:cornerRadius="16dp"
+        android:text="@string/statistics_action_free_slots" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_share_price"
+        style="@style/Widget.MaterialComponents.Button.TonalButton"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        app:cornerRadius="16dp"
+        android:text="@string/statistics_action_share_price" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

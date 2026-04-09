@@ -1,7 +1,6 @@
 package com.avetiso.feature_schedule.calendar.ui
 
 import android.content.Context
-import android.graphics.Typeface.BOLD
 import android.util.TypedValue
 import android.view.View
 import androidx.core.content.ContextCompat

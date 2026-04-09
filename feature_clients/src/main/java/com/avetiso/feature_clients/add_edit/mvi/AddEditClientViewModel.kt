@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
 import com.avetiso.core.data.dao.ClientDao
 import com.avetiso.core.entity.ClientEntity
-import com.avetiso.core.model.UiText
+import com.avetiso.core.models.UiText
 import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -61,7 +61,8 @@ class AddEditClientViewModel @Inject constructor(
             source = currentState.sourceInput.trim(),
             discount = currentState.discountInput.toIntOrNull() ?: 0,
             note = currentState.noteInput.trim(),
-            customFields = currentState.customFieldsInput
+            customFields = currentState.customFieldsInput,
+            createdAt = currentState.originalClient?.createdAt ?: System.currentTimeMillis()
         )
 
         saveClientToDb(clientToSave)

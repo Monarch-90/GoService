@@ -1,6 +1,6 @@
 package com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.mvi
 
-import com.avetiso.core.model.UiText
+import com.avetiso.core.models.UiText
 
 sealed interface AddServiceEvent {
     data class ShowToast(val message: UiText) : AddServiceEvent

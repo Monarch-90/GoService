@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
 import com.avetiso.core.data.repository.SettingsRepository
-import com.avetiso.core.model.AppCurrency
-import com.avetiso.core.model.CurrencyListItem
+import com.avetiso.core.models.AppCurrency
+import com.avetiso.core.models.CurrencyListItem
 import com.avetiso.core.usecase.GetCurrencyListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject

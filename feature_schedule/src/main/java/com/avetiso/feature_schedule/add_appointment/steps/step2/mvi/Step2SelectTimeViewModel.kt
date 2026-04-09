@@ -3,9 +3,8 @@ package com.avetiso.feature_schedule.add_appointment.steps.step2.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.dao.TimeSlotDao
-import com.avetiso.core.entity.ServiceEntity
 import com.avetiso.core.entity.TimeSlotEntity
-import com.avetiso.core.model.UiText
+import com.avetiso.core.models.UiText
 import com.avetiso.feature_schedule.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

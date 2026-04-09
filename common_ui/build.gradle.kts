@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose.compiler)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -45,6 +47,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.fragment.ktx)
+
+    // Hilt (для ViewModel)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
     // Основные библиотеки Compose (версии возьмутся из BOM)
     implementation(libs.compose.material3)

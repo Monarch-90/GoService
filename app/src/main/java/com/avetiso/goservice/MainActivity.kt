@@ -107,6 +107,13 @@ class MainActivity : AppCompatActivity(), SidebarController {
                 when (effect.destinationId) {
                     R.id.nav_settings -> sidebarNavigator.navigateToSettings(navController)
                     R.id.nav_about -> sidebarNavigator.navigateToAbout(navController)
+                    // Добавляем обработку нашего нового пункта меню
+                    R.id.nav_contact_developers -> {
+                        sidebarNavigator.navigateToContactDevelopers(navController)
+                        // Не забудь закрыть шторку после клика, как ты это делаешь для остальных пунктов
+                        closeSideDrawer()
+                        true
+                    }
                 }
             }
         }

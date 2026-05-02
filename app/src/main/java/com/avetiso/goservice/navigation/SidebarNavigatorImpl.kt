@@ -29,4 +29,12 @@ class SidebarNavigatorImpl @Inject constructor() : SidebarNavigator {
 
         navController.navigate(request)
     }
+
+    override fun navigateToContactDevelopers(navController: NavController) {
+        val request = NavDeepLinkRequest.Builder
+            .fromUri(AppConstants.DeepLinks.SIDEBAR_CONTACT_DEVELOPERS.toUri())
+            .build()
+
+        navController.navigate(request)
+    }
 }

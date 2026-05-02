@@ -54,4 +54,8 @@ dependencies {
     // Navigation (если нужна навигация внутри фичи)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+
+    // Retrofit
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
 }

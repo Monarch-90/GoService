@@ -6,4 +6,17 @@
     <string name="Настройки">Настройки</string>
     <string name="Основные">Основные</string>
     <string name="Будет_выбрана_при_создании_услуги">Будет выбрана при создании услуги</string>
+
+    <string name="sidebar_about_contact_devs_button">Связаться с разработчиками</string>
+
+    <string name="sidebar_contact_developers_title">Связаться с разработчиками</string>
+    <string name="sidebar_contact_devs_email_hint">Ваш Email для обратной связи</string>
+    <string name="sidebar_contact_devs_message_hint">Опишите вашу проблему или предложение</string>
+    <string name="sidebar_contact_devs_send_button">Отправить</string>
+
+    <string name="sidebar_contact_devs_error_empty_field">Поле не может быть пустым</string>
+    <string name="sidebar_contact_devs_error_invalid_email">Введите корректный email</string>
+
+    <string name="sidebar_contact_devs_success_toast">Успешно отправлено</string>
+    <string name="sidebar_contact_devs_error_toast">Ошибка при отправке. Проверьте интернет.</string>
 </resources>

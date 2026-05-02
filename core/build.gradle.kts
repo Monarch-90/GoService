@@ -59,6 +59,10 @@ dependencies {
 
     // Desugar (десахаризация)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Retrofit
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
 }
 
 // Parcelize

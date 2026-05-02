@@ -20,4 +20,10 @@ interface SidebarNavigator {
      * @param navController Контроллер навигации.
      */
     fun navigateToAbout(navController: NavController)
+
+    /**
+     * Переход на экран связи с разработчиками.
+     * @param navController Контроллер навигации.
+     */
+    fun navigateToContactDevelopers(navController: NavController)
 }

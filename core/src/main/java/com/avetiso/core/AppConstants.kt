@@ -32,6 +32,7 @@ object AppConstants {
         const val SIDEBAR_ABOUT = "goservice://sidebar/about"
         const val SCHEDULE_MAIN = "goservice://schedule/main"
         const val SCHEDULE_ADD_EDIT = "goservice://schedule/add_edit"
+        const val SIDEBAR_CONTACT_DEVELOPERS = "goservice://sidebar/contact_developers"
     }
 
     // Ключи результатов (Result Keys) внутри Bundle

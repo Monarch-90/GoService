@@ -23,4 +23,13 @@
         <deepLink app:uri="goservice://sidebar/about" />
     </fragment>
 
+    <fragment
+        android:id="@+id/contactDevelopersFragment"
+        android:name="com.avetiso.feature_sidebar.contact_developers.ui.ContactDevelopersFragment"
+        android:label="ContactDevelopersFragment"
+        tools:layout="@layout/fragment_contact_developers">
+
+        <deepLink app:uri="goservice://sidebar/contact_developers" />
+
+    </fragment>
 </navigation>

@@ -20,6 +20,7 @@ recyclerview = "1.4.0"
 room = "2.7.2"
 gson = "2.13.1"
 datastore = "1.0.0"
+retrofit = "3.0.0"
 
 # Compose
 composeBom = "2025.08.01"
@@ -89,6 +90,10 @@ androidx-navigation-common-ktx = { group = "androidx.navigation", name = "naviga
 # Data store
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+
+# Retrofit
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -42,7 +42,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/Отмена_dialog_input"
+            android:text="@string/cancel_dialog_input"
             android:textColor="@color/grey" />
 
         <com.google.android.material.button.MaterialButton
@@ -50,7 +50,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/Сохранить_dialog_input"
+            android:text="@string/save_dialog_input"
             android:textColor="@color/grey" />
 
     </LinearLayout>

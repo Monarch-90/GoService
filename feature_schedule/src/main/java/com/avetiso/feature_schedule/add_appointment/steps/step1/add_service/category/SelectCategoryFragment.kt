@@ -70,7 +70,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         val hasDuplicate = viewModel.isDuplicate(name)
 
         if (hasDuplicate) {
-            Toast.makeText(requireContext(), R.string.Такая_категория_уже_существует, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.category_already_exists, Toast.LENGTH_SHORT).show()
         } else {
             // Просто передаем данные. ViewModel сама знает, редактируем мы или создаем.
             viewModel.onCategoryNameInput(name)
@@ -170,9 +170,9 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         }
 
         val title = if (isEditMode) {
-            context?.getString(R.string.Редактировать_категорию).toString()
+            context?.getString(R.string.edit_category).toString()
         } else {
-            context?.getString(R.string.Новая_категория).toString()
+            context?.getString(R.string.new_category).toString()
         }
 
         val initialValue = category?.name ?: ""
@@ -180,7 +180,7 @@ class SelectCategoryFragment : Fragment(R.layout.fragment_select_category) {
         InputDialogFragment.newInstance(
             requestKey = AppointmentConstants.Request.INPUT_CATEGORY,
             title = title,
-            hint = context?.getString(R.string.Название_категории).toString(),
+            hint = context?.getString(R.string.category_title).toString(),
             initialValue = initialValue
         ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }

@@ -1,33 +1,33 @@
 <resources>
-    <string name="app_name">common_ui</string>
+    <string name="default_currency">Валюта по умолчанию</string>
+    <string name="set_title">Установить %1$s?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
 
-    <string name="Валюта_по_умолчанию">Валюта по умолчанию</string>
-    <string name="Установить_название">Установить %1$s?</string>
-    <string name="Да">Да</string>
-    <string name="Нет">Нет</string>
+    <string name="field_is_required">Поле не может быть пустым</string>
+    <string name="field_already_exists">Такое поле уже существует</string>
 
-    <string name="Поле_не_может_быть_пустым">Поле не может быть пустым</string>
-    <string name="Такое_поле_уже_существует">Такое поле уже существует</string>
+    <string name="deletion">Удаление</string>
 
-    <string name="Удаление">Удаление</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
+    <string name="time_picker_hour_unit"> ч</string>
+    <string name="time_picker_minute_unit"> мин</string>
 
-    <string name="Отмена">Отмена</string>
-    <string name="ОК">ОК</string>
+    <string name="cancel_dialog">Отмена</string>
+    <string name="delete_dialog">Удалить</string>
 
-    <string name="Отмена_dialog">Отмена</string>
-    <string name="Удалить_dialog">Удалить</string>
+    <string name="cancel_dialog_input">Отмена</string>
+    <string name="save_dialog_input">Сохранить</string>
 
-    <string name="Отмена_dialog_input">Отмена</string>
-    <string name="Сохранить_dialog_input">Сохранить</string>
+    <string name="edit_action_icons">Редактировать</string>
+    <string name="delete_action_icons">Удалить</string>
 
-    <string name="Редактировать_action_icons">Редактировать</string>
-    <string name="Удалить_action_icons">Удалить</string>
+    <string name="appointment_status">Cтатус записи</string>
 
-    <string name="Cтатус_записи">Cтатус записи</string>
-
-    <string name="Удалить_запись">Удалить запись?</string>
-    <string name="Введите_текст">Введите текст</string>
-    <string name="Выберите_дату">Выберите дату</string>
+    <string name="delete_appointment">Удалить запись?</string>
+    <string name="enter_text">Введите текст</string>
+    <string name="select_date">Выберите дату</string>
 
     <string name="date_start">Начало</string>
     <string name="date_end">Конец</string>

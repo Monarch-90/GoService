@@ -1,29 +1,28 @@
 <resources>
-    <string name="app_name">feature_clients</string>
+    <string name="clients">Клиенты</string>
+    <string name="client_name">Имя клиента</string>
+    <string name="phone_number">Номер телефона</string>
+    <string name="instagram">Инстаграм</string>
+    <string name="lead_source">Источник привлечения</string>
+    <string name="personal_discount_percent">Личная скидка, %</string>
+    <string name="save">Сохранить</string>
+    <string name="add_field">Добавить поле</string>
 
-    <string name="Имя_клиента">Имя клиента</string>
-    <string name="Номер_телефона">Номер телефона</string>
-    <string name="Инстаграм">Инстаграм</string>
-    <string name="Источник_привлечения">Источник привлечения</string>
-    <string name="Личная_скидка_процент">Личная скидка, %</string>
-    <string name="Сохранить">Сохранить</string>
-    <string name="Добавить_поле">Добавить поле</string>
+    <string name="new_field">Новое поле</string>
+    <string name="field_title">Название поля</string>
 
-    <string name="Новое_поле">Новое поле</string>
-    <string name="Название_поля">Название поля</string>
+    <string name="search_client">Поиск клиента</string>
+    <string name="add_client">Добавить клиента</string>
 
-    <string name="Поиск_клиента">Поиск клиента</string>
-    <string name="Добавить_клиента">Добавить клиента</string>
+    <string name="delete_field">Удалить поле</string>
 
-    <string name="Удалить_поле">Удалить поле</string>
+    <string name="client_already_added">Этот клиент уже добавлен</string>
 
-    <string name="Этот_клиент_уже_добавлен">Этот клиент уже добавлен</string>
+    <string name="edit_client">Редактировать клиента</string>
+    <string name="new_client">Новый клиент</string>
 
-    <string name="Редактировать_клиента">Редактировать клиента</string>
-    <string name="Новый_клиент">Новый клиент</string>
+    <string name="name_is_required">Имя не может быть пустым</string>
 
-    <string name="Имя_не_может_быть_пустым">Имя не может быть пустым</string>
-
-    <string name="Клиент_удален">Клиент удален</string>
-    <string name="Личная_скидка">Личная скидка</string>
+    <string name="client_deleted">Клиент удален</string>
+    <string name="personal_discount">Личная скидка</string>
 </resources>

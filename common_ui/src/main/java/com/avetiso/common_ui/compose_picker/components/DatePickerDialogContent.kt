@@ -43,7 +43,7 @@ fun DatePickerDialogContent(
                 datePickerState.selectedDateMillis?.let { onConfirm(it) }
             }) {
                 Text(
-                    text = stringResource(R.string.ОК),
+                    text = stringResource(R.string.ok),
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -51,7 +51,7 @@ fun DatePickerDialogContent(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(
-                    text = stringResource(R.string.Отмена),
+                    text = stringResource(R.string.cancel),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }

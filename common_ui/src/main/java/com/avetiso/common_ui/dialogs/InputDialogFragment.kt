@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.setFragmentResult
-import com.avetiso.common_ui.CommonConstants
 import com.avetiso.common_ui.R
 import com.avetiso.common_ui.databinding.DialogInputBinding
 import com.avetiso.core.AppConstants
@@ -56,11 +55,11 @@ class InputDialogFragment : BaseDialogFragment<DialogInputBinding>() {
 
             when {
                 text.isBlank() && !allowEmpty -> {
-                    binding.inputLayout.error = getString(R.string.Поле_не_может_быть_пустым)
+                    binding.inputLayout.error = getString(R.string.field_is_required)
                 }
                 // ПРОВЕРКА НА ДУБЛИКАТ ВНУТРИ ДИАЛОГА
                 forbiddenValues.any { it.equals(text, ignoreCase = true) } -> {
-                    binding.inputLayout.error = getString(R.string.Такое_поле_уже_существует)
+                    binding.inputLayout.error = getString(R.string.field_already_exists)
                 }
 
                 else -> {

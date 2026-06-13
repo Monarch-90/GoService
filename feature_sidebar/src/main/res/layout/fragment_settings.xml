@@ -16,8 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="?attr/homeAsUpIndicator"
-            app:navigationContentDescription="Вернуться на главный экран"
-            app:title="Настройки" />
+            app:title="@string/settings" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
@@ -30,7 +29,7 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/Основные"
+            android:text="@string/general"
             android:textColor="@color/custom_main"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -51,14 +50,14 @@
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/Валюта_по_умолчанию"
+                    android:text="@string/default_currency"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="16sp" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/Будет_выбрана_при_создании_услуги"
+                    android:text="@string/will_be_selected"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp" />
             </LinearLayout>

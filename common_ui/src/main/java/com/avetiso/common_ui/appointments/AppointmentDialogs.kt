@@ -29,7 +29,7 @@ fun Fragment.showAppointmentStatusDialog(
             if (selectedStatus == AppointmentStatus.RESCHEDULED) {
                 ComposeDatePickerDialogFragment.newInstance(
                     requestKey = rescheduleRequestKey,
-                    title = getString(R.string.Выберите_дату),
+                    title = getString(R.string.select_date),
                     extraId = appointment.id
                 ).show(childFragmentManager, AppConstants.Tag.DATE_PICKER)
             } else {
@@ -50,8 +50,8 @@ fun Fragment.showAppointmentNoteDialog(
 ) {
     InputDialogFragment.newInstance(
         requestKey = requestKey,
-        title = getString(com.avetiso.core.R.string.Примечание),
-        hint = getString(R.string.Введите_текст),
+        title = getString(com.avetiso.core.R.string.comment),
+        hint = getString(R.string.enter_text),
         initialValue = currentNote,
         isMultiline = true, // Включаем многострочный режим
         allowEmpty = true,
@@ -61,7 +61,7 @@ fun Fragment.showAppointmentNoteDialog(
 fun Fragment.showAppointmentDeleteDialog(
     requestKey: String
 ) {
-    val messageText = getString(R.string.Удалить_запись)
+    val messageText = getString(R.string.delete_appointment)
     DeleteDialogFragment.newInstance(
         requestKey = requestKey,
         message = getString(com.avetiso.core.R.string.delete_dialog_message, messageText)

@@ -1,14 +1,15 @@
 package com.avetiso.feature_appointments.mvi
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
 import com.avetiso.core.action.AppointmentActionHandler
 import com.avetiso.core.data.dao.AppointmentDao
 import com.avetiso.core.mapper.AppointmentMapper
+import com.avetiso.feature_appointments.AppointmentsConstants
 import com.avetiso.feature_appointments.model.AppointmentsListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 import javax.inject.Inject
 
@@ -28,7 +28,8 @@ import javax.inject.Inject
 class AppointmentsViewModel @Inject constructor(
     private val appointmentDao: AppointmentDao,
     private val appointmentMapper: AppointmentMapper,
-    val actionHandler: AppointmentActionHandler,
+    private val actionHandler: AppointmentActionHandler,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppointmentsState())
@@ -44,22 +45,36 @@ class AppointmentsViewModel @Inject constructor(
     private val headerFormatter = DateTimeFormatter.ofPattern(AppConstants.Format.DATE_FORMAT_HEADER, Locale.getDefault())
 
     init {
-
-        android.util.Log.d("AppTrace", "AppointmentsViewModel: INIT")
         observeAppointments()
     }
+
+    private var pendingDeleteId: Long?
+        get() = savedStateHandle[AppointmentsConstants.Pending.KEY_PENDING_DELETE_ID]
+        set(value) {
+            savedStateHandle[AppointmentsConstants.Pending.KEY_PENDING_DELETE_ID] = value
+        }
+
+    private var pendingNoteAppointmentId: Long?
+        get() = savedStateHandle[AppointmentsConstants.Pending.KEY_PENDING_NOTE_ID]
+        set(value) {
+            savedStateHandle[AppointmentsConstants.Pending.KEY_PENDING_NOTE_ID] = value
+        }
 
     fun processIntent(intent: AppointmentsIntent) {
         when (intent) {
             is AppointmentsIntent.OnDeleteClicked -> {
-                actionHandler.appointmentPendingDeleteId = intent.appointmentId
+                pendingDeleteId = intent.appointmentId
                 viewModelScope.launch {
                     _events.send(AppointmentsEvent.ShowDeleteDialog(intent.appointmentId))
                 }
             }
 
             is AppointmentsIntent.ConfirmDelete -> {
-                viewModelScope.launch { actionHandler.confirmDelete() }
+                val id = pendingDeleteId ?: return
+                viewModelScope.launch {
+                    actionHandler.confirmDelete(id) // Передаем ID
+                    pendingDeleteId = null          // Очищаем стейт после успеха
+                }
             }
 
             is AppointmentsIntent.OnEditClicked -> {
@@ -69,14 +84,18 @@ class AppointmentsViewModel @Inject constructor(
             }
 
             is AppointmentsIntent.OnNoteClicked -> {
-                actionHandler.pendingAppointmentId = intent.appointmentId
+                pendingNoteAppointmentId = intent.appointmentId
                 viewModelScope.launch {
                     _events.send(AppointmentsEvent.ShowNoteDialog(intent.appointmentId, intent.currentNote))
                 }
             }
 
             is AppointmentsIntent.SaveNote -> {
-                viewModelScope.launch { actionHandler.updateNote(intent.newNote) }
+                val id = pendingNoteAppointmentId ?: return
+                viewModelScope.launch {
+                    actionHandler.updateNote(id, intent.newNote) // Передаем ID и текст
+                    pendingNoteAppointmentId = null              // Очищаем стейт
+                }
             }
 
             is AppointmentsIntent.ChangeStatus -> {

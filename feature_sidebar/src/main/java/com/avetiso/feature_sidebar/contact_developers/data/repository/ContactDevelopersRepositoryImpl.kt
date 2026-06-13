@@ -28,12 +28,10 @@ class ContactDevelopersRepositoryImpl @Inject constructor(
             } else {
                 // Если сервер нас отшил (например, email не подтвержден)
                 val errorBody = response.errorBody()?.string()
-                android.util.Log.e("AppTrace", "Formspree API Error: code ${response.code()}, body: $errorBody")
                 Result.failure(Exception("API Error: ${response.code()}"))
             }
         } catch (e: Exception) {
             // Если Retrofit вообще не смог собраться или упал (например, из-за BaseURL)
-            android.util.Log.e("AppTrace", "Retrofit Crash during sendFeedback", e)
             Result.failure(e)
         }
     }

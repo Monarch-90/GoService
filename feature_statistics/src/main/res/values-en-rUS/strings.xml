@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="statistics_title">Statistics</string>
+    <string name="statistics_filter_today">Today</string>
+    <string name="statistics_filter_week">Week</string>
+    <string name="statistics_filter_month">30 days</string>
+    <string name="statistics_filter_custom">Select dates</string>
+    <string name="statistics_finance_average_check">Average check: %1$s</string>
+    <string name="statistics_finance_services_count">Services provided: %1$d</string>
+    <string name="statistics_finance_trend_positive">+%1$d%% vs previous period</string>
+    <string name="statistics_finance_trend_negative">-%1$d%% vs previous period</string>
+    <string name="statistics_inventory_warning_title">Low stock materials</string>
+    <string name="statistics_inventory_item_left">left: %1$d %2$s</string>
+    <string name="statistics_inventory_btn_see_all">View all</string>
+    <string name="statistics_inventory_btn_to_list">To shopping list</string>
+    <string name="statistics_inventory_list_item_format">- %1$s</string>
+    <string name="statistics_load_new_clients">New clients</string>
+    <string name="statistics_load_cancellations">Cancelled</string>
+    <string name="statistics_load_work_hours_value">%1$d h</string>
+    <string name="statistics_load_work_hours">Hours worked</string>
+    <string name="statistics_action_free_slots">Available slots</string>
+    <string name="statistics_action_share_price">Share price list</string>
+    <string name="statistics_error_generic">An unexpected error occurred while loading statistics</string>
+    <string name="work_in_progress">In development..</string>
+    <string name="empty_shopping_list">Shopping list is empty.</string>
+    <string name="shopping_list_header">🛒 Shopping list is empty.</string>
+    <string name="shopping_list_item_format">%1$d. %2$s — left: %3$d %4$s</string>
+    <string name="free_windows_header">✨ Available slots:</string>
+    <string name="no_free_windows">No available slots for the selected period.</string>
+    <string name="free_windows_item_format">• %1$s</string>
+    <string name="price_list_header">📋 Price list:</string>
+    <string name="empty_price_list">Price list is empty.</string>
+    <string name="price_list_item_format">%1$s — %2$s GEL</string>
+</resources>

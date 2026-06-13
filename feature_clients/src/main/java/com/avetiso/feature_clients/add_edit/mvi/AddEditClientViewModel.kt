@@ -90,7 +90,7 @@ class AddEditClientViewModel @Inject constructor(
                 _eventChannel.send(
                     AddEditClientEvent.ShowToast(
                         UiText.StringResource(
-                            R.string.Этот_клиент_уже_добавлен
+                            R.string.client_already_added
                         )
                     )
                 )

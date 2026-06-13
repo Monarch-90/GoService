@@ -110,7 +110,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             },
             onItemClick = { /* TODO: Логика клика */ },
             onActionsShown = {
-                android.util.Log.d("ScheduleDebug", "onActionsShown - скрываем btnAddAppointment")
 
                 binding.btnAddAppointment.animate()
                     .scaleX(0f)
@@ -123,7 +122,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                     .start()
             },
             onActionsDismissed = {
-                android.util.Log.d("ScheduleDebug", "onActionsDismissed - показываем btnAddAppointment")
 
                 binding.btnAddAppointment.visibility = View.VISIBLE
                 binding.btnAddAppointment.animate()
@@ -158,7 +156,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             }
         }
         binding.btnAddAppointment.setOnClickListener {
-            android.util.Log.d("ScheduleDebug", "btnAddAppointment clicked! Visibility = ${binding.btnAddAppointment.visibility}")
 
             // Получаем выбранную дату из ViewModel календаря
             val selectedDate = calendarViewModel.state.value.selectedDate
@@ -173,7 +170,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 findNavController().navigate(action)
             } else {
                 // Если дата не выбрана, показываем подсказку
-                Toast.makeText(requireContext(), R.string.Пожалуйста_выберите_день, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.please_select_day, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -228,12 +225,6 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 launch {
                     var previousSelectedDate: LocalDate? = null
                     calendarViewModel.state.collect { state ->
-
-                        android.util.Log.d(
-                            "ScheduleDebug",
-                            "calendar state collected: new_date=${state.selectedDate}, prev_date=$previousSelectedDate"
-                        )
-
                         if (previousSelectedDate != null && previousSelectedDate != state.selectedDate) {
                             // 1. СНАЧАЛА закрываем открытую запись.
                             //    В этот момент RecyclerView еще показывает старый список.
@@ -277,12 +268,19 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     }
 
     private fun updateMonthTitle(yearMonth: YearMonth) {
+
         val monthTitle = yearMonth.month.getDisplayName(
             TextStyle.FULL_STANDALONE,
-            Locale.forLanguageTag("ru")
+            Locale.getDefault()
         ).replaceFirstChar { it.uppercase() }
+
         val yearTitle = yearMonth.year.toString()
-        binding.textMonthTitle.text = "$monthTitle $yearTitle"
+
+        binding.textMonthTitle.text = getString(
+            R.string.calendar_title_format,
+            monthTitle,
+            yearTitle
+        )
     }
 
     override fun onDestroyView() {

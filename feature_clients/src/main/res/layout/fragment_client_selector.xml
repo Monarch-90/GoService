@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/surface_color"
-            android:hint="@string/Поиск_клиента"
+            android:hint="@string/search_client"
             android:paddingStart="30dp"
             android:textCursorDrawable="@null" />
 
@@ -37,7 +37,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
         android:baselineAligned="false"
-        android:text="@string/Добавить_клиента" />
+        android:text="@string/add_client" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_clients"

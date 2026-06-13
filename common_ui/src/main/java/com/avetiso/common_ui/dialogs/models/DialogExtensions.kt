@@ -11,10 +11,10 @@ fun Fragment.showChangeCurrencyDialog(
 ) {
     val payload = ConfirmationDialogPayload(
         requestKey = requestKey,
-        title = getString(R.string.Валюта_по_умолчанию),
-        message = getString(R.string.Установить_название, currencyName),
-        positiveText = getString(R.string.Да),
-        negativeText = getString(R.string.Нет),
+        title = getString(R.string.default_currency),
+        message = getString(R.string.set_title, currencyName),
+        positiveText = getString(R.string.yes),
+        negativeText = getString(R.string.no),
         isDestructive = false // По умолчанию обычный стиль (не красный)
     )
 
@@ -33,7 +33,7 @@ fun Fragment.showDeleteCustomCurrencyDialog(
             onCurrencySelected(currencies[which])
         }
         // Используем твою кастомную строку из common_ui
-        .setNegativeButton(R.string.Отмена_dialog, null)
+        .setNegativeButton(R.string.cancel_dialog, null)
         .create()
 
     // Навешиваем твои фирменные скругления в стиле Enterprise

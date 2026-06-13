@@ -53,9 +53,7 @@ class AppointmentsFragment : Fragment(R.layout.fragment_appointments) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        android.util.Log.d("AppTrace", "AppointmentsFragment: onViewCreated STARTED")
         _binding = FragmentAppointmentsBinding.bind(view)
-
         pickerResultManager = PickerResultManager(this)
 
         setupRecyclerView()
@@ -63,7 +61,6 @@ class AppointmentsFragment : Fragment(R.layout.fragment_appointments) {
         observeViewModel()
         setupSearch()
 
-        android.util.Log.d("AppTrace", "AppointmentsFragment: onViewCreated FINISHED")
     }
 
     private fun setupRecyclerView() {
@@ -158,7 +155,6 @@ class AppointmentsFragment : Fragment(R.layout.fragment_appointments) {
                 launch {
                     viewModel.state.collect { state ->
 
-                        android.util.Log.d("AppTrace", "AppointmentsFragment: State collected, items size = ${state.items.size}")
                         appointmentsAdapter?.submitList(state.items)
                     }
                 }

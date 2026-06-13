@@ -1,7 +1,6 @@
 package com.avetiso.common_ui.actions.listeners
 
 import android.graphics.Rect
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View

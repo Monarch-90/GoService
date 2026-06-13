@@ -2,17 +2,17 @@
     <item
         android:id="@+id/schedule_nav_graph"
         android:icon="@drawable/ic_schedule"
-        android:title="@string/Расписание" />
+        android:title="@string/schedule" />
     <item
         android:id="@+id/appointments_nav_graph"
         android:icon="@drawable/ic_appointment"
-        android:title="@string/Записи" />
+        android:title="@string/appointments" />
     <item
         android:id="@+id/clients_nav_graph"
         android:icon="@drawable/ic_clients"
-        android:title="@string/Клиенты" />
+        android:title="@string/clients" />
     <item
         android:id="@+id/statistics_nav_graph"
         android:icon="@drawable/ic_statistics"
-        android:title="@string/Статистика" />
+        android:title="@string/statistics" />
 </menu>

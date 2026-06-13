@@ -159,7 +159,7 @@ class AddServiceViewModel @Inject constructor(
                 _events.send(
                     AddServiceEvent.ShowToast(
                         UiText.StringResource(
-                            R.string.Такая_услуга_уже_существует
+                            R.string.service_already_exists
                         )
                     )
                 )

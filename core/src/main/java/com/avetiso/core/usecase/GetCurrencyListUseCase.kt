@@ -37,7 +37,7 @@ class GetCurrencyListUseCase @Inject constructor(
                 }
 
                 // 4. Кнопка удаления появляется ТОЛЬКО если есть кастомные валюты
-                list.add(CurrencyListItem.ActionDelete(context.getString(R.string.remove_custom_currency)))
+                list.add(CurrencyListItem.ActionDelete(context.getString(R.string.delete_custom_currency)))
             }
 
             list

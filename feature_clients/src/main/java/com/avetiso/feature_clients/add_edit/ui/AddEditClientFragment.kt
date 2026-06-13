@@ -84,9 +84,9 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         val currentBinding = binding ?: return
 
         currentBinding.toolbar.title = if (state.isEditing) {
-            getString(R.string.Редактировать_клиента)
+            getString(R.string.edit_client)
         } else {
-            getString(R.string.Новый_клиент)
+            getString(R.string.new_client)
         }
 
         // Функция-помощник для обновления текста без "дёрганья" курсора
@@ -184,7 +184,7 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         currentBinding.btnSave.setOnClickListener {
             // Валидация UI перед отправкой в VM (для красивой ошибки на поле)
             if (currentBinding.inputEditTextName.text.isNullOrBlank()) {
-                currentBinding.inputLayoutName.error = getString(R.string.Имя_не_может_быть_пустым)
+                currentBinding.inputLayoutName.error = getString(R.string.name_is_required)
             } else {
                 currentBinding.inputLayoutName.error = null
                 viewModel.onSaveClicked()
@@ -209,12 +209,12 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
         val state = viewModel.state.value
 
         val usedNames = mutableListOf(
-            getString(R.string.Имя_клиента),
-            getString(R.string.Номер_телефона),
-            getString(R.string.Инстаграм),
-            getString(R.string.Источник_привлечения),
-            getString(R.string.Личная_скидка_процент),
-            getString(com.avetiso.core.R.string.Примечание),
+            getString(R.string.client_name),
+            getString(R.string.phone_number),
+            getString(R.string.instagram),
+            getString(R.string.lead_source),
+            getString(R.string.personal_discount_percent),
+            getString(com.avetiso.core.R.string.comment),
         )
 
         // Добавляем уже созданные кастомные поля
@@ -222,8 +222,8 @@ class AddEditClientFragment : Fragment(R.layout.fragment_add_edit_client) {
 
         InputDialogFragment.newInstance(
             requestKey = ClientsConstants.Requests.INPUT_FIELD,
-            title = getString(R.string.Новое_поле),
-            hint = getString(R.string.Название_поля),
+            title = getString(R.string.new_field),
+            hint = getString(R.string.field_title),
             forbiddenValues = usedNames,
         ).show(childFragmentManager, AppConstants.Result.INPUT_DIALOG)
     }

@@ -20,7 +20,7 @@ class DeleteDialogFragment : BaseDialogFragment<DialogDeleteBinding>() {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val title = arguments?.getString(ARG_TITLE) ?: getString(R.string.Удаление)
+        val title = arguments?.getString(ARG_TITLE) ?: getString(R.string.deletion)
         val message = arguments?.getString(ARG_MESSAGE) ?: ""
         val requestKey = arguments?.getString(ARG_REQUEST_KEY) ?: CommonConstants.Request.DELETE_REQUEST
 
@@ -48,7 +48,7 @@ class DeleteDialogFragment : BaseDialogFragment<DialogDeleteBinding>() {
         fun newInstance(
             requestKey: String,
             message: String,
-            @StringRes title: Int = R.string.Удаление,
+            @StringRes title: Int = R.string.deletion,
         ): DeleteDialogFragment {
             return DeleteDialogFragment().apply {
                 arguments = bundleOf(

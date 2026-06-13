@@ -17,7 +17,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="@string/Записи" />
+            app:title="@string/appointments" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/surface_color"
-                android:hint="@string/Поиск"
+                android:hint="@string/search"
                 android:paddingStart="30dp"
                 android:textCursorDrawable="@null" />
 

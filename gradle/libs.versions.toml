@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.0"
+agp = "9.2.1"
 kotlin = "2.2.10"
 hiltAndroid = "2.57.1"
 ksp = "2.3.2"
@@ -28,6 +28,7 @@ chargemapNumberPicker = "1.0.3"
 material3 = "1.3.2"
 navigationCommonKtx = "2.9.5"
 firebaseCrashlyticsBuildtools = "3.0.6"
+lifecycleViewmodelSavedstate = "2.10.0"
 
 [libraries]
 # AndroidX
@@ -94,6 +95,7 @@ firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "fireb
 # Retrofit
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+androidx-lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "lifecycleViewmodelSavedstate" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

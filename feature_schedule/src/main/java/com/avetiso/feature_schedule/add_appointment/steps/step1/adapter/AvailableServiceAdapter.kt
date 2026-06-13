@@ -10,6 +10,7 @@ import com.avetiso.common_ui.actions.ActionsViewHolder
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.core.AppConstants
 import com.avetiso.core.entity.ServiceEntity
+import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.databinding.ItemAvailableServiceBinding
 
 class AvailableServiceAdapter :
@@ -72,27 +73,17 @@ class AvailableServiceAdapter :
 
             // Цена
             val pricePrefix = if (service.isPriceFrom) {
-                context.getString(com.avetiso.core.R.string.от_)
+                context.getString(com.avetiso.core.R.string.from_)
             } else {
                 ""
             }
             val priceString = "${pricePrefix}${service.price} ${service.currency}"
 
-            // продолжительность в формате ч:мм
-//            val durationInMinutes = service.durationMinutes
-//            val hours = durationInMinutes / 60
-//            val minutes = durationInMinutes % 60
-//            val durationString = when {
-//                hours > 0 && minutes > 0 -> "$hours ч $minutes мин"
-//                hours > 0 -> "$hours ч"
-//                else -> "$minutes мин"
-//            }
-//
-//            binding.textServiceDetails.text =
-//                "$priceString • $durationString"
-
-            binding.tvServiceDetails.text =
-                "$priceString • ${service.durationMinutes} мин"
+            binding.tvServiceDetails.text =context.getString(
+                R.string.service_details_format,
+                priceString,
+                service.durationMinutes
+            )
 
             binding.viewSelectedCheck.isVisible = isSelected
         }

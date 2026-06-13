@@ -21,7 +21,7 @@ import com.avetiso.feature_statistics.models.InventoryWarningItem
 import com.avetiso.feature_statistics.models.PeriodFilterItem
 import com.avetiso.feature_statistics.models.QuickActionsItem
 import com.avetiso.feature_statistics.models.StatisticsListItem
-import com.avetiso.feature_statistics.models.TimePeriod
+import com.avetiso.feature_statistics.domain.models.TimePeriod
 import com.avetiso.feature_statistics.models.WorkloadItem
 import com.avetiso.feature_statistics.mvi.OnCustomDateClick
 import com.avetiso.feature_statistics.mvi.OnFinanceCardClicked

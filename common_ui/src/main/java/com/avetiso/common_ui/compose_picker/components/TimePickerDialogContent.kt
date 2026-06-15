@@ -34,6 +34,9 @@ fun TimePickerDialogContent(
     val minuteDisplayValues = (0..55 step 5).map { String.format("%02d", it) }
     val minuteIndex = selectedMinute / 5
 
+    val hourSuffix = stringResource(R.string.time_picker_hour_unit)
+    val minuteSuffix = stringResource(R.string.time_picker_minute_unit)
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -49,7 +52,7 @@ fun TimePickerDialogContent(
                     value = selectedHour,
                     onValueChange = { selectedHour = it },
                     range = 0..23,
-                    label = { "$it ч" },
+                    label = { "$it $hourSuffix" },
                     dividersColor = MaterialTheme.colorScheme.secondary,
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
                 )
@@ -57,7 +60,7 @@ fun TimePickerDialogContent(
                     value = minuteIndex,
                     onValueChange = { newIndex -> selectedMinute = newIndex * 5 },
                     range = 0 until minuteDisplayValues.size,
-                    label = { minuteDisplayValues[it] + " мин" },
+                    label = { "${minuteDisplayValues[it]} $minuteSuffix" },
                     dividersColor = MaterialTheme.colorScheme.secondary,
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
                 )
@@ -65,12 +68,12 @@ fun TimePickerDialogContent(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(selectedHour, selectedMinute) }) {
-                Text(stringResource(R.string.ОК), color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text(stringResource(R.string.ok), color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.Отмена), color = MaterialTheme.colorScheme.onPrimary)
+                Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     )

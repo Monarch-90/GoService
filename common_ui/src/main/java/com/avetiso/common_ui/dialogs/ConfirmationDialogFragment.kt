@@ -42,8 +42,8 @@ class ConfirmationDialogFragment : BaseDialogFragment<DialogConfirmationBinding>
             tvMessage.text = payload.message
 
             // Используем ресурсы, если текст не передан явно
-            btnPositive.text = payload.positiveText ?: getString(R.string.ОК)
-            btnNegative.text = payload.negativeText ?: getString(R.string.Отмена)
+            btnPositive.text = payload.positiveText ?: getString(R.string.ok)
+            btnNegative.text = payload.negativeText ?: getString(R.string.cancel)
         }
     }
 

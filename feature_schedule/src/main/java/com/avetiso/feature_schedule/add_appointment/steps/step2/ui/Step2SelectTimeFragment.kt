@@ -161,9 +161,9 @@ class Step2SelectTimeFragment : Fragment(R.layout.fragment_step2_select_time) {
     private fun showTimePicker(timeSlotToEdit: TimeSlotEntity?) {
         val isEditing = timeSlotToEdit != null
         val title = if (isEditing) {
-            getString(R.string.Редактировать_слот)
+            getString(R.string.edit_slot)
         } else
-            getString(R.string.Добавить_слот)
+            getString(R.string.add_slot)
 
         val initialHour = timeSlotToEdit?.let { it.startTimeMinutes / 60 } ?: 0
         val initialMinute = timeSlotToEdit?.let { it.startTimeMinutes % 60 } ?: 0

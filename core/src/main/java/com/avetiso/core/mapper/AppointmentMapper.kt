@@ -25,8 +25,6 @@ class AppointmentMapper @Inject constructor(
 
     suspend fun mapToUiModel(entity: AppointmentEntity): Appointment = withContext(Dispatchers.IO) {
 
-        android.util.Log.d("AppTrace", "Mapper: mapToUiModel STARTED for ID = ${entity.id} on thread = ${Thread.currentThread().name}")
-
         val listType = object : TypeToken<List<ServiceSnapshot>>() {}.type
         val services: List<ServiceSnapshot> = gson.fromJson(entity.servicesJson, listType) ?: emptyList()
 
@@ -66,8 +64,6 @@ class AppointmentMapper @Inject constructor(
             status = entity.status,
             note = entity.note,
         )
-
-        android.util.Log.d("AppTrace", "Mapper: mapToUiModel FINISHED for ID = ${entity.id}")
         result
     }
 }

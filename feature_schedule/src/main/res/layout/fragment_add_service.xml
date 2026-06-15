@@ -15,7 +15,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/android:colorBackground"
             app:navigationIcon="@drawable/ic_close"
-            app:title="@string/Новая_услуга">
+            app:title="@string/new_schedule">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/btn_save"
@@ -24,7 +24,7 @@
                 android:layout_gravity="end|center_vertical"
                 android:layout_marginEnd="22dp"
                 android:src="@drawable/ic_check"
-                android:text="@string/Сохранить"
+                android:text="@string/save"
                 app:tint="@color/custom_black_white" />
 
         </com.google.android.material.appbar.MaterialToolbar>
@@ -47,7 +47,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/Наименование_услуги"
+                android:hint="@string/service_title"
                 app:cursorErrorColor="@color/error_ping">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/Категория" />
+                android:text="@string/category" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_category"
@@ -73,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/Стоимость" />
+                android:text="@string/price" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -93,7 +93,7 @@
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/от" />
+                        android:text="@string/from" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -103,7 +103,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:hint="@string/Сумма"
+                    android:hint="@string/amount"
                     app:cursorErrorColor="@color/error_ping">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -126,7 +126,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/Продолжительность" />
+                android:text="@string/duration" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_duration"

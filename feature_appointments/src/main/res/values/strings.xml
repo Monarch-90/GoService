@@ -1,5 +1,3 @@
 <resources>
-    <string name="app_name">feature_appointments</string>
-
-    <string name="Записи">Записи</string>
+    <string name="appointments">Записи</string>
 </resources>

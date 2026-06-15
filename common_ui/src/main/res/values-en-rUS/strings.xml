@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_currency">Default currency</string>
+    <string name="set_title">Set %1$s?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="field_is_required">Field is required</string>
+    <string name="field_already_exists">Field already exists</string>
+    <string name="deletion">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="time_picker_minute_unit">" min"</string>
+    <string name="cancel_dialog">Cancel</string>
+    <string name="delete_dialog">Delete</string>
+    <string name="cancel_dialog_input">Cancel</string>
+    <string name="save_dialog_input">Save</string>
+    <string name="edit_action_icons">Edit</string>
+    <string name="delete_action_icons">Delete</string>
+    <string name="appointment_status">Appointment status</string>
+    <string name="delete_appointment">Delete appointment?</string>
+    <string name="enter_text">Enter text</string>
+    <string name="select_date">Select date</string>
+    <string name="date_start">Start</string>
+    <string name="date_end">End</string>
+    <string name="time_picker_hour_unit">" h"</string>
+</resources>

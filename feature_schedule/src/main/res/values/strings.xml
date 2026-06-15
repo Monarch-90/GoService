@@ -1,60 +1,61 @@
 <resources>
-    <string name="app_name">feature_schedule</string>
-
     <string name="add_appointment_step_1_title">Выбор услуг</string>
     <string name="add_appointment_step_2_title">Выбор времени</string>
     <string name="add_appointment_step_3_title">Выбор клиента</string>
 
 <!--    feature_schedule_code-->
-    <string name="Пожалуйста_выберите_день">Пожалуйста, выберите день</string>
-    <string name="Такая_категория_уже_существует">Такая категория уже существует</string>
-    <string name="Редактировать_категорию">Редактировать категорию</string>
-    <string name="Новая_категория">Новая категория</string>
-    <string name="Название_категории">Название категории</string>
-    <string name="Такая_услуга_уже_существует">Такая услуга уже существует</string>
-    <string name="Выбрать_категорию">Выбрать категорию</string>
-    <string name="Выберите_категорию">Выберите категорию</string>
-    <string name="Редактировать_услугу">Редактировать услугу</string>
-    <string name="Редактировать_слот">Редактировать слот</string>
-    <string name="Название_не_может_быть_пустым">Название не может быть пустым</string>
-    <string name="Укажите_цену">Укажите цену</string>
-    <string name="Укажите_продолжительность">Укажите продолжительность</string>
-    <string name="Выберите_продолжительность">Выберите продолжительность</string>
-    <string name="Такой_слот_уже_существует">Такой слот уже существует</string>
-    <string name="Запись_успешно_создана">Запись успешно создана</string>
+    <string name="please_select_day">Пожалуйста, выберите день</string>
+    <string name="category_already_exists">Такая категория уже существует</string>
+    <string name="edit_category">Редактировать категорию</string>
+    <string name="new_category">Новая категория</string>
+    <string name="category_title">Название категории</string>
+    <string name="service_already_exists">Такая услуга уже существует</string>
+    <string name="select_category">Выбрать категорию</string>
+    <string name="choose_category">Выберите категорию</string>
+    <string name="edit_service">Редактировать услугу</string>
+    <string name="edit_slot">Редактировать слот</string>
+    <string name="title_is_required">Название не может быть пустым</string>
+    <string name="enter_price">Укажите цену</string>
+    <string name="enter_duration">Укажите продолжительность</string>
+    <string name="select_duration">Выберите продолжительность</string>
+    <string name="slot_already_exists">Такой слот уже существует</string>
+    <string name="appointment_created_successfully">Запись успешно создана</string>
+    <string name="service_details_format">%1$s • %2$d мин</string>
+    <string name="duration_format">%1$d ч %2$02d мин</string>
 
-    <string name="Сохранить">Сохранить</string>
-    <string name="Наименование_услуги">Наименование услуги</string>
-    <string name="Категория">Категория</string>
-    <string name="Стоимость">Стоимость</string>
-    <string name="от">от</string>
-    <string name="Сумма">Сумма</string>
-    <string name="Продолжительность">Продолжительность</string>
+    <string name="save">Сохранить</string>
+    <string name="service_title">Наименование услуги</string>
+    <string name="category">Категория</string>
+    <string name="price">Стоимость</string>
+    <string name="from">от</string>
+    <string name="amount">Сумма</string>
+    <string name="duration">Продолжительность</string>
 
-    <string name="Предыдущий_месяц">Предыдущий месяц</string>
-    <string name="Следующий_месяц">Следующий месяц</string>
-    <string name="ПН">ПН</string>
-    <string name="ВТ">ВТ</string>
-    <string name="СР">СР</string>
-    <string name="ЧТ">ЧТ</string>
-    <string name="ПТ">ПТ</string>
-    <string name="СБ">СБ</string>
-    <string name="ВС">ВС</string>
-    <string name="Добавить_запись">Добавить запись</string>
+    <string name="previous_month">Предыдущий месяц</string>
+    <string name="next_month">Следующий месяц</string>
+    <string name="mon">ПН</string>
+    <string name="tue">ВТ</string>
+    <string name="wed">СР</string>
+    <string name="thu">ЧТ</string>
+    <string name="fri">ПТ</string>
+    <string name="sat">СБ</string>
+    <string name="sun">ВС</string>
+    <string name="add_appointment">Добавить запись</string>
 
-    <string name="Поиск_категории">Поиск категории</string>
-    <string name="Добавить_категорию">Добавить категорию</string>
+    <string name="search_category">Поиск категории</string>
+    <string name="add_category">Добавить категорию</string>
 
-    <string name="Поиск_услуги">Поиск услуги</string>
-    <string name="Добавить_услугу">Добавить услугу</string>
+    <string name="search_service">Поиск услуги</string>
+    <string name="add_service">Добавить услугу</string>
 
-    <string name="Добавить_слот">Добавить слот</string>
+    <string name="add_slot">Добавить слот</string>
 
-    <string name="Услуги">Услуги</string>
-    <string name="Время">Время</string>
-    <string name="Клиент">Клиент</string>
+    <string name="schedules">Услуги</string>
+    <string name="time">Время</string>
+    <string name="clients">Клиент</string>
 
-    <string name="Новая_услуга">Новая услуга</string>
+    <string name="new_schedule">Новая услуга</string>
 
-    <string name="Выбор_категории">Выбор категории</string>
+    <string name="category_selection">Выбор категории</string>
+    <string name="calendar_title_format">%1$s %2$s</string>
 </resources>

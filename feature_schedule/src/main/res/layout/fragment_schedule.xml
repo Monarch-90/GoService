@@ -24,7 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/Предыдущий_месяц"
+                android:contentDescription="@string/previous_month"
                 android:padding="8dp"
                 android:src="@drawable/ic_chevron_left" />
 
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/Следующий_месяц"
+                android:contentDescription="@string/next_month"
                 android:padding="8dp"
                 android:src="@drawable/ic_chevron_right" />
 
@@ -61,7 +61,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/ПН" />
+            android:text="@string/mon" />
 
         <View
             android:layout_width="1dp"
@@ -72,7 +72,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/ВТ" />
+            android:text="@string/tue" />
 
         <View
             android:layout_width="1dp"
@@ -83,7 +83,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/СР" />
+            android:text="@string/wed" />
 
         <View
             android:layout_width="1dp"
@@ -94,7 +94,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/ЧТ" />
+            android:text="@string/thu" />
 
         <View
             android:layout_width="1dp"
@@ -105,7 +105,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/ПТ" />
+            android:text="@string/fri" />
 
         <View
             android:layout_width="1dp"
@@ -116,7 +116,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/СБ" />
+            android:text="@string/sat" />
 
         <View
             android:layout_width="1dp"
@@ -127,7 +127,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             style="@style/DayOfWeek"
-            android:text="@string/ВС" />
+            android:text="@string/sun" />
 
         <View
             android:layout_width="1dp"
@@ -181,7 +181,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="80dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/Добавить_запись"
+        android:contentDescription="@string/add_appointment"
         android:src="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

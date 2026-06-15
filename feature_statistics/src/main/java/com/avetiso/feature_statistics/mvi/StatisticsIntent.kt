@@ -1,6 +1,6 @@
 package com.avetiso.feature_statistics.mvi
 
-import com.avetiso.feature_statistics.models.TimePeriod
+import com.avetiso.feature_statistics.domain.models.TimePeriod
 
 /**
  * Интенты (действия пользователя и жизненного цикла) для экрана статистики.

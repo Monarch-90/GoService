@@ -1,9 +1,7 @@
 <resources>
-    <string name="app_name">feature_core</string>
-
     <string name="delete_dialog_message">\"%1$s\"</string>
 
-    <string name="Примечание">Примечание</string>
+    <string name="comment">Примечание</string>
 
     <!--    Статусы-->
     <string name="status_active">Активна</string>
@@ -12,14 +10,14 @@
     <string name="status_rescheduled">Перенос</string>
     <string name="status_no_show">Неявка</string>
 
-    <string name="Такая_запись_уже_существует_на_эту_дату">Такая запись уже существует на эту дату</string>
-    <string name="от_">от\u0020</string>
+    <string name="appointment_already_exists">Такая запись уже существует на эту дату</string>
+    <string name="from_">от\u0020</string>
 
-    <string name="Поиск">Поиск</string>
+    <string name="search">Поиск</string>
 
     <string name="add_custom_currency">Добавить</string>
     <string name="add_currency_title">Добавить валюту</string>
     <string name="add_currency_hint">GEL</string>
-    <string name="remove_custom_currency">Удалить</string>
+    <string name="delete_custom_currency">Удалить</string>
     <string name="select_currency_to_delete">Выберите валюту для удаления</string>
 </resources>

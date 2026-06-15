@@ -14,7 +14,7 @@ class AppointmentPriceMapper @Inject constructor(
     fun mapToString(totals: List<CurrencyTotal>): String {
         return totals.joinToString("\n") { total ->
             val prefix = if (total.isPriceFrom) {
-                "${context.getString(R.string.от_)} "
+                "${context.getString(R.string.from_)} "
             } else ""
 
             val formattedPrice = AppConstants.Format.PRICE_2_DECIMALS.format(total.amount)
@@ -23,6 +23,6 @@ class AppointmentPriceMapper @Inject constructor(
     }
 
     fun getDuplicateErrorString(): String {
-        return context.getString(R.string.Такая_запись_уже_существует_на_эту_дату)
+        return context.getString(R.string.appointment_already_exists)
     }
 }

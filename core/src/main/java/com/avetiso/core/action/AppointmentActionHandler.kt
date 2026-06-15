@@ -10,10 +10,6 @@ import javax.inject.Inject
 class AppointmentActionHandler @Inject constructor(
     private val appointmentDao: AppointmentDao
 ) {
-    // Состояние для диалогов, которое переживет поворот экрана внутри ViewModel
-    var pendingAppointmentId: Long? = null
-    var appointmentPendingDeleteId: Long? = null
-
     suspend fun updateAppointmentStatus(
         appointmentId: Long,
         newStatus: AppointmentStatus,
@@ -36,7 +32,7 @@ class AppointmentActionHandler @Inject constructor(
             }
 
             if (isDuplicate) {
-                return@withContext AppointmentActionResult.Error(R.string.Такая_запись_уже_существует_на_эту_дату)
+                return@withContext AppointmentActionResult.Error(R.string.appointment_already_exists)
             }
         }
 
@@ -55,22 +51,16 @@ class AppointmentActionHandler @Inject constructor(
     }
 
     // Подтвердили удаление
-    suspend fun confirmDelete() = withContext(Dispatchers.IO) {
-        val id = appointmentPendingDeleteId ?: return@withContext
-        val entity = appointmentDao.getAppointmentById(id)
-        if (entity != null) {
-            appointmentDao.deleteAppointment(entity)
-        }
-        appointmentPendingDeleteId = null
+    suspend fun confirmDelete(appointmentId: Long) = withContext(Dispatchers.IO) {
+        val entity = appointmentDao.getAppointmentById(appointmentId) ?: return@withContext
+        appointmentDao.deleteAppointment(entity)
     }
 
     // Фрагмент вызывает это, когда диалог вернул результат
-    suspend fun updateNote(newText: String) = withContext(Dispatchers.IO) {
-        val id = pendingAppointmentId ?: return@withContext // Если ID потерялся, ничего не делаем
-        val appointment = appointmentDao.getAppointmentById(id) ?: return@withContext
+    suspend fun updateNote(appointmentId: Long, newText: String) = withContext(Dispatchers.IO) {
+        val appointment = appointmentDao.getAppointmentById(appointmentId) ?: return@withContext
         val updatedAppointment = appointment.copy(note = newText)
         appointmentDao.updateAppointment(updatedAppointment)
-        pendingAppointmentId = null // Сбрасываем после сохранения
     }
 }
 

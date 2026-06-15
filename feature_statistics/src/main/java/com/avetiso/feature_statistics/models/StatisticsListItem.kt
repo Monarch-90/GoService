@@ -1,5 +1,7 @@
 package com.avetiso.feature_statistics.models
 
+import com.avetiso.feature_statistics.domain.models.TimePeriod
+
 /**
  * Базовый контракт для всех элементов главного списка экрана статистики.
  * Строго плоская структура, никаких вложенных (nested) классов.

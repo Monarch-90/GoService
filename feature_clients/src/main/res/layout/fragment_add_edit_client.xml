@@ -24,7 +24,7 @@
                 android:layout_gravity="end|center_vertical"
                 android:layout_marginEnd="22dp"
                 android:src="@drawable/ic_check"
-                android:text="@string/Сохранить"
+                android:text="@string/save"
                 app:tint="@color/custom_black_white" />
 
         </com.google.android.material.appbar.MaterialToolbar>
@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:baselineAligned="false"
-                android:text="@string/Добавить_поле" />
+                android:text="@string/add_field" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_layout_name"
@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:hint="@string/Имя_клиента">
+                android:hint="@string/client_name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_name"
@@ -72,7 +72,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/Номер_телефона">
+                android:hint="@string/phone_number">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_phone"
@@ -87,7 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/Инстаграм"
+                android:hint="@string/instagram"
                 app:prefixText="@">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -102,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/Источник_привлечения">
+                android:hint="@string/lead_source">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_source"
@@ -117,7 +117,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/Личная_скидка_процент">
+                android:hint="@string/personal_discount_percent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_discount"
@@ -138,7 +138,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/Примечание">
+                android:hint="@string/comment">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_edit_text_note"

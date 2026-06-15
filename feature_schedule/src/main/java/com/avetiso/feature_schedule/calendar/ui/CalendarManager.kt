@@ -86,7 +86,6 @@ class CalendarManager(
         container.binding.root.background = null
 
         container.binding.root.setOnClickListener {
-            android.util.Log.d("ScheduleDebug", "Calendar cell clicked: date=${data.date}, position=${data.position}")
 
             if (data.position == DayPosition.MonthDate) {
                 viewModel.handleEvent(CalendarEvent.DateSelected(data.date))

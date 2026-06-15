@@ -14,7 +14,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="30dp"
         android:baselineAligned="false"
-        android:text="@string/Добавить_слот"
+        android:text="@string/add_slot"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

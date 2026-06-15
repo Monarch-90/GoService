@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_client">Search client</string>
+    <string name="add_client">Add client</string>
+    <string name="save">Save</string>
+    <string name="add_field">Add field</string>
+    <string name="clients">Clients</string>
+    <string name="client_name">Client name</string>
+    <string name="client_already_added">This client is already added</string>
+    <string name="edit_client">Edit client</string>
+    <string name="new_client">New client</string>
+    <string name="name_is_required">Name is required</string>
+    <string name="phone_number">Phone number</string>
+    <string name="instagram">Instagram</string>
+    <string name="lead_source">Lead source</string>
+    <string name="client_deleted">Client deleted</string>
+    <string name="personal_discount">Personal discount</string>
+    <string name="personal_discount_percent">Personal discount, %</string>
+    <string name="new_field">New field</string>
+    <string name="field_title">Field title</string>
+    <string name="delete_field">Delete field</string>
+</resources>

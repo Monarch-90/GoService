@@ -21,7 +21,6 @@ object AppConstants {
         const val DATE_FORMAT_YEAR_MONTH = "yyyy-MM"
         const val TIME_HH_MM = "%02d:%02d"
         const val PRICE_2_DECIMALS = "%.2f"
-        const val DURATION = "%d ч %02d мин"
     }
 
     // Deep Links (используются внутри модуля или навигатором)

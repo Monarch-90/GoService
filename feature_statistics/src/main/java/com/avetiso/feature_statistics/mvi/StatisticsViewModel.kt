@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.feature_statistics.R
-import com.avetiso.feature_statistics.models.TimePeriod
-import com.avetiso.feature_statistics.usecases.GenerateStatisticsTextUseCase
-import com.avetiso.feature_statistics.usecases.GetAvailableCurrenciesUseCase
-import com.avetiso.feature_statistics.usecases.GetFinanceSummaryUseCase
-import com.avetiso.feature_statistics.usecases.GetInventoryShortagesUseCase
-import com.avetiso.feature_statistics.usecases.GetWorkloadSummaryUseCase
+import com.avetiso.feature_statistics.domain.models.TimePeriod
+import com.avetiso.feature_statistics.domain.usecases.GenerateStatisticsTextUseCase
+import com.avetiso.feature_statistics.domain.usecases.GetAvailableCurrenciesUseCase
+import com.avetiso.feature_statistics.domain.usecases.GetFinanceSummaryUseCase
+import com.avetiso.feature_statistics.domain.usecases.GetInventoryShortagesUseCase
+import com.avetiso.feature_statistics.domain.usecases.GetWorkloadSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -140,21 +140,21 @@ class StatisticsViewModel @Inject constructor(
     private fun handleCopyInventory() {
         viewModelScope.launch {
             val textToCopy = generateTextUseCase.generateInventoryShoppingList(state.value.inventoryShortages)
-            sendEvent(CopyToClipboard(textToCopy, R.string.Список_покупок_в_разработке))
+            sendEvent(CopyToClipboard(textToCopy, R.string.work_in_progress))
         }
     }
 
     private fun handleGenerateFreeWindows() {
         viewModelScope.launch {
             val textToCopy = generateTextUseCase.generateFreeWindows(state.value.selectedPeriod)
-            sendEvent(CopyToClipboard(textToCopy, R.string.Свободные_окна_в_разработке))
+            sendEvent(CopyToClipboard(textToCopy, R.string.work_in_progress))
         }
     }
 
     private fun handleSharePriceList() {
         viewModelScope.launch {
             val textToCopy = generateTextUseCase.generatePriceList()
-            sendEvent(CopyToClipboard(textToCopy, R.string.Прайс_лист_в_разработке))
+            sendEvent(CopyToClipboard(textToCopy, R.string.work_in_progress))
         }
     }
 

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">feature_statistics</string>
-
     <string name="statistics_title">Статистика</string>
 
     <string name="statistics_filter_today">Сегодня</string>
@@ -30,9 +28,7 @@
 
     <string name="statistics_error_generic">Произошла непредвиденная ошибка при загрузке статистики.</string>
 
-    <string name="Список_покупок_в_разработке">В процессе разработки..</string>
-    <string name="Свободные_окна_в_разработке">В процессе разработки..</string>
-    <string name="Прайс_лист_в_разработке">В процессе разработки..</string>
+    <string name="work_in_progress">В процессе разработки..</string>
 
     <string name="empty_shopping_list">Список покупок пуст.</string>
     <string name="shopping_list_header">🛒 Список покупок:</string>

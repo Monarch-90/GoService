@@ -45,7 +45,7 @@ class Step2SelectTimeViewModel @Inject constructor(
                 // Текст "Такой слот..." вынеси в ресурсы позже
                 _eventChannel.send(
                     Step2Event.ShowToast(
-                        UiText.StringResource(R.string.Такой_слот_уже_существует
+                        UiText.StringResource(R.string.slot_already_exists
                         )
                     )
                 )

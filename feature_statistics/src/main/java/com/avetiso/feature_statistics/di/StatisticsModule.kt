@@ -1,7 +1,7 @@
 package com.avetiso.feature_statistics.di
 
-import com.avetiso.feature_statistics.repository.StatisticsRepositoryImpl
-import com.avetiso.feature_statistics.repository.StatisticsRepository
+import com.avetiso.feature_statistics.data.repository.StatisticsRepositoryImpl
+import com.avetiso.feature_statistics.domain.repository.StatisticsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

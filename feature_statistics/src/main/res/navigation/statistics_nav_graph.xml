@@ -8,7 +8,6 @@
     <fragment
         android:id="@+id/statisticsFragment"
         android:name="com.avetiso.feature_statistics.ui.StatisticsFragment"
-        android:label="fragment_statistics"
         tools:layout="@layout/fragment_statistics" />
 
 </navigation>

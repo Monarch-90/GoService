@@ -47,7 +47,6 @@ class CalendarViewModel @Inject constructor(
     fun handleEvent(event: CalendarEvent) {
         when (event) {
             is CalendarEvent.DateSelected -> {
-                android.util.Log.d("ScheduleDebug", "CalendarEvent.DateSelected: event_date=${event.date}, current_state_date=${_state.value.selectedDate}")
 
                 // Игнорируем клик, если дата уже выбрана
                 if (_state.value.selectedDate == event.date) return

@@ -1,9 +1,9 @@
 package com.avetiso.feature_statistics.mvi
 
-import com.avetiso.feature_statistics.models.FinanceSummary
-import com.avetiso.feature_statistics.models.InventoryShortageItem
-import com.avetiso.feature_statistics.models.WorkloadSummary
-import com.avetiso.feature_statistics.models.TimePeriod
+import com.avetiso.feature_statistics.domain.models.FinanceSummary
+import com.avetiso.feature_statistics.domain.models.InventoryShortageItem
+import com.avetiso.feature_statistics.domain.models.WorkloadSummary
+import com.avetiso.feature_statistics.domain.models.TimePeriod
 
 /**
  * Состояние экрана статистики (Дашборд).

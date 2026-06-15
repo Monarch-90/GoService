@@ -13,4 +13,9 @@ internal object AppointmentsConstants {
         const val INPUT_NOTE_KEY = "appointments_input_note_request"
         const val RESCHEDULE_DATE_KEY = "appointments_reschedule_date_request"
     }
+
+    object Pending {
+        const val KEY_PENDING_DELETE_ID = "pending_delete_id"
+        const val KEY_PENDING_NOTE_ID = "pending_note_id"
+    }
 }

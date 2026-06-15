@@ -7,7 +7,6 @@
     <fragment
         android:id="@+id/scheduleFragment"
         android:name="com.avetiso.feature_schedule.ui.ScheduleFragment"
-        android:label="fragment_schedule"
         tools:layout="@layout/fragment_schedule">
 
         <deepLink app:uri="goservice://schedule/main" />
@@ -20,7 +19,6 @@
     <fragment
         android:id="@+id/addAppointmentFragment"
         android:name="com.avetiso.feature_schedule.add_appointment.ui.AddAppointmentFragment"
-        android:label="fragment_add_appointment"
         tools:layout="@layout/fragment_add_appointment">
 
         <argument
@@ -48,7 +46,6 @@
     <fragment
         android:id="@+id/addServiceFragment"
         android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.ui.AddServiceFragment"
-        android:label="AddServiceFragment"
         tools:layout="@layout/fragment_add_service">
         <action
             android:id="@+id/action_addServiceFragment_to_selectCategoryFragment"
@@ -64,7 +61,6 @@
     <fragment
         android:id="@+id/selectCategoryFragment"
         android:name="com.avetiso.feature_schedule.add_appointment.steps.step1.add_service.category.SelectCategoryFragment"
-        android:label="SelectCategoryFragment"
         tools:layout="@layout/fragment_select_category" />
 
 </navigation>

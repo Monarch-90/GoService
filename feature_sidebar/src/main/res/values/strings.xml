@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">feature_sidebar</string>
-
-    <string name="О_приложении">О приложении</string>
-    <string name="Настройки">Настройки</string>
-    <string name="Основные">Основные</string>
-    <string name="Будет_выбрана_при_создании_услуги">Будет выбрана при создании услуги</string>
+    <string name="about_app">О приложении</string>
+    <string name="settings">Настройки</string>
+    <string name="general">Основные</string>
+    <string name="will_be_selected">Будет выбрана при создании услуги</string>
 
     <string name="sidebar_about_contact_devs_button">Связаться с разработчиками</string>
 
@@ -19,4 +17,11 @@
 
     <string name="sidebar_contact_devs_success_toast">Успешно отправлено</string>
     <string name="sidebar_contact_devs_error_toast">Ошибка при отправке. Проверьте интернет.</string>
+
+    <string name="about_app_title">О приложении</string>
+    <string name="navigate_back_desc">Вернуться</string>
+
+    <string name="privacy_policy_title">Политика конфиденциальности</string>
+    <string name="sidebar_about_error_browser_not_found">Браузер не найден</string>
+    <string name="sidebar_about_error_open_link">Не удалось открыть ссылку</string>
 </resources>

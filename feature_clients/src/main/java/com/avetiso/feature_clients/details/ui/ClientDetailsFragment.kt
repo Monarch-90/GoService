@@ -143,7 +143,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         // 1. Скидка
         if (client.discount > 0) {
             addDetailField(
-                label = getString(R.string.Личная_скидка),
+                label = getString(R.string.personal_discount),
                 value = "${client.discount}%",
                 iconResId = com.avetiso.core.R.drawable.ic_percent
             )
@@ -152,7 +152,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         // 2. Источник привлечения
         if (client.source.isNotBlank()) {
             addDetailField(
-                label = getString(R.string.Источник_привлечения),
+                label = getString(R.string.lead_source),
                 value = client.source,
                 iconResId = com.avetiso.core.R.drawable.ic_label
             )
@@ -172,7 +172,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
         // 4. Примечание
         if (client.note.isNotBlank()) {
             addDetailField(
-                label = getString(com.avetiso.core.R.string.Примечание),
+                label = getString(com.avetiso.core.R.string.comment),
                 value = client.note,
                 iconResId = com.avetiso.core.R.drawable.ic_description
             )
@@ -210,7 +210,7 @@ class ClientDetailsFragment : Fragment(R.layout.fragment_client_details) {
     private fun handleDeleteEvent() {
         android.widget.Toast.makeText(
             requireContext(),
-            getString(R.string.Клиент_удален),
+            getString(R.string.client_deleted),
             android.widget.Toast.LENGTH_SHORT
         ).show()
         findNavController().navigateUp()

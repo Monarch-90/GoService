@@ -54,6 +54,7 @@ object AppConstants {
     object Preferences {
         const val KEY_DEFAULT_CURRENCY = "default_currency"
         const val KEY_CUSTOM_CURRENCIES = "custom_currencies"
+        const val KEY_APP_LAUNCH_COUNT = "app_launch_count"
     }
 
     // Временные интервалы и тайм-ауты
@@ -80,6 +81,16 @@ object AppConstants {
     // Управление отображением виджетами в модуле статистики
     object FeatureToggles {
         const val IS_INVENTORY_WIDGET_ENABLED = true // Управление отображением виджета склада
+    }
+
+    object AdConstants {
+        // Тестовые идентификаторы Яндекса. На релизе заменим на боевые.
+        const val YANDEX_APP_OPEN_DEMO_ID = "demo-appopenad-yandex"       // При запуске
+        const val APP_OPEN_AD_FREQUENCY = 3 // Кол-во открытий приложения до запуска полноэкранной рекламы
+        const val YANDEX_BANNER_DEMO_ID = "demo-banner-yandex"           // Нижний баннер
+        const val YANDEX_NATIVE_DEMO_ID = "demo-nativeapp-yandex"        // В списках
+        const val YANDEX_REWARDED_DEMO_ID = "demo-rewarded-yandex"       // Видео за бонус (на будущее)
+
     }
 
     const val ID_NONE = -1L

@@ -63,6 +63,9 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.gson)
+
+    // Ads Monetization
+    implementation(libs.yandex.mobileads)
 }
 
 // Parcelize

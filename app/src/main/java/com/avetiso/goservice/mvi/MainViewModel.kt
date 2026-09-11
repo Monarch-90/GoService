@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
+import com.avetiso.core.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     // Гарантированная доставка событий (навигация) без потерь при повороте экрана
@@ -38,7 +40,17 @@ class MainViewModel @Inject constructor(
                 when (intent) {
                     is MainIntent.OnSidebarItemClicked -> handleItemClick(intent.itemId)
                     is MainIntent.OnDrawerClosed -> handleDrawerClosed()
+                    is MainIntent.CheckLaunchCountForAd -> handleCheckLaunchCount()
                 }
+            }
+        }
+    }
+
+    private fun handleCheckLaunchCount() {
+        viewModelScope.launch {
+            val launchCount = settingsRepository.incrementAndGetLaunchCount()
+            if (launchCount % AppConstants.AdConstants.APP_OPEN_AD_FREQUENCY == 0) {
+                _effects.send(MainSideEffect.ShowAppOpenAd)
             }
         }
     }

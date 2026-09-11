@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -26,6 +27,16 @@ class SettingsRepository @Inject constructor(
 ) {
     private val defaultCurrencyKey = stringPreferencesKey(AppConstants.Preferences.KEY_DEFAULT_CURRENCY)
     private val customCurrenciesKey = stringSetPreferencesKey(AppConstants.Preferences.KEY_CUSTOM_CURRENCIES)
+    private val appLaunchCountKey = intPreferencesKey(AppConstants.Preferences.KEY_APP_LAUNCH_COUNT)
+
+    suspend fun incrementAndGetLaunchCount(): Int {
+        var currentCount = 0
+        context.dataStore.edit { preferences ->
+            currentCount = (preferences[appLaunchCountKey] ?: 0) + 1
+            preferences[appLaunchCountKey] = currentCount
+        }
+        return currentCount
+    }
 
     // Поток данных: всегда возвращает актуальную валюту. По умолчанию "GEL".
     val defaultCurrency: Flow<String> = context.dataStore.data

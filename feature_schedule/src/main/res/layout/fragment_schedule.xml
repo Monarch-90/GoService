@@ -179,7 +179,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="30dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/add_appointment"
         android:src="@drawable/ic_add"

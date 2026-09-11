@@ -16,6 +16,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.avetiso.core.ads.AdManager
 import com.avetiso.goservice.databinding.ActivityMainBinding
 import com.avetiso.goservice.mvi.MainIntent
 import com.avetiso.goservice.mvi.MainSideEffect
@@ -33,8 +34,12 @@ class MainActivity : AppCompatActivity(), SidebarController {
     private val viewModel: MainViewModel by viewModels()
     private var _binding: ActivityMainBinding? = null
     private val binding get() = requireNotNull(_binding) { "Binding is null" }
+
     @Inject
     lateinit var sidebarNavigator: SidebarNavigator
+
+    @Inject
+    lateinit var adManager: AdManager
 
     private val navController: NavController
         get() = binding.navHostFragment.getFragment<NavHostFragment>().navController
@@ -60,6 +65,19 @@ class MainActivity : AppCompatActivity(), SidebarController {
         setupNavigation()
         setupSideMenu()
         observeEffects()
+        setupAds()
+        checkAppLaunchForAd(savedInstanceState)
+    }
+
+    private fun setupAds() {
+        adManager.showBanner(binding.adContainer)
+        adManager.loadAppOpenAd()
+    }
+
+    private fun checkAppLaunchForAd(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {
+            viewModel.processIntent(MainIntent.CheckLaunchCountForAd)
+        }
     }
 
     private fun setupWindowInsets() {
@@ -103,6 +121,7 @@ class MainActivity : AppCompatActivity(), SidebarController {
             is MainSideEffect.CloseSidebar -> {
                 binding.drawerLayout.closeDrawers()
             }
+
             is MainSideEffect.Navigate -> {
                 when (effect.destinationId) {
                     R.id.nav_settings -> sidebarNavigator.navigateToSettings(navController)
@@ -114,6 +133,13 @@ class MainActivity : AppCompatActivity(), SidebarController {
                         closeSideDrawer()
                         true
                     }
+                }
+            }
+
+            is MainSideEffect.ShowAppOpenAd -> {
+                // Если реклама успела загрузиться - покажет, иначе сработает пустой onAdClosed
+                adManager.showAppOpenAd(this) {
+                    // Здесь можно обработать закрытие рекламы, если нужно
                 }
             }
         }

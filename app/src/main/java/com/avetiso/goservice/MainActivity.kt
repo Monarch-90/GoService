@@ -16,8 +16,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.avetiso.core.ads.AdManager
+import com.avetiso.core.ads.AppOpenAdController
+import com.avetiso.core.ads.BannerAdController
 import com.avetiso.goservice.databinding.ActivityMainBinding
+import com.avetiso.goservice.mvi.MainAdEffect
+import com.avetiso.goservice.mvi.MainAdEffectHandledIntent
+import com.avetiso.goservice.mvi.MainAdEffectType
+import com.avetiso.goservice.mvi.MainAdHostAttachedIntent
+import com.avetiso.goservice.mvi.MainAppLaunchedIntent
 import com.avetiso.goservice.mvi.MainIntent
 import com.avetiso.goservice.mvi.MainSideEffect
 import com.avetiso.goservice.mvi.MainViewModel
@@ -26,6 +32,10 @@ import com.avetiso.navigation.routers.SidebarNavigator
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -39,12 +49,14 @@ class MainActivity : AppCompatActivity(), SidebarController {
     lateinit var sidebarNavigator: SidebarNavigator
 
     @Inject
-    lateinit var adManager: AdManager
+    lateinit var appOpenAdController: AppOpenAdController
+
+    @Inject
+    lateinit var bannerAdController: BannerAdController
 
     private val navController: NavController
         get() = binding.navHostFragment.getFragment<NavHostFragment>().navController
 
-    // Сохраняем ссылку на listener, чтобы безопасно отписать его в onDestroy
     private val drawerListener = object : DrawerLayout.SimpleDrawerListener() {
         override fun onDrawerClosed(drawerView: View) {
             super.onDrawerClosed(drawerView)
@@ -64,19 +76,18 @@ class MainActivity : AppCompatActivity(), SidebarController {
         setupWindowInsets()
         setupNavigation()
         setupSideMenu()
-        observeEffects()
-        setupAds()
-        checkAppLaunchForAd(savedInstanceState)
+        observeViewModel()
+        notifyAdHostAttached()
+        notifyAppLaunched(savedInstanceState)
     }
 
-    private fun setupAds() {
-        adManager.showBanner(binding.adContainer)
-        adManager.loadAppOpenAd()
+    private fun notifyAdHostAttached() {
+        viewModel.processIntent(MainAdHostAttachedIntent)
     }
 
-    private fun checkAppLaunchForAd(savedInstanceState: Bundle?) {
+    private fun notifyAppLaunched(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
-            viewModel.processIntent(MainIntent.CheckLaunchCountForAd)
+            viewModel.processIntent(MainAppLaunchedIntent)
         }
     }
 
@@ -98,7 +109,6 @@ class MainActivity : AppCompatActivity(), SidebarController {
 
         val navItemSelectedListener = NavigationView.OnNavigationItemSelectedListener { menuItem ->
             viewModel.processIntent(MainIntent.OnSidebarItemClicked(menuItem.itemId))
-            // Возвращаем false: глушим стандартное "залипание" (checked state) элемента меню
             return@OnNavigationItemSelectedListener false
         }
 
@@ -106,11 +116,23 @@ class MainActivity : AppCompatActivity(), SidebarController {
         binding.about.setNavigationItemSelectedListener(navItemSelectedListener)
     }
 
-    private fun observeEffects() {
+    private fun observeViewModel() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.effects.collect { effect ->
-                    handleSideEffect(effect)
+                launch {
+                    viewModel.state
+                        .map { state -> state.pendingAdEffects.firstOrNull() }
+                        .distinctUntilChanged()
+                        .collect { effect ->
+                            effect ?: return@collect
+                            handleAdEffect(effect)
+                        }
+                }
+
+                launch {
+                    viewModel.effects.collect { effect ->
+                        handleSideEffect(effect)
+                    }
                 }
             }
         }
@@ -126,26 +148,58 @@ class MainActivity : AppCompatActivity(), SidebarController {
                 when (effect.destinationId) {
                     R.id.nav_settings -> sidebarNavigator.navigateToSettings(navController)
                     R.id.nav_about -> sidebarNavigator.navigateToAbout(navController)
-                    // Добавляем обработку нашего нового пункта меню
                     R.id.nav_contact_developers -> {
                         sidebarNavigator.navigateToContactDevelopers(navController)
-                        // Не забудь закрыть шторку после клика, как ты это делаешь для остальных пунктов
                         closeSideDrawer()
-                        true
                     }
-                }
-            }
-
-            is MainSideEffect.ShowAppOpenAd -> {
-                // Если реклама успела загрузиться - покажет, иначе сработает пустой onAdClosed
-                adManager.showAppOpenAd(this) {
-                    // Здесь можно обработать закрытие рекламы, если нужно
                 }
             }
         }
     }
 
-    // Этот метод нужен для корректной работы кнопки "назад"
+    private suspend fun handleAdEffect(effect: MainAdEffect) {
+        when (effect.type) {
+            MainAdEffectType.LOAD_APP_OPEN -> {
+                appOpenAdController.loadAppOpenAd()
+            }
+
+            MainAdEffectType.SHOW_APP_OPEN -> {
+                showAppOpenAdWhenResumed()
+            }
+
+            MainAdEffectType.SHOW_BANNER -> {
+                bannerAdController.showBanner(binding.adContainer)
+            }
+        }
+
+        acknowledgeAdEffect(effect)
+    }
+
+    private fun acknowledgeAdEffect(effect: MainAdEffect) {
+        viewModel.processIntent(
+            MainAdEffectHandledIntent(
+                requestId = effect.requestId
+            )
+        )
+    }
+
+    private suspend fun showAppOpenAdWhenResumed() = coroutineScope {
+        val showCompletion = CompletableDeferred<Unit>()
+
+        val lifecycleJob = launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                appOpenAdController.showAppOpenAd(this@MainActivity)
+                showCompletion.complete(Unit)
+            }
+        }
+
+        try {
+            showCompletion.await()
+        } finally {
+            lifecycleJob.cancel()
+        }
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }

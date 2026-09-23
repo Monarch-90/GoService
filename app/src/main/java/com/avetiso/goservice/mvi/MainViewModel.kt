@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
-import com.avetiso.core.data.repository.SettingsRepository
+import com.avetiso.core.usecase.ShouldShowAppOpenAdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -16,48 +19,93 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val settingsRepository: SettingsRepository
+    private val shouldShowAppOpenAdUseCase: ShouldShowAppOpenAdUseCase
 ) : ViewModel() {
 
-    // Гарантированная доставка событий (навигация) без потерь при повороте экрана
     private val _effects = Channel<MainSideEffect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()
 
-    // Сохранение таргета, которое переживет Process Death
+    private val _state = MutableStateFlow(MainState())
+    val state = _state.asStateFlow()
+
     private var pendingDestinationId: Int?
         get() = savedStateHandle[AppConstants.Time.KEY_PENDING_DESTINATION]
         set(value) {
             savedStateHandle[AppConstants.Time.KEY_PENDING_DESTINATION] = value
         }
 
-    // Защита от race conditions и спама кликами (Thread-safety)
     private val actionMutex = Mutex()
+    private var nextAdEffectRequestId = 0L
 
     fun processIntent(intent: MainIntent) {
         viewModelScope.launch {
-            // Гарантируем последовательную обработку намерений
             actionMutex.withLock {
                 when (intent) {
                     is MainIntent.OnSidebarItemClicked -> handleItemClick(intent.itemId)
                     is MainIntent.OnDrawerClosed -> handleDrawerClosed()
-                    is MainIntent.CheckLaunchCountForAd -> handleCheckLaunchCount()
+                    MainAppLaunchedIntent -> handleAppLaunched()
+                    MainAdHostAttachedIntent -> handleAdHostAttached()
+                    is MainAdEffectHandledIntent -> handleAdEffectHandled(intent.requestId)
                 }
             }
         }
     }
 
-    private fun handleCheckLaunchCount() {
-        viewModelScope.launch {
-            val launchCount = settingsRepository.incrementAndGetLaunchCount()
-            if (launchCount % AppConstants.AdConstants.APP_OPEN_AD_FREQUENCY == 0) {
-                _effects.send(MainSideEffect.ShowAppOpenAd)
-            }
+    private suspend fun handleAppLaunched() {
+        requestAdEffect(MainAdEffectType.LOAD_APP_OPEN)
+
+        if (shouldShowAppOpenAdUseCase()) {
+            requestAdEffect(MainAdEffectType.SHOW_APP_OPEN)
         }
     }
 
+    private fun handleAdHostAttached() {
+        val bannerEffect = createAdEffect(MainAdEffectType.SHOW_BANNER)
+
+        _state.update { state ->
+            state.copy(
+                pendingAdEffects = state.pendingAdEffects
+                    .filterNot { effect ->
+                        effect.type == MainAdEffectType.SHOW_BANNER
+                    }
+                    .plus(bannerEffect)
+            )
+        }
+    }
+
+    private fun handleAdEffectHandled(requestId: Long) {
+        _state.update { state ->
+            state.copy(
+                pendingAdEffects = state.pendingAdEffects.filterNot { effect ->
+                    effect.requestId == requestId
+                }
+            )
+        }
+    }
+
+    private fun requestAdEffect(type: MainAdEffectType) {
+        val effect = createAdEffect(type)
+
+        _state.update { state ->
+            state.copy(
+                pendingAdEffects = state.pendingAdEffects + effect
+            )
+        }
+    }
+
+    private fun createAdEffect(type: MainAdEffectType): MainAdEffect {
+        nextAdEffectRequestId += 1
+
+        return MainAdEffect(
+            requestId = nextAdEffectRequestId,
+            type = type
+        )
+    }
+
     private suspend fun handleItemClick(itemId: Int) {
-        // Если навигация уже запущена (пользователь спамит), игнорируем
-        if (pendingDestinationId != null) return
+        if (pendingDestinationId != null) {
+            return
+        }
 
         pendingDestinationId = itemId
         _effects.send(MainSideEffect.CloseSidebar)
@@ -66,7 +114,6 @@ class MainViewModel @Inject constructor(
     private suspend fun handleDrawerClosed() {
         val destinationId = pendingDestinationId ?: return
 
-        // Очищаем стейт ПЕРЕД навигацией
         pendingDestinationId = null
         _effects.send(MainSideEffect.Navigate(destinationId))
     }

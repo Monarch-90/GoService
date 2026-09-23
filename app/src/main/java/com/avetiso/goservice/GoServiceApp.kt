@@ -1,17 +1,21 @@
 package com.avetiso.goservice
 
 import android.app.Application
+import com.avetiso.core.ads.AdsSdkInitializer
 import dagger.hilt.android.HiltAndroidApp
-import com.yandex.mobile.ads.common.YandexAds
+import javax.inject.Inject
 
 @HiltAndroidApp
 class GoServiceHilt : Application() {
+
+    @Inject
+    lateinit var adsSdkInitializers: Set<@JvmSuppressWildcards AdsSdkInitializer>
+
     override fun onCreate() {
         super.onCreate()
 
-        // Инициализация Yandex Mobile Ads SDK
-        YandexAds.initialize(this) {
-            // В будущем здесь можно добавить Timber для логирования старта
+        adsSdkInitializers.forEach { initializer ->
+            initializer.initialize()
         }
     }
 }

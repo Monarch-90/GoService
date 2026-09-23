@@ -84,13 +84,13 @@ object AppConstants {
     }
 
     object AdConstants {
-        // Тестовые идентификаторы Яндекса. На релизе заменим на боевые.
-        const val YANDEX_APP_OPEN_DEMO_ID = "demo-appopenad-yandex"       // При запуске
-        const val APP_OPEN_AD_FREQUENCY = 3 // Кол-во открытий приложения до запуска полноэкранной рекламы
-        const val YANDEX_BANNER_DEMO_ID = "demo-banner-yandex"           // Нижний баннер
-        const val YANDEX_NATIVE_DEMO_ID = "demo-nativeapp-yandex"        // В списках
-        const val YANDEX_REWARDED_DEMO_ID = "demo-rewarded-yandex"       // Видео за бонус (на будущее)
-
+        // Тестовые идентификаторы Яндекса. После настройки production-рекламы заменяются на боевые.
+        const val YANDEX_APP_OPEN_DEMO_ID = "demo-appopenad-yandex"
+        const val APP_OPEN_AD_FREQUENCY = 3
+        const val YANDEX_BANNER_DEMO_ID = "demo-banner-yandex"
+        const val YANDEX_NATIVE_DEMO_ID = "demo-nativeapp-yandex"
+        const val YANDEX_REWARDED_DEMO_ID = "demo-rewarded-yandex"
+        const val BANNER_HEIGHT_DP = 50
     }
 
     const val ID_NONE = -1L

@@ -19,12 +19,11 @@ class RecyclerViewActions<T : Any>(
     private val onItemClick: ((T) -> Unit)? = null,
     private val onActionsShown: (() -> Unit)? = null,
     private val onActionsDismissed: (() -> Unit)? = null,
+    private val canShowActions: (T) -> Boolean = { true },
     val triggerMode: TriggerMode = TriggerMode.LONG_PRESS,
 ) {
     var activeItemId: Any?
-        // Используем тег RecyclerView для хранения ID активного элемента.
-        // Это позволяет разным слушателям "общаться" друг с другом.
-        get() = recyclerView.tag as? Long
+        get() = recyclerView.tag
         private set(value) {
             recyclerView.tag = value
         }
@@ -37,7 +36,9 @@ class RecyclerViewActions<T : Any>(
                     recyclerView = recyclerView,
                     onLongPress = { position -> showActionsForPosition(position) },
                     onItemClick = { position ->
-                        val clickedItem = adapter.currentList.getOrNull(position) ?: return@ItemActionTouchListener
+                        val clickedItem = adapter.currentList.getOrNull(position)
+                            ?: return@ItemActionTouchListener
+
                         if (activeItemId != null) {
                             dismissActions()
                         } else {
@@ -50,7 +51,6 @@ class RecyclerViewActions<T : Any>(
             }
 
             TriggerMode.SWIPE_REVEAL -> {
-                // ОБНОВЛЕННЫЙ ВЫЗОВ КОНСТРУКТОРА
                 val swipeListener = SwipeRevealTouchListener(
                     recyclerView = recyclerView,
                     adapter = adapter,
@@ -64,18 +64,16 @@ class RecyclerViewActions<T : Any>(
                     adapter = adapter,
                     getItemId = getItemId,
                     onDismiss = { dismissActions() },
-                    // Эта лямбда вызывается при тапе на иконку "Редактировать"
                     onEdit = { position ->
                         adapter.currentList.getOrNull(position)?.let { item ->
-                            onEdit(item)       // 1. Выполняем действие (переход на экран)
-                            dismissActions()   // 2. Закрываем свайп
+                            onEdit(item)
+                            dismissActions()
                         }
                     },
-                    // Эта лямбда теперь правильно вызывает диалог
                     onDelete = { position ->
                         adapter.currentList.getOrNull(position)?.let { item ->
                             onDeleteClicked(item)
-                            dismissActions()                   // Сразу закрываем свайп
+                            dismissActions()
                         }
                     }
                 )
@@ -94,8 +92,15 @@ class RecyclerViewActions<T : Any>(
 
     fun showActionsForPosition(position: Int) {
         val newActiveItem = adapter.currentList.getOrNull(position) ?: return
+
+        if (!canShowActions(newActiveItem)) {
+            return
+        }
+
         val newActiveId = getItemId(newActiveItem)
-        if (newActiveId == activeItemId) return
+        if (newActiveId == activeItemId) {
+            return
+        }
 
         dismissActions()
         onActionsShown?.invoke()
@@ -105,14 +110,11 @@ class RecyclerViewActions<T : Any>(
 
         if (triggerMode == TriggerMode.LONG_PRESS) {
             adapter.notifyItemChanged(position)
-        } else { // SWIPE_REVEAL
-            if (holder is ActionsViewHolder && holder is ISwipeableHolder) {
-                // Анимация теперь вызывается прямо отсюда.
-                holder.contentContainer.animate()
-                    .translationX(-holder.actionsContainer.width.toFloat())
-                    .setDuration(250)
-                    .start()
-            }
+        } else if (holder is ActionsViewHolder && holder is ISwipeableHolder) {
+            holder.contentContainer.animate()
+                .translationX(-holder.actionsContainer.width.toFloat())
+                .setDuration(250)
+                .start()
         }
     }
 
@@ -122,15 +124,19 @@ class RecyclerViewActions<T : Any>(
         val oldActiveId = activeItemId ?: return
         val oldPosition = findIndexOfItem(oldActiveId)
 
-        activeItemId = null // Сбрасываем ID
+        activeItemId = null
 
         if (oldPosition != null) {
             val holder = recyclerView.findViewHolderForAdapterPosition(oldPosition)
             if (triggerMode == TriggerMode.LONG_PRESS) {
                 adapter.notifyItemChanged(oldPosition)
-            } else { // SWIPE_REVEAL
-                // Анимация закрытия тоже здесь.
-                (holder as? ISwipeableHolder)?.contentContainer?.animate()?.translationX(0f)?.alpha(1.0f)?.setDuration(250)
+            } else {
+                (holder as? ISwipeableHolder)
+                    ?.contentContainer
+                    ?.animate()
+                    ?.translationX(0f)
+                    ?.alpha(1.0f)
+                    ?.setDuration(250)
                     ?.start()
             }
         }
@@ -143,15 +149,12 @@ class RecyclerViewActions<T : Any>(
 
     fun bindViewHolderActions(holder: ActionsViewHolder, item: T) {
         val itemId = getItemId(item)
-        val isActionsVisible = (itemId == activeItemId)
+        val isActionsVisible = itemId == activeItemId
 
-        // Для LongPress мы по-прежнему используем этот метод, чтобы показать/скрыть view
         if (triggerMode == TriggerMode.LONG_PRESS) {
             holder.toggleActions(isActionsVisible)
         }
 
-        // Для Swipe, если элемент неактивен, принудительно ставим его в начальное положение.
-        // Это важно при переиспользовании ViewHolder'ов.
         if (triggerMode == TriggerMode.SWIPE_REVEAL && !isActionsVisible) {
             (holder as? ISwipeableHolder)?.contentContainer?.translationX = 0f
         }
@@ -167,7 +170,6 @@ class RecyclerViewActions<T : Any>(
                     dismissActions()
                 }
             } else {
-                // Обязательно очищаем слушатели для переиспользуемых ViewHolder'ов
                 holder.editButton.setOnClickListener(null)
                 holder.deleteButton.setOnClickListener(null)
             }

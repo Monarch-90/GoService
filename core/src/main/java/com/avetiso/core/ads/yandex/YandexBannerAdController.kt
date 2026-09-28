@@ -1,6 +1,7 @@
 package com.avetiso.core.ads.yandex
 
 import android.app.Activity
+import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.doOnLayout
@@ -14,10 +15,13 @@ import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
 import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
+import kotlinx.coroutines.CancellationException
 import java.util.WeakHashMap
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.roundToInt
 
+@Singleton
 class YandexBannerAdController @Inject constructor(
     private val adsConfiguration: AdsConfiguration,
     private val adsSdkReadiness: AdsSdkReadiness
@@ -25,18 +29,37 @@ class YandexBannerAdController @Inject constructor(
 
     private val pendingAttachRequests = WeakHashMap<ViewGroup, Any>()
     private val activeBanners = WeakHashMap<ViewGroup, BannerAdView>()
-    private val attachStateListeners =
-        WeakHashMap<ViewGroup, View.OnAttachStateChangeListener>()
 
     override suspend fun showBanner(container: ViewGroup) {
-        if (!adsSdkReadiness.awaitReady()) {
+        requireMainThread()
+        container.visibility = View.VISIBLE
+
+        if (
+            activeBanners.containsKey(container) ||
+            pendingAttachRequests.containsKey(container)
+        ) {
             return
         }
 
-        destroyBanner(container)
-
         val requestToken = Any()
         pendingAttachRequests[container] = requestToken
+
+        val isReady = try {
+            adsSdkReadiness.awaitReady()
+        } catch (exception: CancellationException) {
+            removePendingRequest(container, requestToken)
+            throw exception
+        }
+
+        if (!isReady) {
+            removePendingRequest(container, requestToken)
+            container.visibility = View.GONE
+            return
+        }
+
+        if (pendingAttachRequests[container] !== requestToken) {
+            return
+        }
 
         container.doOnLayout {
             if (pendingAttachRequests[container] !== requestToken) {
@@ -48,11 +71,28 @@ class YandexBannerAdController @Inject constructor(
         }
     }
 
+    override fun destroyBanner(container: ViewGroup) {
+        requireMainThread()
+
+        pendingAttachRequests.remove(container)
+
+        activeBanners.remove(container)?.let { banner ->
+            banner.setBannerAdEventListener(null)
+
+            if (banner.parent === container) {
+                container.removeView(banner)
+            }
+
+            banner.destroy()
+        }
+    }
+
     private fun attachBanner(container: ViewGroup) {
         val availableWidthPixels =
             container.width - container.paddingLeft - container.paddingRight
 
         if (availableWidthPixels <= 0) {
+            container.visibility = View.GONE
             return
         }
 
@@ -84,10 +124,8 @@ class YandexBannerAdController @Inject constructor(
                     }
                 }
 
-                override fun onAdFailedToLoad(
-                    error: AdRequestError
-                ) {
-                    destroyBannerIfCurrent(
+                override fun onAdFailedToLoad(error: AdRequestError) {
+                    hideFailedBannerIfCurrent(
                         container = container,
                         banner = banner
                     )
@@ -95,28 +133,11 @@ class YandexBannerAdController @Inject constructor(
 
                 override fun onAdClicked() = Unit
 
-                override fun onImpression(
-                    impressionData: ImpressionData?
-                ) = Unit
+                override fun onImpression(impressionData: ImpressionData?) = Unit
             }
         )
 
-        val attachStateListener = object : View.OnAttachStateChangeListener {
-
-            override fun onViewAttachedToWindow(view: View) = Unit
-
-            override fun onViewDetachedFromWindow(view: View) {
-                destroyBannerIfCurrent(
-                    container = container,
-                    banner = banner
-                )
-            }
-        }
-
         activeBanners[container] = banner
-        attachStateListeners[container] = attachStateListener
-
-        container.addOnAttachStateChangeListener(attachStateListener)
         container.addView(banner)
 
         banner.loadAd(
@@ -124,6 +145,19 @@ class YandexBannerAdController @Inject constructor(
                 adsConfiguration.bannerAdUnitId
             ).build()
         )
+    }
+
+    private fun hideFailedBannerIfCurrent(
+        container: ViewGroup,
+        banner: BannerAdView
+    ) {
+        if (activeBanners[container] === banner) {
+            destroyBanner(container)
+            container.visibility = View.GONE
+        } else {
+            banner.setBannerAdEventListener(null)
+            banner.destroy()
+        }
     }
 
     private fun destroyBannerIfCurrent(
@@ -138,21 +172,18 @@ class YandexBannerAdController @Inject constructor(
         }
     }
 
-    private fun destroyBanner(container: ViewGroup) {
-        pendingAttachRequests.remove(container)
-
-        attachStateListeners.remove(container)?.let { listener ->
-            container.removeOnAttachStateChangeListener(listener)
+    private fun removePendingRequest(
+        container: ViewGroup,
+        requestToken: Any
+    ) {
+        if (pendingAttachRequests[container] === requestToken) {
+            pendingAttachRequests.remove(container)
         }
+    }
 
-        activeBanners.remove(container)?.let { banner ->
-            banner.setBannerAdEventListener(null)
-
-            if (banner.parent === container) {
-                container.removeView(banner)
-            }
-
-            banner.destroy()
+    private fun requireMainThread() {
+        check(Looper.getMainLooper().isCurrentThread) {
+            "Yandex Mobile Ads SDK must be accessed from the main thread"
         }
     }
 }

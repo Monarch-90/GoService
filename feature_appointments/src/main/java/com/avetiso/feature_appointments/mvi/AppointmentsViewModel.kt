@@ -5,14 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
 import com.avetiso.core.action.AppointmentActionHandler
+import com.avetiso.core.action.AppointmentActionResult
 import com.avetiso.core.data.dao.AppointmentDao
+import com.avetiso.core.entity.ui.Appointment
 import com.avetiso.core.mapper.AppointmentMapper
 import com.avetiso.feature_appointments.AppointmentsConstants
+import com.avetiso.feature_appointments.model.AppointmentContentItem
+import com.avetiso.feature_appointments.model.AppointmentDateHeaderItem
+import com.avetiso.feature_appointments.model.AppointmentBannerAdItem
 import com.avetiso.feature_appointments.model.AppointmentsListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -38,15 +44,13 @@ class AppointmentsViewModel @Inject constructor(
     private val _events = Channel<AppointmentsEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    private val _searchQuery = MutableStateFlow("")
-    private val _mappedAppointments = MutableStateFlow<List<Pair<String, com.avetiso.core.entity.ui.Appointment>>>(emptyList())
+    private val searchQuery = MutableStateFlow("")
+    private val mappedAppointments = MutableStateFlow<List<Pair<String, Appointment>>>(emptyList())
 
-    // Форматтер для заголовка (например, "12 марта 2026")
-    private val headerFormatter = DateTimeFormatter.ofPattern(AppConstants.Format.DATE_FORMAT_HEADER, Locale.getDefault())
-
-    init {
-        observeAppointments()
-    }
+    private val headerFormatter = DateTimeFormatter.ofPattern(
+        AppConstants.Format.DATE_FORMAT_HEADER,
+        Locale.getDefault()
+    )
 
     private var pendingDeleteId: Long?
         get() = savedStateHandle[AppointmentsConstants.Pending.KEY_PENDING_DELETE_ID]
@@ -60,113 +64,170 @@ class AppointmentsViewModel @Inject constructor(
             savedStateHandle[AppointmentsConstants.Pending.KEY_PENDING_NOTE_ID] = value
         }
 
+    init {
+        observeAppointments()
+        observeListItems()
+    }
+
     fun processIntent(intent: AppointmentsIntent) {
         when (intent) {
-            is AppointmentsIntent.OnDeleteClicked -> {
+            is DeleteAppointmentClickedIntent -> {
                 pendingDeleteId = intent.appointmentId
                 viewModelScope.launch {
-                    _events.send(AppointmentsEvent.ShowDeleteDialog(intent.appointmentId))
+                    _events.send(ShowAppointmentDeleteDialogEvent)
                 }
             }
 
-            is AppointmentsIntent.ConfirmDelete -> {
+            is ConfirmAppointmentDeleteIntent -> {
                 val id = pendingDeleteId ?: return
                 viewModelScope.launch {
-                    actionHandler.confirmDelete(id) // Передаем ID
-                    pendingDeleteId = null          // Очищаем стейт после успеха
+                    actionHandler.confirmDelete(id)
+                    pendingDeleteId = null
                 }
             }
 
-            is AppointmentsIntent.OnEditClicked -> {
+            is EditAppointmentIntent -> {
                 viewModelScope.launch {
-                    _events.send(AppointmentsEvent.NavigateToEdit(intent.appointmentId))
+                    _events.send(NavigateToEditAppointmentEvent(intent.appointmentId))
                 }
             }
 
-            is AppointmentsIntent.OnNoteClicked -> {
+            is OpenAppointmentNoteIntent -> {
                 pendingNoteAppointmentId = intent.appointmentId
                 viewModelScope.launch {
-                    _events.send(AppointmentsEvent.ShowNoteDialog(intent.appointmentId, intent.currentNote))
+                    _events.send(
+                        ShowAppointmentNoteDialogEvent(
+                            currentNote = intent.currentNote
+                        )
+                    )
                 }
             }
 
-            is AppointmentsIntent.SaveNote -> {
+            is SaveAppointmentNoteIntent -> {
                 val id = pendingNoteAppointmentId ?: return
                 viewModelScope.launch {
-                    actionHandler.updateNote(id, intent.newNote) // Передаем ID и текст
-                    pendingNoteAppointmentId = null              // Очищаем стейт
+                    actionHandler.updateNote(id, intent.newNote)
+                    pendingNoteAppointmentId = null
                 }
             }
 
-            is AppointmentsIntent.ChangeStatus -> {
+            is ChangeAppointmentStatusIntent -> {
                 viewModelScope.launch {
-                    val result = actionHandler.updateAppointmentStatus(intent.appointmentId, intent.status, intent.newDate)
-                    if (result is com.avetiso.core.action.AppointmentActionResult.Error) {
-                        _events.send(AppointmentsEvent.ShowToast(result.messageResId))
+                    val result = actionHandler.updateAppointmentStatus(
+                        appointmentId = intent.appointmentId,
+                        newStatus = intent.status,
+                        newDate = intent.newDate
+                    )
+
+                    if (result is AppointmentActionResult.Error) {
+                        _events.send(ShowAppointmentsToastEvent(result.messageResId))
                     }
                 }
             }
 
-            is AppointmentsIntent.UpdateSearchQuery -> _searchQuery.value = intent.query
+            is UpdateAppointmentsSearchQueryIntent -> {
+                searchQuery.value = intent.query
+            }
         }
     }
 
     private fun observeAppointments() {
-        // 1. Поток: Слушаем БД, мапим тяжелые данные ТОЛЬКО при изменении базы и кэшируем в памяти
         appointmentDao.getAllAppointments()
             .map { entityList ->
                 entityList.map { entity ->
-                    // Сохраняем пару: (Сырая дата из БД -> Готовая UI модель)
                     entity.date to appointmentMapper.mapToUiModel(entity)
                 }
             }
             .onEach { mappedList ->
-                _mappedAppointments.value = mappedList
-            }
-            .launchIn(viewModelScope)
-
-        // 2. Поток: Молниеносный поиск по кэшированным UI-моделям прямо в оперативной памяти
-        kotlinx.coroutines.flow.combine(_mappedAppointments, _searchQuery) { mappedList, query ->
-            val lowerQuery = query.trim().lowercase()
-
-            val filteredList = if (lowerQuery.isBlank()) {
-                mappedList
-            } else {
-                mappedList.filter { (_, appt) ->
-                    appt.clientName.lowercase().contains(lowerQuery) ||
-                            appt.serviceNames.lowercase().contains(lowerQuery) ||
-                            appt.date.lowercase().contains(lowerQuery) ||
-                            appt.time.lowercase().contains(lowerQuery) ||
-                            appt.price.lowercase().contains(lowerQuery) ||
-                            appt.note.lowercase().contains(lowerQuery) ||
-                            appt.status.name.lowercase().contains(lowerQuery) // Fallback для статуса
-                }
-            }
-
-            val listItems = mutableListOf<AppointmentsListItem>()
-            val grouped = filteredList.groupBy { it.first }
-
-            for ((rawDate, pairs) in grouped) {
-                val headerDateText = try {
-                    if (rawDate.isBlank()) "" else {
-                        val localDate = LocalDate.parse(rawDate)
-                        localDate.format(headerFormatter)
-                    }
-                } catch (e: Exception) {
-                    rawDate
-                }
-
-                listItems.add(AppointmentsListItem.DateHeader(headerDateText))
-
-                for ((_, appt) in pairs) {
-                    listItems.add(AppointmentsListItem.AppointmentItem(appt))
-                }
-            }
-            listItems
-        }
-            .onEach { items ->
-                _state.update { it.copy(isLoading = false, items = items) }
+                mappedAppointments.value = mappedList
             }
             .launchIn(viewModelScope)
     }
+
+    private fun observeListItems() {
+        combine(
+            mappedAppointments,
+            searchQuery
+        ) { mappedList, query ->
+            val filteredAppointments = filterAppointments(
+                mappedList = mappedList,
+                query = query
+            )
+
+            buildListItems(
+                filteredAppointments = filteredAppointments
+            )
+        }
+            .onEach { items ->
+                _state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        items = items
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun filterAppointments(
+        mappedList: List<Pair<String, Appointment>>,
+        query: String
+    ): List<Pair<String, Appointment>> {
+        val lowerQuery = query.trim().lowercase()
+
+        if (lowerQuery.isBlank()) {
+            return mappedList
+        }
+
+        return mappedList.filter { (_, appointment) ->
+            appointment.clientName.lowercase().contains(lowerQuery) ||
+                    appointment.serviceNames.lowercase().contains(lowerQuery) ||
+                    appointment.date.lowercase().contains(lowerQuery) ||
+                    appointment.time.lowercase().contains(lowerQuery) ||
+                    appointment.price.lowercase().contains(lowerQuery) ||
+                    appointment.note.lowercase().contains(lowerQuery) ||
+                    appointment.status.name.lowercase().contains(lowerQuery)
+        }
+    }
+
+    private fun buildListItems(
+        filteredAppointments: List<Pair<String, Appointment>>
+    ): List<AppointmentsListItem> {
+        val items = mutableListOf<AppointmentsListItem>()
+
+        items.add(AppointmentBannerAdItem)
+
+        filteredAppointments
+            .groupBy { pair -> pair.first }
+            .forEach { (rawDate, appointmentsForDate) ->
+                items.add(
+                    AppointmentDateHeaderItem(
+                        date = formatHeaderDate(rawDate)
+                    )
+                )
+
+                appointmentsForDate.forEach { (_, appointment) ->
+                    items.add(
+                        AppointmentContentItem(
+                            appointment = appointment
+                        )
+                    )
+                }
+            }
+
+        return items
+    }
+
+    private fun formatHeaderDate(rawDate: String): String {
+        if (rawDate.isBlank()) {
+            return ""
+        }
+
+        return try {
+            LocalDate.parse(rawDate).format(headerFormatter)
+        } catch (exception: Exception) {
+            rawDate
+        }
+    }
+
 }

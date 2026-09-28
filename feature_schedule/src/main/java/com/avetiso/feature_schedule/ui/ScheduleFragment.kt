@@ -2,6 +2,7 @@ package com.avetiso.feature_schedule.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -16,7 +17,7 @@ import com.avetiso.common_ui.appointments.showAppointmentNoteDialog
 import com.avetiso.common_ui.appointments.showAppointmentStatusDialog
 import com.avetiso.common_ui.compose_picker.managers.PickerResultManager
 import com.avetiso.core.AppConstants
-import com.avetiso.core.entity.ui.Appointment
+import com.avetiso.core.ads.BannerAdController
 import com.avetiso.core.models.AppointmentStatus
 import com.avetiso.feature_schedule.R
 import com.avetiso.feature_schedule.ScheduleConstants
@@ -24,6 +25,9 @@ import com.avetiso.feature_schedule.add_appointment.adapter.AppointmentAdapter
 import com.avetiso.feature_schedule.calendar.mvi.CalendarViewModel
 import com.avetiso.feature_schedule.calendar.ui.CalendarManager
 import com.avetiso.feature_schedule.databinding.FragmentScheduleBinding
+import com.avetiso.feature_schedule.model.ScheduleAppointmentItem
+import com.avetiso.feature_schedule.model.ScheduleListItem
+import com.avetiso.feature_schedule.model.ScheduleBannerAdItem
 import com.avetiso.feature_schedule.mvi.ScheduleState
 import com.avetiso.feature_schedule.mvi.ScheduleViewModel
 import com.avetiso.navigation.controllers.SidebarController
@@ -31,7 +35,7 @@ import com.avetiso.navigation.routers.ScheduleNavigator
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import dagger.hilt.android.AndroidEntryPoint
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -45,6 +49,9 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     @Inject
     lateinit var scheduleNavigator: ScheduleNavigator
+
+    @Inject
+    lateinit var bannerAdController: BannerAdController
     private var _binding: FragmentScheduleBinding? = null
     private val binding get() = _binding!!
     private val calendarViewModel: CalendarViewModel by viewModels()
@@ -53,7 +60,7 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
     // Менеджер календаря будет null, пока View не создано
     private var calendarManager: CalendarManager? = null
     private var appointmentAdapter: AppointmentAdapter? = null
-    private var actions: RecyclerViewActions<Appointment>? = null
+    private var actions: RecyclerViewActions<ScheduleListItem>? = null
     private var pickerResultManager: PickerResultManager? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,6 +78,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
 
     private fun setupAdapter() {
         val adapter = AppointmentAdapter(
+            onBannerBound = ::showBanner,
+            onBannerRecycled = bannerAdController::destroyBanner,
             onStatusClicked = { appointment ->
                 showAppointmentStatusDialog(
                     appointment = appointment,
@@ -95,20 +104,28 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
             fragment = this,
             recyclerView = binding.rvAppointments,
             adapter = adapter,
-            getItemId = { it.id },
-            onEdit = { appointment ->
-                scheduleNavigator.navigateToAddEditAppointment(
-                    navController = findNavController(),
-                    appointmentId = appointment.id,
-                    selectedDate = calendarViewModel.state.value.selectedDate?.toString()
-                )
+            getItemId = { item ->
+                when (item) {
+                    is ScheduleAppointmentItem -> item.appointment.id
+                    is ScheduleBannerAdItem -> item
+                }
             },
-            onDeleteClicked = { appointment ->
-                scheduleViewModel.onDeleteIconClicked(appointment.id)
-                // Вызываем общий диалог
-                showAppointmentDeleteDialog(ScheduleConstants.Requests.APPOINTMENT_DELETE)
+            onEdit = { item ->
+                if (item is ScheduleAppointmentItem) {
+                    scheduleNavigator.navigateToAddEditAppointment(
+                        navController = findNavController(),
+                        appointmentId = item.appointment.id,
+                        selectedDate = calendarViewModel.state.value.selectedDate?.toString()
+                    )
+                }
             },
-            onItemClick = { /* TODO: Логика клика */ },
+            onDeleteClicked = { item ->
+                if (item is ScheduleAppointmentItem) {
+                    scheduleViewModel.onDeleteIconClicked(item.appointment.id)
+                    showAppointmentDeleteDialog(ScheduleConstants.Requests.APPOINTMENT_DELETE)
+                }
+            },
+            onItemClick = { },
             onActionsShown = {
 
                 binding.btnAddAppointment.animate()
@@ -131,9 +148,16 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                     .withEndAction(null)
                     .start()
             },
+            canShowActions = { item -> item is ScheduleAppointmentItem },
             triggerMode = TriggerMode.SWIPE_REVEAL
         )
         adapter.actions = actions
+    }
+
+    private fun showBanner(container: ViewGroup) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            bannerAdController.showBanner(container)
+        }
     }
 
     private fun setupCalendar() {
@@ -240,9 +264,8 @@ class ScheduleFragment : Fragment(R.layout.fragment_schedule) {
                 }
 
                 launch {
-                    scheduleViewModel.appointmentsForDate.collect { appointmentsForAdapter ->
-                        // Просто передаем готовый список в адаптер
-                        appointmentAdapter?.submitList(appointmentsForAdapter)
+                    scheduleViewModel.listItems.collect { items ->
+                        appointmentAdapter?.submitList(items)
                     }
                 }
 

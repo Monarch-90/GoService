@@ -1,107 +1,129 @@
 package com.avetiso.feature_clients.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.avetiso.common_ui.actions.ActionsViewHolder
+import androidx.recyclerview.widget.RecyclerView
 import com.avetiso.common_ui.actions.RecyclerViewActions
-import com.avetiso.core.AppConstants
+import com.avetiso.common_ui.ads.BannerAdViewHolder
+import com.avetiso.common_ui.databinding.ItemClientBannerAdHostBinding
 import com.avetiso.core.entity.ClientEntity
+import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.databinding.ItemClientBinding
+import com.avetiso.feature_clients.model.ClientBannerAdItem
+import com.avetiso.feature_clients.model.ClientContentItem
+import com.avetiso.feature_clients.model.ClientsListItem
 
-class ClientAdapter : ListAdapter<ClientEntity, ClientAdapter.ClientViewHolder>(DiffCallback) {
+class ClientAdapter(
+    private val onBannerBound: (ViewGroup) -> Unit,
+    private val onBannerRecycled: (ViewGroup) -> Unit
+) : ListAdapter<ClientsListItem, RecyclerView.ViewHolder>(ClientsFeedListItemDiffCallback) {
 
-    var actions: RecyclerViewActions<ClientEntity>? = null
-    private var selectedClient: ClientEntity? = null
+    var actions: RecyclerViewActions<ClientsListItem>? = null
 
-    // Карта для хранения позиций: ID клиента -> Позиция в списке
+    private var selectedClientId: Long? = null
     private val clientIdToPositionMap = mutableMapOf<Long, Int>()
 
-    // Переопределяем submitList, чтобы обновлять карту позиций
-    override fun submitList(list: List<ClientEntity>?) {
+    override fun submitList(list: List<ClientsListItem>?) {
         updatePositionMap(list)
         super.submitList(list)
     }
 
-    override fun submitList(list: List<ClientEntity>?, commitCallback: Runnable?) {
+    override fun submitList(
+        list: List<ClientsListItem>?,
+        commitCallback: Runnable?
+    ) {
         updatePositionMap(list)
         super.submitList(list, commitCallback)
     }
 
-    // Вспомогательная функция для обновления карты
-    private fun updatePositionMap(list: List<ClientEntity>?) {
-        clientIdToPositionMap.clear()
-        list?.forEachIndexed { index, client ->
-            clientIdToPositionMap[client.id] = index
-        }
-    }
-
-    // Метод для обновления выделения, как в первом шаге
     fun updateSelection(client: ClientEntity?) {
-        val oldClient = selectedClient
-        selectedClient = client
+        val previousClientId = selectedClientId
+        val newClientId = client?.id
 
-        // Находим старую позицию через Map (O(1))
-        if (oldClient != null) {
-            clientIdToPositionMap[oldClient.id]?.let { oldPosition ->
-                notifyItemChanged(oldPosition)
+        if (previousClientId == newClientId) {
+            return
+        }
+
+        selectedClientId = newClientId
+
+        previousClientId?.let { clientId ->
+            clientIdToPositionMap[clientId]?.let(::notifyItemChanged)
+        }
+
+        newClientId?.let { clientId ->
+            clientIdToPositionMap[clientId]?.let(::notifyItemChanged)
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is ClientContentItem -> ClientsConstants.ViewType.CLIENT
+            is ClientBannerAdItem -> ClientsConstants.ViewType.BANNER_AD
+        }
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+
+        return when (viewType) {
+            ClientsConstants.ViewType.CLIENT -> {
+                ClientSelectorClientViewHolder(
+                    ItemClientBinding.inflate(inflater, parent, false)
+                )
+            }
+
+            ClientsConstants.ViewType.BANNER_AD -> {
+                BannerAdViewHolder(
+                    container = ItemClientBannerAdHostBinding
+                        .inflate(inflater, parent, false)
+                        .root,
+                    onBannerBound = onBannerBound,
+                    onBannerRecycled = onBannerRecycled
+                )
+            }
+
+            else -> throw IllegalArgumentException("Unknown viewType: $viewType")
+        }
+    }
+
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int
+    ) {
+        when (val item = getItem(position)) {
+            is ClientContentItem -> {
+                val clientHolder = holder as ClientSelectorClientViewHolder
+                clientHolder.bind(
+                    client = item.client,
+                    isSelected = item.client.id == selectedClientId
+                )
+                actions?.bindViewHolderActions(clientHolder, item)
+            }
+
+            is ClientBannerAdItem -> {
+                (holder as BannerAdViewHolder).bind()
             }
         }
-        // Находим новую позицию через Map (O(1))
-        if (client != null) {
-            clientIdToPositionMap[client.id]?.let { newPosition ->
-                notifyItemChanged(newPosition)
+    }
+
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        if (holder is BannerAdViewHolder) {
+            holder.recycle()
+        }
+        super.onViewRecycled(holder)
+    }
+
+    private fun updatePositionMap(list: List<ClientsListItem>?) {
+        clientIdToPositionMap.clear()
+
+        list?.forEachIndexed { index, item ->
+            if (item is ClientContentItem) {
+                clientIdToPositionMap[item.client.id] = index
             }
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClientViewHolder {
-        val binding = ItemClientBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ClientViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: ClientViewHolder, position: Int) {
-        val client = getItem(position)
-        holder.bind(client, client == selectedClient)
-        actions?.bindViewHolderActions(holder, client)
-    }
-
-    class ClientViewHolder(
-        private val binding: ItemClientBinding,
-    ) : ActionsViewHolder(binding) {
-
-        // Используем ID из <include>
-        override val actionsContainer: View = binding.actionsContainer.root
-        override val editButton: View = binding.actionsContainer.btnEdit
-        override val deleteButton: View = binding.actionsContainer.btnDelete
-
-        fun bind(client: ClientEntity, isSelected: Boolean) {
-            binding.tvClientName.text = client.name
-
-            // Управляем видимостью индикатора выделения
-            binding.viewSelectedCheck.isVisible = isSelected
-
-            binding.ivIconDiscount.isVisible = client.discount > 0
-        }
-
-        // Полностью повторяем логику из первого шага
-        override fun toggleActions(show: Boolean) {
-            actionsContainer.isVisible = show
-            binding.llClientItemContainer.alpha = if (show) AppConstants.Ui.ALPHA_DIMMED else AppConstants.Ui.ALPHA_OPAQUE
-
-            if (show) {
-                binding.viewSelectedCheck.isVisible = false
-            }
-        }
-    }
-
-    companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<ClientEntity>() {
-            override fun areItemsTheSame(a: ClientEntity, b: ClientEntity) = a.id == b.id
-            override fun areContentsTheSame(a: ClientEntity, b: ClientEntity) = a == b
         }
     }
 }

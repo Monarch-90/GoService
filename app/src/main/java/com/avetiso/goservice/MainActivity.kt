@@ -17,12 +17,10 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.avetiso.core.ads.AppOpenAdController
-import com.avetiso.core.ads.BannerAdController
 import com.avetiso.goservice.databinding.ActivityMainBinding
 import com.avetiso.goservice.mvi.MainAdEffect
 import com.avetiso.goservice.mvi.MainAdEffectHandledIntent
 import com.avetiso.goservice.mvi.MainAdEffectType
-import com.avetiso.goservice.mvi.MainAdHostAttachedIntent
 import com.avetiso.goservice.mvi.MainAppLaunchedIntent
 import com.avetiso.goservice.mvi.MainIntent
 import com.avetiso.goservice.mvi.MainSideEffect
@@ -51,9 +49,6 @@ class MainActivity : AppCompatActivity(), SidebarController {
     @Inject
     lateinit var appOpenAdController: AppOpenAdController
 
-    @Inject
-    lateinit var bannerAdController: BannerAdController
-
     private val navController: NavController
         get() = binding.navHostFragment.getFragment<NavHostFragment>().navController
 
@@ -77,12 +72,7 @@ class MainActivity : AppCompatActivity(), SidebarController {
         setupNavigation()
         setupSideMenu()
         observeViewModel()
-        notifyAdHostAttached()
         notifyAppLaunched(savedInstanceState)
-    }
-
-    private fun notifyAdHostAttached() {
-        viewModel.processIntent(MainAdHostAttachedIntent)
     }
 
     private fun notifyAppLaunched(savedInstanceState: Bundle?) {
@@ -166,10 +156,6 @@ class MainActivity : AppCompatActivity(), SidebarController {
             MainAdEffectType.SHOW_APP_OPEN -> {
                 showAppOpenAdWhenResumed()
             }
-
-            MainAdEffectType.SHOW_BANNER -> {
-                bannerAdController.showBanner(binding.adContainer)
-            }
         }
 
         acknowledgeAdEffect(effect)
@@ -218,3 +204,5 @@ class MainActivity : AppCompatActivity(), SidebarController {
         super.onDestroy()
     }
 }
+
+

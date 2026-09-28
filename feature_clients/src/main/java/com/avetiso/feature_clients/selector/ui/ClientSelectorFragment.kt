@@ -2,6 +2,7 @@ package com.avetiso.feature_clients.selector.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -15,32 +16,40 @@ import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.actions.RecyclerViewActions
 import com.avetiso.common_ui.dialogs.DeleteDialogFragment
 import com.avetiso.core.AppConstants
-import com.avetiso.core.entity.ClientEntity
+import com.avetiso.core.ads.BannerAdController
 import com.avetiso.feature_clients.ClientsConstants
 import com.avetiso.feature_clients.R
 import com.avetiso.feature_clients.adapter.ClientAdapter
 import com.avetiso.feature_clients.databinding.FragmentClientSelectorBinding
+import com.avetiso.feature_clients.model.ClientContentItem
+import com.avetiso.feature_clients.model.ClientBannerAdItem
+import com.avetiso.feature_clients.model.ClientsListItem
 import com.avetiso.feature_clients.selector.mvi.ClientSelectorViewModel
 import com.avetiso.navigation.routers.ClientsNavigator
 import dagger.hilt.android.AndroidEntryPoint
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlin.getValue
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
 
     private var binding: FragmentClientSelectorBinding? = null
     private var clientAdapter: ClientAdapter? = null
-    private var actions: RecyclerViewActions<ClientEntity>? = null
+    private var actions: RecyclerViewActions<ClientsListItem>? = null
     private val viewModel: ClientSelectorViewModel by viewModels()
 
     @Inject
     lateinit var clientsNavigator: ClientsNavigator
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    @Inject
+    lateinit var bannerAdController: BannerAdController
+
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentClientSelectorBinding.bind(view)
 
@@ -64,33 +73,48 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
 
     private fun setupRecyclerView() {
         val currentBinding = binding ?: return
-        val adapter = ClientAdapter().also { clientAdapter = it }
-        currentBinding.rvClients.adapter = adapter
+        val adapter = ClientAdapter(
+            onBannerBound = ::showBanner,
+            onBannerRecycled = bannerAdController::destroyBanner
+        ).also { clientAdapter = it }
 
-        // Отключает анимацию на андроид 15
+        currentBinding.rvClients.adapter = adapter
         currentBinding.rvClients.itemAnimator = null
 
         actions = RecyclerViewActions(
             fragment = this,
             recyclerView = currentBinding.rvClients,
             adapter = adapter,
-            getItemId = { client -> client.id },
-            onEdit = { client ->
-                // Навигация на экран редактирования
-                clientsNavigator.navigateToAddEditClient(findNavController(), client.id)
+            getItemId = { item ->
+                when (item) {
+                    is ClientContentItem -> item.client.id
+                    is ClientBannerAdItem -> item
+                }
             },
-            onDeleteClicked = { client ->
-                // Сначала сохраняем состояние в ViewModel!
-                viewModel.onDeleteIconClicked(client)
-
-                // Потом показываем диалог
-                DeleteDialogFragment.newInstance(
-                    requestKey = ClientsConstants.Requests.CLIENT_DELETE_FROM_SELECTOR,
-                    message = getString(com.avetiso.core.R.string.delete_dialog_message, client.name)
-                ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
+            onEdit = { item ->
+                if (item is ClientContentItem) {
+                    clientsNavigator.navigateToAddEditClient(
+                        findNavController(),
+                        item.client.id
+                    )
+                }
             },
-            onItemClick = { client ->
-                viewModel.onClientSelected(client)
+            onDeleteClicked = { item ->
+                if (item is ClientContentItem) {
+                    viewModel.onDeleteIconClicked(item.client)
+                    DeleteDialogFragment.newInstance(
+                        requestKey = ClientsConstants.Requests.CLIENT_DELETE_FROM_SELECTOR,
+                        message = getString(
+                            com.avetiso.core.R.string.delete_dialog_message,
+                            item.client.name
+                        )
+                    ).show(childFragmentManager, AppConstants.Result.DELETE_DIALOG)
+                }
+            },
+            onItemClick = { item ->
+                if (item is ClientContentItem) {
+                    viewModel.onClientSelected(item.client)
+                }
             },
             onActionsShown = {
                 viewModel.clearClientSelection()
@@ -98,16 +122,24 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
                     AppConstants.Requests.CLIENT_SELECT,
                     bundleOf(AppConstants.Result.SELECTED_CLIENT to null)
                 )
-            }
+            },
+            canShowActions = { item -> item is ClientContentItem }
         )
-        // Передаем actions в адаптер
+
         adapter.actions = actions
     }
 
-    private fun setupListeners() {
-        binding?.etSearch?.addTextChangedListener {
-            viewModel.onSearchQueryChanged(it.toString())
+    private fun showBanner(container: ViewGroup) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            bannerAdController.showBanner(container)
         }
+    }
+
+    private fun setupListeners() {
+        binding?.etSearch?.addTextChangedListener { editable ->
+            viewModel.onSearchQueryChanged(editable?.toString().orEmpty())
+        }
+
         binding?.btnAddClient?.setOnClickListener {
             clientsNavigator.navigateToAddEditClient(findNavController(), null)
         }
@@ -116,20 +148,21 @@ class ClientSelectorFragment : Fragment(R.layout.fragment_client_selector) {
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Подписка на список клиентов
-                launch {
-                    viewModel.clients.collect { clients ->
-                        clientAdapter?.submitList(clients)
-                    }
-                }
                 launch {
                     viewModel.state
-                        .map { it.selectedClient }
+                        .map { state -> state.items }
+                        .distinctUntilChanged()
+                        .collect { items ->
+                            clientAdapter?.submitList(items)
+                        }
+                }
+
+                launch {
+                    viewModel.state
+                        .map { state -> state.selectedClient }
                         .distinctUntilChanged()
                         .collect { selectedClient ->
-                            // 1. Обновляем UI (подсветка)
-                            clientAdapter?.updateSelection(selectedClient) // Безопасный вызов
-                            // 2. Отправляем результат родителю
+                            clientAdapter?.updateSelection(selectedClient)
                             setFragmentResult(
                                 AppConstants.Requests.CLIENT_SELECT,
                                 bundleOf(AppConstants.Result.SELECTED_CLIENT to selectedClient)

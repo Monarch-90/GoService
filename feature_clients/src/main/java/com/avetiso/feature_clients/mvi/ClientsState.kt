@@ -1,8 +1,8 @@
 package com.avetiso.feature_clients.mvi
 
-import com.avetiso.core.entity.ClientEntity
+import com.avetiso.feature_clients.model.ClientsListItem
 
 data class ClientsState(
-    val clients: List<ClientEntity> = emptyList(),
+    val items: List<ClientsListItem> = emptyList(),
     val searchQuery: String = ""
 )

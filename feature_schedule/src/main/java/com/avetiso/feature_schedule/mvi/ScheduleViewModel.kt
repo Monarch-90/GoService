@@ -10,6 +10,9 @@ import com.avetiso.core.entity.ui.Appointment
 import com.avetiso.core.mapper.AppointmentMapper
 import com.avetiso.core.models.AppointmentStatus
 import com.avetiso.feature_schedule.ScheduleConstants
+import com.avetiso.feature_schedule.model.ScheduleAppointmentItem
+import com.avetiso.feature_schedule.model.ScheduleBannerAdItem
+import com.avetiso.feature_schedule.model.ScheduleListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,16 +35,22 @@ class ScheduleViewModel @Inject constructor(
 
     private var pendingDeleteId: Long?
         get() = savedStateHandle[ScheduleConstants.Pending.KEY_SCHEDULE_PENDING_DELETE_ID]
-        set(value) { savedStateHandle[ScheduleConstants.Pending.KEY_SCHEDULE_PENDING_DELETE_ID] = value }
+        set(value) {
+            savedStateHandle[ScheduleConstants.Pending.KEY_SCHEDULE_PENDING_DELETE_ID] = value
+        }
 
     private var pendingNoteAppointmentId: Long?
         get() = savedStateHandle[ScheduleConstants.Pending.KEY_SCHEDULE_PENDING_NOTE_ID]
-        set(value) { savedStateHandle[ScheduleConstants.Pending.KEY_SCHEDULE_PENDING_NOTE_ID] = value }
+        set(value) {
+            savedStateHandle[ScheduleConstants.Pending.KEY_SCHEDULE_PENDING_NOTE_ID] = value
+        }
 
     private val _scheduleState = MutableStateFlow<ScheduleState>(ScheduleState.Idle)
     val scheduleState = _scheduleState.asStateFlow()
-    private val _selectedDate = MutableStateFlow("")
-    val appointmentsForDate: StateFlow<List<Appointment>> = _selectedDate
+
+    private val selectedDate = MutableStateFlow("")
+
+    private val appointmentsForDate: StateFlow<List<Appointment>> = selectedDate
         .flatMapLatest { date ->
             if (date.isBlank()) {
                 flowOf(emptyList())
@@ -49,16 +58,50 @@ class ScheduleViewModel @Inject constructor(
                 appointmentDao.getAppointmentsForDate(date)
             }
         }
-        .map { entityList -> entityList.map { appointmentMapper.mapToUiModel(it) } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .map { entityList ->
+            entityList.map { entity ->
+                appointmentMapper.mapToUiModel(entity)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val listItems: StateFlow<List<ScheduleListItem>> = appointmentsForDate
+        .map { appointments ->
+            buildList {
+                add(ScheduleBannerAdItem)
+
+                appointments.forEach { appointment ->
+                    add(ScheduleAppointmentItem(appointment))
+                }
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = listOf(ScheduleBannerAdItem)
+        )
 
     fun loadAppointmentsForDate(date: String) {
-        _selectedDate.value = date
+        selectedDate.value = date
     }
 
-    fun updateAppointmentStatus(appointmentId: Long, newStatus: AppointmentStatus, newDate: String? = null) {
+    fun updateAppointmentStatus(
+        appointmentId: Long,
+        newStatus: AppointmentStatus,
+        newDate: String? = null
+    ) {
         viewModelScope.launch {
-            when (val result = actionHandler.updateAppointmentStatus(appointmentId, newStatus, newDate)) {
+            when (
+                val result = actionHandler.updateAppointmentStatus(
+                    appointmentId,
+                    newStatus,
+                    newDate
+                )
+            ) {
                 is AppointmentActionResult.Error -> {
                     _scheduleState.value = ScheduleState.Error(result.messageResId)
                 }
@@ -67,9 +110,7 @@ class ScheduleViewModel @Inject constructor(
                     _scheduleState.value = ScheduleState.Success
                 }
 
-                is AppointmentActionResult.Success -> {
-                    // Успешно обновили статус, UI-стейт менять не нужно
-                }
+                is AppointmentActionResult.Success -> Unit
             }
         }
     }
@@ -78,31 +119,29 @@ class ScheduleViewModel @Inject constructor(
         _scheduleState.value = ScheduleState.Idle
     }
 
-    // 1. Фрагмент передает ID (так как у него есть только Appointment c ID)
     fun onDeleteIconClicked(id: Long) {
         pendingDeleteId = id
     }
 
-    // 2. Подтвердили удаление
     fun onDeleteConfirmed() {
-        val id = pendingDeleteId ?: return // Достаем ID
+        val id = pendingDeleteId ?: return
+
         viewModelScope.launch {
-            actionHandler.confirmDelete(id) // Передаем ID в Stateless UseCase
-            pendingDeleteId = null          // Сбрасываем после успеха
+            actionHandler.confirmDelete(id)
+            pendingDeleteId = null
         }
     }
 
-    // 1. Фрагмент вызывает это, когда открывает диалог
     fun onEditNoteClicked(appointmentId: Long) {
         pendingNoteAppointmentId = appointmentId
     }
 
-    // 2. Фрагмент вызывает это, когда диалог вернул результат
     fun onNoteDialogResult(newText: String) {
-        val id = pendingNoteAppointmentId ?: return // Достаем ID (выживет даже после сворачивания)
+        val id = pendingNoteAppointmentId ?: return
+
         viewModelScope.launch {
-            actionHandler.updateNote(id, newText) // Передаем ID и текст
-            pendingNoteAppointmentId = null       // Сбрасываем
+            actionHandler.updateNote(id, newText)
+            pendingNoteAppointmentId = null
         }
     }
 }

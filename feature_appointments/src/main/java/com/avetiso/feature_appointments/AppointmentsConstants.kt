@@ -5,9 +5,9 @@ internal object AppointmentsConstants {
     object ViewType {
         const val VIEW_TYPE_HEADER = 0
         const val VIEW_TYPE_ITEM = 1
+        const val VIEW_TYPE_BANNER_AD = 2
     }
 
-    // Ключи запросов (Request Keys) для Fragment Result API
     object Requests {
         const val APPOINTMENT_DELETE = "appointments_delete_request"
         const val INPUT_NOTE_KEY = "appointments_input_note_request"

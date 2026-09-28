@@ -42,7 +42,6 @@ object AppConstants {
         const val DELETE_DIALOG = "delete_dialog"
         const val INPUT_DIALOG = "input_dialog"
         const val RESULT_TEXT = "result_text"
-
     }
 
     object Requests {
@@ -88,7 +87,6 @@ object AppConstants {
         const val YANDEX_APP_OPEN_DEMO_ID = "demo-appopenad-yandex"
         const val APP_OPEN_AD_FREQUENCY = 3
         const val YANDEX_BANNER_DEMO_ID = "demo-banner-yandex"
-        const val YANDEX_NATIVE_DEMO_ID = "demo-nativeapp-yandex"
         const val YANDEX_REWARDED_DEMO_ID = "demo-rewarded-yandex"
         const val BANNER_HEIGHT_DP = 50
     }

@@ -44,7 +44,6 @@ class MainViewModel @Inject constructor(
                     is MainIntent.OnSidebarItemClicked -> handleItemClick(intent.itemId)
                     is MainIntent.OnDrawerClosed -> handleDrawerClosed()
                     MainAppLaunchedIntent -> handleAppLaunched()
-                    MainAdHostAttachedIntent -> handleAdHostAttached()
                     is MainAdEffectHandledIntent -> handleAdEffectHandled(intent.requestId)
                 }
             }
@@ -56,20 +55,6 @@ class MainViewModel @Inject constructor(
 
         if (shouldShowAppOpenAdUseCase()) {
             requestAdEffect(MainAdEffectType.SHOW_APP_OPEN)
-        }
-    }
-
-    private fun handleAdHostAttached() {
-        val bannerEffect = createAdEffect(MainAdEffectType.SHOW_BANNER)
-
-        _state.update { state ->
-            state.copy(
-                pendingAdEffects = state.pendingAdEffects
-                    .filterNot { effect ->
-                        effect.type == MainAdEffectType.SHOW_BANNER
-                    }
-                    .plus(bannerEffect)
-            )
         }
     }
 
@@ -123,3 +108,5 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 }
+
+

@@ -22,6 +22,7 @@ gson = "2.13.1"
 datastore = "1.0.0"
 retrofit = "3.0.0"
 yandexAds = "8.2.0"
+googleMobileAds = "25.5.0"
 
 # Compose
 composeBom = "2025.08.01"
@@ -100,6 +101,7 @@ androidx-lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name =
 
 # Ads Monetization
 yandex-mobileads = { group = "com.yandex.android", name = "mobileads", version.ref = "yandexAds" }
+google-mobileads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "googleMobileAds" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

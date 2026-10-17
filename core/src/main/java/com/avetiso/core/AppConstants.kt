@@ -83,12 +83,26 @@ object AppConstants {
     }
 
     object AdConstants {
-        // Тестовые идентификаторы Яндекса. После настройки production-рекламы заменяются на боевые.
-        const val YANDEX_APP_OPEN_DEMO_ID = "demo-appopenad-yandex"
         const val APP_OPEN_AD_FREQUENCY = 3
-        const val YANDEX_BANNER_DEMO_ID = "demo-banner-yandex"
-        const val YANDEX_REWARDED_DEMO_ID = "demo-rewarded-yandex"
         const val BANNER_HEIGHT_DP = 50
+
+        object RegionRouting {
+            const val ISO_ALPHA_2_LENGTH = 2
+            val YANDEX_COUNTRY_ISO_CODES = setOf("RU")
+        }
+
+        object Yandex {
+            const val APP_OPEN_DEMO_ID = "demo-appopenad-yandex"
+            const val BANNER_DEMO_ID = "demo-banner-yandex"
+            const val REWARDED_DEMO_ID = "demo-rewarded-yandex"
+        }
+
+        object AdMob {
+            const val IS_ENABLED = false
+            const val APP_OPEN_DEMO_ID = "ca-app-pub-3940256099942544/9257395921"
+            const val BANNER_DEMO_ID = "ca-app-pub-3940256099942544/9214589741"
+            const val APP_OPEN_EXPIRATION_MILLIS = 4L * 60L * 60L * 1000L
+        }
     }
 
     const val ID_NONE = -1L

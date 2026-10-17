@@ -1,7 +1,8 @@
 package com.avetiso.core.ads.yandex
 
 import android.content.Context
-import com.avetiso.core.ads.AdsSdkInitializer
+import com.avetiso.core.ads.AdsNetworkSdkInitializer
+import com.avetiso.core.ads.AdsProvider
 import com.yandex.mobile.ads.common.YandexAds
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -12,7 +13,9 @@ import javax.inject.Singleton
 @Singleton
 class YandexAdsSdkInitializer @Inject constructor(
     @ApplicationContext private val context: Context
-) : AdsSdkInitializer {
+) : AdsNetworkSdkInitializer {
+
+    override val provider = AdsProvider.YANDEX
 
     private val initializationStarted = AtomicBoolean(false)
     private val readiness = CompletableDeferred<Boolean>()

@@ -66,6 +66,7 @@ dependencies {
 
     // Ads Monetization
     implementation(libs.yandex.mobileads)
+    implementation(libs.google.mobileads)
 }
 
 // Parcelize

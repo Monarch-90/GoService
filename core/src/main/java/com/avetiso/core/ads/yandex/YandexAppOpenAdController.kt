@@ -6,8 +6,10 @@ import android.content.Context
 import android.os.Bundle
 import com.avetiso.core.ads.AdsConfiguration
 import com.avetiso.core.ads.AdsSdkReadiness
-import com.avetiso.core.ads.AppOpenAdController
+import com.avetiso.core.ads.AdsProvider
+import com.avetiso.core.ads.AppOpenAdProvider
 import com.avetiso.core.ads.AppOpenAdShowResult
+import com.avetiso.core.ads.qualifier.YandexAds
 import com.yandex.mobile.ads.appopenad.AppOpenAd
 import com.yandex.mobile.ads.appopenad.AppOpenAdEventListener
 import com.yandex.mobile.ads.appopenad.AppOpenAdLoadListener
@@ -27,9 +29,11 @@ import javax.inject.Singleton
 @Singleton
 class YandexAppOpenAdController @Inject constructor(
     @ApplicationContext context: Context,
-    private val adsConfiguration: AdsConfiguration,
-    private val adsSdkReadiness: AdsSdkReadiness
-) : AppOpenAdController {
+    @YandexAds private val adsConfiguration: AdsConfiguration,
+    @YandexAds private val adsSdkReadiness: AdsSdkReadiness
+) : AppOpenAdProvider {
+
+    override val provider = AdsProvider.YANDEX
 
     private val stateLock = Any()
     private val applicationContext = context.applicationContext

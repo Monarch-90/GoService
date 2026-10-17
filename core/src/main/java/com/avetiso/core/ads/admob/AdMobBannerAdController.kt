@@ -1,0 +1,181 @@
+package com.avetiso.core.ads.admob
+
+import android.app.Activity
+import android.os.Looper
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.doOnLayout
+import com.avetiso.core.AppConstants
+import com.avetiso.core.ads.AdsConfiguration
+import com.avetiso.core.ads.AdsProvider
+import com.avetiso.core.ads.AdsSdkReadiness
+import com.avetiso.core.ads.BannerAdProvider
+import com.avetiso.core.ads.qualifier.AdMobAds
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import kotlinx.coroutines.CancellationException
+import java.util.WeakHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.math.roundToInt
+
+@Singleton
+class AdMobBannerAdController @Inject constructor(
+    @AdMobAds private val adsConfiguration: AdsConfiguration,
+    @AdMobAds private val adsSdkReadiness: AdsSdkReadiness
+) : BannerAdProvider {
+
+    override val provider = AdsProvider.ADMOB
+
+    private val pendingAttachRequests = WeakHashMap<ViewGroup, Any>()
+    private val activeBanners = WeakHashMap<ViewGroup, AdView>()
+
+    override suspend fun showBanner(container: ViewGroup) {
+        requireMainThread()
+        container.visibility = View.VISIBLE
+
+        if (
+            activeBanners.containsKey(container) ||
+            pendingAttachRequests.containsKey(container)
+        ) {
+            return
+        }
+
+        val requestToken = Any()
+        pendingAttachRequests[container] = requestToken
+
+        val isReady = try {
+            adsSdkReadiness.awaitReady()
+        } catch (exception: CancellationException) {
+            removePendingRequest(container, requestToken)
+            throw exception
+        }
+
+        if (!isReady) {
+            removePendingRequest(container, requestToken)
+            container.visibility = View.GONE
+            return
+        }
+
+        if (pendingAttachRequests[container] !== requestToken) {
+            return
+        }
+
+        container.doOnLayout {
+            if (pendingAttachRequests[container] !== requestToken) {
+                return@doOnLayout
+            }
+
+            pendingAttachRequests.remove(container)
+            attachBanner(container)
+        }
+    }
+
+    override fun destroyBanner(container: ViewGroup) {
+        requireMainThread()
+
+        pendingAttachRequests.remove(container)
+
+        activeBanners.remove(container)?.let { banner ->
+            if (banner.parent === container) {
+                container.removeView(banner)
+            }
+
+            banner.destroy()
+        }
+    }
+
+    private fun attachBanner(container: ViewGroup) {
+        val availableWidthPixels =
+            container.width - container.paddingLeft - container.paddingRight
+
+        if (availableWidthPixels <= 0) {
+            container.visibility = View.GONE
+            return
+        }
+
+        val density = container.resources.displayMetrics.density
+        val availableWidthDp =
+            (availableWidthPixels / density).roundToInt()
+
+        val banner = AdView(container.context).apply {
+            adUnitId = adsConfiguration.bannerAdUnitId
+            setAdSize(
+                AdSize.getInlineAdaptiveBannerAdSize(
+                    availableWidthDp,
+                    AppConstants.AdConstants.BANNER_HEIGHT_DP
+                )
+            )
+        }
+
+        banner.adListener = object : AdListener() {
+
+            override fun onAdLoaded() {
+                val activity = container.context as? Activity
+
+                if (activity?.isDestroyed == true || activity?.isFinishing == true) {
+                    destroyBannerIfCurrent(
+                        container = container,
+                        banner = banner
+                    )
+                }
+            }
+
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                hideFailedBannerIfCurrent(
+                    container = container,
+                    banner = banner
+                )
+            }
+
+            override fun onAdClicked() = Unit
+
+            override fun onAdImpression() = Unit
+        }
+
+        activeBanners[container] = banner
+        container.addView(banner)
+        banner.loadAd(AdRequest.Builder().build())
+    }
+
+    private fun hideFailedBannerIfCurrent(
+        container: ViewGroup,
+        banner: AdView
+    ) {
+        if (activeBanners[container] === banner) {
+            destroyBanner(container)
+            container.visibility = View.GONE
+        } else {
+            banner.destroy()
+        }
+    }
+
+    private fun destroyBannerIfCurrent(
+        container: ViewGroup,
+        banner: AdView
+    ) {
+        if (activeBanners[container] === banner) {
+            destroyBanner(container)
+        } else {
+            banner.destroy()
+        }
+    }
+
+    private fun removePendingRequest(
+        container: ViewGroup,
+        requestToken: Any
+    ) {
+        if (pendingAttachRequests[container] === requestToken) {
+            pendingAttachRequests.remove(container)
+        }
+    }
+
+    private fun requireMainThread() {
+        check(Looper.getMainLooper().isCurrentThread) {
+            "Google Mobile Ads SDK banner operations must run on the main thread"
+        }
+    }
+}

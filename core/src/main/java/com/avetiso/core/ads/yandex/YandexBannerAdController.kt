@@ -8,7 +8,9 @@ import androidx.core.view.doOnLayout
 import com.avetiso.core.AppConstants
 import com.avetiso.core.ads.AdsConfiguration
 import com.avetiso.core.ads.AdsSdkReadiness
-import com.avetiso.core.ads.BannerAdController
+import com.avetiso.core.ads.AdsProvider
+import com.avetiso.core.ads.BannerAdProvider
+import com.avetiso.core.ads.qualifier.YandexAds
 import com.yandex.mobile.ads.banner.BannerAdEventListener
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
@@ -23,9 +25,11 @@ import kotlin.math.roundToInt
 
 @Singleton
 class YandexBannerAdController @Inject constructor(
-    private val adsConfiguration: AdsConfiguration,
-    private val adsSdkReadiness: AdsSdkReadiness
-) : BannerAdController {
+    @YandexAds private val adsConfiguration: AdsConfiguration,
+    @YandexAds private val adsSdkReadiness: AdsSdkReadiness
+) : BannerAdProvider {
+
+    override val provider = AdsProvider.YANDEX
 
     private val pendingAttachRequests = WeakHashMap<ViewGroup, Any>()
     private val activeBanners = WeakHashMap<ViewGroup, BannerAdView>()

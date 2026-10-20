@@ -54,6 +54,7 @@ object AppConstants {
         const val KEY_DEFAULT_CURRENCY = "default_currency"
         const val KEY_CUSTOM_CURRENCIES = "custom_currencies"
         const val KEY_APP_LAUNCH_COUNT = "app_launch_count"
+        const val KEY_ADS_DATA_CONSENT = "ads_data_consent"
     }
 
     // Временные интервалы и тайм-ауты
@@ -83,6 +84,14 @@ object AppConstants {
     }
 
     object AdConstants {
+        object Privacy {
+            const val POLICY_URL = "https://sites.google.com/view/go-service-privacy-policy"
+            const val INITIAL_DIALOG_TAG = "ads_consent_initial_dialog"
+            const val SETTINGS_DIALOG_TAG = "ads_consent_settings_dialog"
+            const val INITIAL_RESULT_KEY = "ads_consent_initial_result"
+            const val SETTINGS_RESULT_KEY = "ads_consent_settings_result"
+        }
+
         const val APP_OPEN_AD_FREQUENCY = 3
         const val BANNER_HEIGHT_DP = 50
 
@@ -95,6 +104,9 @@ object AppConstants {
             const val APP_OPEN_DEMO_ID = "demo-appopenad-yandex"
             const val BANNER_DEMO_ID = "demo-banner-yandex"
             const val REWARDED_DEMO_ID = "demo-rewarded-yandex"
+
+            const val APP_OPEN_PRODUCTION_ID = "R-M-20237983-2"
+            const val BANNER_PRODUCTION_ID = "R-M-20237983-1"
         }
 
         object AdMob {

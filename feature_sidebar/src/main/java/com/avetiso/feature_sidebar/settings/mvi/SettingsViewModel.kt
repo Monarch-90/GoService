@@ -3,6 +3,9 @@ package com.avetiso.feature_sidebar.settings.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
+import com.avetiso.core.ads.AdsConsentRepository
+import com.avetiso.core.ads.AdsDataConsent
+import com.avetiso.core.usecase.SaveAdsConsentUseCase
 import com.avetiso.core.data.repository.SettingsRepository
 import com.avetiso.core.models.AppCurrency
 import com.avetiso.core.models.CurrencyListItem
@@ -20,6 +23,8 @@ import kotlinx.coroutines.launch
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     getCurrencyListUseCase: GetCurrencyListUseCase,
+    private val adsConsentRepository: AdsConsentRepository,
+    private val saveAdsConsentUseCase: SaveAdsConsentUseCase,
 ) : ViewModel() {
 
     // Подписываемся на реальные данные из БД
@@ -37,6 +42,12 @@ class SettingsViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(AppConstants.Ui.SNACKBAR_LONG_DURATION),
             emptyList()
         )
+
+    val adsConsent = adsConsentRepository.consent.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(AppConstants.Ui.SNACKBAR_LONG_DURATION),
+        AdsDataConsent.UNDECIDED
+    )
 
     private val _events = Channel<SettingsEvent>()
     val events = _events.receiveAsFlow()
@@ -87,6 +98,20 @@ class SettingsViewModel @Inject constructor(
         pendingCurrency = null
         viewModelScope.launch {
             _events.send(SettingsEvent.RestoreSelection(currentDefaultCurrency.value))
+        }
+    }
+
+    fun onAdsPreferencesClicked() {
+        viewModelScope.launch { _events.send(SettingsEvent.ShowAdsConsentDialog) }
+    }
+
+    fun onAdsConsentSelected(granted: Boolean) {
+        viewModelScope.launch {
+            val consent = if (granted) AdsDataConsent.GRANTED else AdsDataConsent.DENIED
+            if (adsConsentRepository.consent.first() != consent) {
+                saveAdsConsentUseCase(consent)
+                _events.send(SettingsEvent.RecreateHostActivity)
+            }
         }
     }
 

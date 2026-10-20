@@ -1,6 +1,10 @@
 package com.avetiso.common_ui.dialogs
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.os.BundleCompat
@@ -44,10 +48,21 @@ class ConfirmationDialogFragment : BaseDialogFragment<DialogConfirmationBinding>
             // Используем ресурсы, если текст не передан явно
             btnPositive.text = payload.positiveText ?: getString(R.string.ok)
             btnNegative.text = payload.negativeText ?: getString(R.string.cancel)
+            btnInfo.visibility = if (payload.infoUrl.isNullOrBlank()) View.GONE else View.VISIBLE
+            btnInfo.text = payload.infoText.orEmpty()
         }
     }
 
     private fun setupListeners() {
+        binding.btnInfo.setOnClickListener {
+            val url = payload.infoUrl ?: return@setOnClickListener
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (_: ActivityNotFoundException) {
+                // The user can still choose either option if a browser is unavailable.
+            }
+        }
+
         binding.btnPositive.setOnClickListener {
             sendResult(confirmed = true)
         }

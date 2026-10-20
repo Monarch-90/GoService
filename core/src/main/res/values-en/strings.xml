@@ -1,0 +1,12 @@
+<resources>
+    <string name="ads_consent_title">Advertising and privacy</string>
+    <string name="ads_consent_description">GoService uses Yandex Ads. With your consent, the ad provider may process device data and advertising identifiers to select and measure ads. If you decline, we do not provide consent for this processing, but ads still be served without personalization. You can change your choice in Settings.</string>
+    <string name="ads_consent_accept">Agree</string>
+    <string name="ads_consent_decline">Decline</string>
+    <string name="ads_consent_privacy_link">Privacy policy</string>
+    <string name="ads_consent_settings_title">Ad preferences</string>
+    <string name="ads_consent_settings_summary">Manage consent for advertising data processing</string>
+    <string name="ads_consent_status_granted">Consent granted</string>
+    <string name="ads_consent_status_denied">Consent declined</string>
+    <string name="ads_consent_status_unknown">Not chosen</string>
+</resources>

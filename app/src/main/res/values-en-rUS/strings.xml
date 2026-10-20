@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Go Service</string>
+    <string name="app_name">GoService</string>
     <string name="schedule">Schedule</string>
     <string name="clients">Clients</string>
     <string name="appointments">Appointments</string>

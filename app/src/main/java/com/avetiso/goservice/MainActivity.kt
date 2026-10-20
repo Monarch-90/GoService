@@ -16,11 +16,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.avetiso.feature_sidebar.ads.AdsConsentDialogLauncher
+import com.avetiso.core.AppConstants
 import com.avetiso.core.ads.AppOpenAdController
 import com.avetiso.goservice.databinding.ActivityMainBinding
 import com.avetiso.goservice.mvi.MainAdEffect
 import com.avetiso.goservice.mvi.MainAdEffectHandledIntent
 import com.avetiso.goservice.mvi.MainAdEffectType
+import com.avetiso.goservice.mvi.MainAdsConsentChosenIntent
 import com.avetiso.goservice.mvi.MainAppLaunchedIntent
 import com.avetiso.goservice.mvi.MainIntent
 import com.avetiso.goservice.mvi.MainSideEffect
@@ -71,6 +74,7 @@ class MainActivity : AppCompatActivity(), SidebarController {
         setupWindowInsets()
         setupNavigation()
         setupSideMenu()
+        setupAdsConsentResultListener()
         observeViewModel()
         notifyAppLaunched(savedInstanceState)
     }
@@ -106,6 +110,23 @@ class MainActivity : AppCompatActivity(), SidebarController {
         binding.about.setNavigationItemSelectedListener(navItemSelectedListener)
     }
 
+    private fun setupAdsConsentResultListener() {
+        supportFragmentManager.setFragmentResultListener(
+            AppConstants.AdConstants.Privacy.INITIAL_RESULT_KEY,
+            this
+        ) { _, result ->
+            viewModel.processIntent(
+                MainAdsConsentChosenIntent(
+                    result.getBoolean(AppConstants.Result.RESULT_CONFIRMED)
+                )
+            )
+        }
+    }
+
+    private fun showAdsConsentDialog() {
+        AdsConsentDialogLauncher.showInitial(this)
+    }
+
     private fun observeViewModel() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -130,6 +151,7 @@ class MainActivity : AppCompatActivity(), SidebarController {
 
     private fun handleSideEffect(effect: MainSideEffect) {
         when (effect) {
+            MainSideEffect.ShowAdsConsentDialog -> showAdsConsentDialog()
             is MainSideEffect.CloseSidebar -> {
                 binding.drawerLayout.closeDrawers()
             }
@@ -204,5 +226,3 @@ class MainActivity : AppCompatActivity(), SidebarController {
         super.onDestroy()
     }
 }
-
-

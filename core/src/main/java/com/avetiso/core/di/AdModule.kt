@@ -1,5 +1,7 @@
 package com.avetiso.core.di
 
+import com.avetiso.core.ads.AdsConsentRepository
+import com.avetiso.core.ads.AdsPrivacySdk
 import com.avetiso.core.ads.AdsNetworkSdkInitializer
 import com.avetiso.core.ads.AdsProviderPolicy
 import com.avetiso.core.ads.AdsRegionResolver
@@ -15,6 +17,7 @@ import com.avetiso.core.ads.DeviceAdsRegionResolver
 import com.avetiso.core.ads.RoutingAdsSdkInitializer
 import com.avetiso.core.ads.RoutingAppOpenAdController
 import com.avetiso.core.ads.RoutingBannerAdController
+import com.avetiso.core.ads.yandex.YandexAdsPrivacySdk
 import com.avetiso.core.ads.admob.AdMobAdsSdkInitializer
 import com.avetiso.core.ads.admob.AdMobAppOpenAdController
 import com.avetiso.core.ads.admob.AdMobBannerAdController
@@ -24,6 +27,7 @@ import com.avetiso.core.ads.yandex.YandexAdsSdkInitializer
 import com.avetiso.core.ads.yandex.YandexAppOpenAdController
 import com.avetiso.core.ads.yandex.YandexBannerAdController
 import com.avetiso.core.data.repository.DataStoreAppLaunchCounterRepository
+import com.avetiso.core.data.repository.DataStoreAdsConsentRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,6 +37,13 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 interface AdModule {
+
+    @Binds
+    fun bindAdsConsentRepository(impl: DataStoreAdsConsentRepository): AdsConsentRepository
+
+    @Binds
+    fun bindAdsPrivacySdk(impl: YandexAdsPrivacySdk): AdsPrivacySdk
+
 
     @Binds
     fun bindAppOpenAdController(

@@ -5,6 +5,9 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import com.avetiso.core.ads.AdsConfiguration
+import com.avetiso.core.ads.AdsConsentRepository
+import com.avetiso.core.ads.AdsDataConsent
+import kotlinx.coroutines.flow.first
 import com.avetiso.core.ads.AdsSdkReadiness
 import com.avetiso.core.ads.AdsProvider
 import com.avetiso.core.ads.AppOpenAdProvider
@@ -30,7 +33,8 @@ import javax.inject.Singleton
 class YandexAppOpenAdController @Inject constructor(
     @ApplicationContext context: Context,
     @YandexAds private val adsConfiguration: AdsConfiguration,
-    @YandexAds private val adsSdkReadiness: AdsSdkReadiness
+    @YandexAds private val adsSdkReadiness: AdsSdkReadiness,
+    private val consentRepository: AdsConsentRepository
 ) : AppOpenAdProvider {
 
     override val provider = AdsProvider.YANDEX
@@ -43,6 +47,7 @@ class YandexAppOpenAdController @Inject constructor(
     }
 
     private var appOpenAd: AppOpenAd? = null
+    private var loadedForConsent: AdsDataConsent? = null
     private var appOpenAdLoadCompletion: CompletableDeferred<Boolean>? = null
     private var isAppOpenAdShowing = false
     private var activeShowAd: AppOpenAd? = null
@@ -53,7 +58,12 @@ class YandexAppOpenAdController @Inject constructor(
             return
         }
 
+        val currentConsent = consentRepository.consent.first { it != AdsDataConsent.UNDECIDED }
         val loadCompletion = synchronized(stateLock) {
+            if (loadedForConsent != currentConsent) {
+                appOpenAd = null
+                loadedForConsent = null
+            }
             if (appOpenAd != null || appOpenAdLoadCompletion?.isActive == true) {
                 return
             }
@@ -75,6 +85,7 @@ class YandexAppOpenAdController @Inject constructor(
                     override fun onAdLoaded(ad: AppOpenAd) {
                         synchronized(stateLock) {
                             appOpenAd = ad
+                            loadedForConsent = currentConsent
 
                             if (appOpenAdLoadCompletion === loadCompletion) {
                                 appOpenAdLoadCompletion = null
@@ -196,6 +207,13 @@ class YandexAppOpenAdController @Inject constructor(
     }
 
     private suspend fun awaitAvailableAd(): AppOpenAd? {
+        val currentConsent = consentRepository.consent.first { it != AdsDataConsent.UNDECIDED }
+        synchronized(stateLock) {
+            if (loadedForConsent != currentConsent) {
+                appOpenAd = null
+                loadedForConsent = null
+            }
+        }
         synchronized(stateLock) {
             appOpenAd
         }?.let { ad ->
@@ -205,7 +223,7 @@ class YandexAppOpenAdController @Inject constructor(
         loadAppOpenAd()
 
         synchronized(stateLock) {
-            appOpenAd
+            if (loadedForConsent == currentConsent) appOpenAd else null
         }?.let { ad ->
             return ad
         }
@@ -213,7 +231,7 @@ class YandexAppOpenAdController @Inject constructor(
         val loadCompletion = synchronized(stateLock) {
             appOpenAdLoadCompletion
         } ?: return synchronized(stateLock) {
-            appOpenAd
+            if (loadedForConsent == currentConsent) appOpenAd else null
         }
 
         if (!loadCompletion.await()) {
@@ -221,7 +239,13 @@ class YandexAppOpenAdController @Inject constructor(
         }
 
         return synchronized(stateLock) {
-            appOpenAd
+            if (loadedForConsent == currentConsent) {
+                appOpenAd
+            } else {
+                appOpenAd = null
+                loadedForConsent = null
+                null
+            }
         }
     }
 
@@ -269,6 +293,7 @@ class YandexAppOpenAdController @Inject constructor(
             } else {
                 if (appOpenAd === ad) {
                     appOpenAd = null
+                    loadedForConsent = null
                 }
 
                 activeShowAd = null

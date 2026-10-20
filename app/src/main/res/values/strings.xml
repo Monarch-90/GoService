@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Go Service</string>
+    <string name="app_name">GoService</string>
     <string name="schedule">Расписание</string>
     <string name="clients">Клиенты</string>
     <string name="appointments">Записи</string>

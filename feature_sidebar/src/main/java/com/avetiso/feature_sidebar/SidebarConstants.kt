@@ -1,5 +1,7 @@
 package com.avetiso.feature_sidebar
 
+import com.avetiso.core.AppConstants
+
 internal object SidebarConstants {
 
     object Validation {
@@ -22,7 +24,7 @@ internal object SidebarConstants {
         const val ERROR_READING_FILE = "Ошибка при загрузке текста о приложении"
         const val UNKNOWN_ERROR = "Произошла неизвестная ошибка"
         const val BINDING_LIFECYCLE_ERROR = "Обращение к ViewBinding вне жизненного цикла View (после onDestroyView)"
-        const val PRIVACY_POLICY_URL = "https://sites.google.com/view/go-service-privacy-policy"
+        const val PRIVACY_POLICY_URL = AppConstants.AdConstants.Privacy.POLICY_URL
         const val NO_BROWSER_FOUND_ERROR = "На устройстве не установлен браузер для открытия ссылки"
     }
 }

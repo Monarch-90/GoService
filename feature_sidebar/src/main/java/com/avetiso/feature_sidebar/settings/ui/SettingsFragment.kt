@@ -11,9 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.avetiso.common_ui.dialogs.InputDialogFragment
+import com.avetiso.common_ui.dialogs.AdsConsentDialogFactory
 import com.avetiso.common_ui.dialogs.models.showChangeCurrencyDialog
 import com.avetiso.common_ui.dialogs.models.showDeleteCustomCurrencyDialog
 import com.avetiso.core.AppConstants
+import com.avetiso.core.ads.AdsDataConsent
 import com.avetiso.core.models.CurrencyListItem
 import com.avetiso.feature_sidebar.R
 import com.avetiso.feature_sidebar.databinding.FragmentSettingsBinding
@@ -38,6 +40,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         setupToolbar()
         setupResultListeners() // Регистрируем. ОТВЕТЫ: Входящие данные (что мне возвращают другие)
         setupSpinner()
+        binding.adPreferences.setOnClickListener { viewModel.onAdsPreferencesClicked() }
         observeState()
     }
 
@@ -51,6 +54,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     }
 
     private fun setupResultListeners() {
+        childFragmentManager.setFragmentResultListener(
+            AppConstants.AdConstants.Privacy.SETTINGS_RESULT_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
+            viewModel.onAdsConsentSelected(
+                result.getBoolean(AppConstants.Result.RESULT_CONFIRMED)
+            )
+        }
+
         childFragmentManager.setFragmentResultListener(
             AppConstants.Requests.CHANGE_CURRENCY,
             viewLifecycleOwner
@@ -93,6 +105,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
+                launch {
+                    viewModel.adsConsent.collect { consent ->
+                        binding.adPreferencesStatus.setText(
+                            when (consent) {
+                                AdsDataConsent.GRANTED -> com.avetiso.core.R.string.ads_consent_status_granted
+                                AdsDataConsent.DENIED -> com.avetiso.core.R.string.ads_consent_status_denied
+                                AdsDataConsent.UNDECIDED -> com.avetiso.core.R.string.ads_consent_status_unknown
+                            }
+                        )
+                    }
+                }
+
                 // 1. Слушаем список валют из UseCase
                 launch {
                     viewModel.currencyList.collect { list ->
@@ -134,11 +158,25 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                             is SettingsEvent.ShowDeleteCurrencyDialog -> {
                                 showDeleteCurrencyDialog(event.currencies)
                             }
+
+                            SettingsEvent.ShowAdsConsentDialog -> showAdsConsentDialog()
+                            SettingsEvent.RecreateHostActivity -> requireActivity().recreate()
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun showAdsConsentDialog() {
+        val manager = childFragmentManager
+        if (manager.isStateSaved ||
+            manager.findFragmentByTag(AppConstants.AdConstants.Privacy.SETTINGS_DIALOG_TAG) != null
+        ) return
+        AdsConsentDialogFactory.create(
+            requireContext(),
+            AppConstants.AdConstants.Privacy.SETTINGS_RESULT_KEY
+        ).show(manager, AppConstants.AdConstants.Privacy.SETTINGS_DIALOG_TAG)
     }
 
     private fun updateSpinnerAdapter(list: List<CurrencyListItem>) {

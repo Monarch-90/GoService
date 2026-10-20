@@ -1,0 +1,37 @@
+1. General Provisions
+
+This Privacy Policy (hereinafter referred to as the "Policy") governs the processing and protection of the personal information of users of the Go Service mobile application (hereinafter referred to as the "Application"). The Go Service development team (hereinafter referred to as the "Developer") holds the privacy of its users in the highest regard. The use of the Application constitutes the User’s unconditional consent to and acceptance of this Policy.
+
+
+2. Categories of Data Processed
+
+To facilitate the functionality of appointment scheduling and client database management, the Application may request and store the following user-inputted data:
+
+
+Names and contact details of clients (including telephone numbers and links to social media networks, e.g., Instagram).
+
+
+Information pertaining to scheduled and past appointments, selected services, and the cost thereof.
+
+
+User notes and custom fields created for client profiles.
+
+
+3. Data Storage and Transfer
+
+The fundamental operational principle of the Application is strict data locality. All aforementioned data is stored exclusively within the internal memory of your mobile device (within a local database). The Developer does not collect, copy, upload to remote servers, or disclose to any third parties the personal information of your clients or your appointment history.
+
+
+4. Permissions Requested by the Application
+
+The Application requests Internet access solely to ensure the basic operability of internal libraries and system functions of the device. This permission is not utilized for the covert or unauthorized transmission of the User's personal data.
+
+
+5. Security
+
+Given that the data is stored locally on the User's device, the sole responsibility for safeguarding such data against unauthorized access by third parties (e.g., in the event of device loss or theft) rests with the User. We strongly advise utilizing standard Android OS security mechanisms (such as a password, PIN, fingerprint scanner, or facial recognition). Upon uninstallation of the Application, all stored data is irrecoverably deleted.
+
+
+6. Contact Information
+
+Should you have any questions, inquiries, or concerns regarding this Privacy Policy, please contact us via email at: avdeveloperstudio@gmail.com.

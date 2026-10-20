@@ -10,5 +10,7 @@ data class ConfirmationDialogPayload(
     val message: String,
     val positiveText: String? = null,
     val negativeText: String? = null,
-    val isDestructive: Boolean = false
+    val isDestructive: Boolean = false,
+    val infoText: String? = null,
+    val infoUrl: String? = null
 ) : Parcelable

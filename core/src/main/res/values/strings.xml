@@ -20,4 +20,14 @@
     <string name="add_currency_hint">GEL</string>
     <string name="delete_custom_currency">Удалить</string>
     <string name="select_currency_to_delete">Выберите валюту для удаления</string>
+    <string name="ads_consent_title">Реклама и конфиденциальность</string>
+    <string name="ads_consent_description">GoService использует Яндекс Рекламу. С вашего согласия рекламный сервис может обрабатывать данные устройства и рекламные идентификаторы для подбора и измерения рекламы. При отказе согласие на такую обработку не передаётся, но реклама продолжит показываться без персонализации. Выбор можно изменить в настройках.</string>
+    <string name="ads_consent_accept">Согласен</string>
+    <string name="ads_consent_decline">Не согласен</string>
+    <string name="ads_consent_privacy_link">Политика конфиденциальности</string>
+    <string name="ads_consent_settings_title">Рекламные предпочтения</string>
+    <string name="ads_consent_settings_summary">Управление согласием на рекламную обработку данных</string>
+    <string name="ads_consent_status_granted">Согласие дано</string>
+    <string name="ads_consent_status_denied">Без согласия</string>
+    <string name="ads_consent_status_unknown">Выбор не сделан</string>
 </resources>

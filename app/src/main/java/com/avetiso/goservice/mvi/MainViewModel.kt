@@ -4,11 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avetiso.core.AppConstants
+import com.avetiso.core.ads.AdsConsentRepository
+import com.avetiso.core.ads.AdsDataConsent
+import com.avetiso.core.usecase.SaveAdsConsentUseCase
 import com.avetiso.core.usecase.ShouldShowAppOpenAdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,7 +23,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val shouldShowAppOpenAdUseCase: ShouldShowAppOpenAdUseCase
+    private val shouldShowAppOpenAdUseCase: ShouldShowAppOpenAdUseCase,
+    private val adsConsentRepository: AdsConsentRepository,
+    private val saveAdsConsentUseCase: SaveAdsConsentUseCase
 ) : ViewModel() {
 
     private val _effects = Channel<MainSideEffect>(Channel.BUFFERED)
@@ -36,6 +42,27 @@ class MainViewModel @Inject constructor(
 
     private val actionMutex = Mutex()
     private var nextAdEffectRequestId = 0L
+    private var currentAdsConsent: AdsDataConsent? = null
+    private var appLaunchRequested = false
+    private var adsScheduledForThisLaunch = false
+    private var consentDialogRequestSent = false
+
+    init {
+        viewModelScope.launch {
+            adsConsentRepository.consent.collect { choice ->
+                actionMutex.withLock {
+                    currentAdsConsent = choice
+                    if (choice == AdsDataConsent.UNDECIDED && !consentDialogRequestSent) {
+                        consentDialogRequestSent = true
+                        _effects.send(MainSideEffect.ShowAdsConsentDialog)
+                    } else if (choice != AdsDataConsent.UNDECIDED) {
+                        consentDialogRequestSent = false
+                    }
+                    enqueueLaunchAdsIfReady()
+                }
+            }
+        }
+    }
 
     fun processIntent(intent: MainIntent) {
         viewModelScope.launch {
@@ -45,14 +72,26 @@ class MainViewModel @Inject constructor(
                     is MainIntent.OnDrawerClosed -> handleDrawerClosed()
                     MainAppLaunchedIntent -> handleAppLaunched()
                     is MainAdEffectHandledIntent -> handleAdEffectHandled(intent.requestId)
+                    is MainAdsConsentChosenIntent -> saveAdsConsentUseCase(
+                        if (intent.consentGranted) AdsDataConsent.GRANTED else AdsDataConsent.DENIED
+                    )
                 }
             }
         }
     }
 
     private suspend fun handleAppLaunched() {
-        requestAdEffect(MainAdEffectType.LOAD_APP_OPEN)
+        appLaunchRequested = true
+        enqueueLaunchAdsIfReady()
+    }
 
+    private suspend fun enqueueLaunchAdsIfReady() {
+        if (!appLaunchRequested || adsScheduledForThisLaunch) return
+        val choice = currentAdsConsent ?: return
+        if (choice == AdsDataConsent.UNDECIDED) return
+
+        adsScheduledForThisLaunch = true
+        requestAdEffect(MainAdEffectType.LOAD_APP_OPEN)
         if (shouldShowAppOpenAdUseCase()) {
             requestAdEffect(MainAdEffectType.SHOW_APP_OPEN)
         }
@@ -108,5 +147,3 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 }
-
-

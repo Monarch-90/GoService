@@ -1,37 +1,50 @@
-1. General Provisions
-
-This Privacy Policy (hereinafter referred to as the "Policy") governs the processing and protection of the personal information of users of the Go Service mobile application (hereinafter referred to as the "Application"). The Go Service development team (hereinafter referred to as the "Developer") holds the privacy of its users in the highest regard. The use of the Application constitutes the User’s unconditional consent to and acceptance of this Policy.
-
-
-2. Categories of Data Processed
-
-To facilitate the functionality of appointment scheduling and client database management, the Application may request and store the following user-inputted data:
-
-
-Names and contact details of clients (including telephone numbers and links to social media networks, e.g., Instagram).
-
-
-Information pertaining to scheduled and past appointments, selected services, and the cost thereof.
-
-
-User notes and custom fields created for client profiles.
-
-
-3. Data Storage and Transfer
-
-The fundamental operational principle of the Application is strict data locality. All aforementioned data is stored exclusively within the internal memory of your mobile device (within a local database). The Developer does not collect, copy, upload to remote servers, or disclose to any third parties the personal information of your clients or your appointment history.
-
-
-4. Permissions Requested by the Application
-
-The Application requests Internet access solely to ensure the basic operability of internal libraries and system functions of the device. This permission is not utilized for the covert or unauthorized transmission of the User's personal data.
-
-
-5. Security
-
-Given that the data is stored locally on the User's device, the sole responsibility for safeguarding such data against unauthorized access by third parties (e.g., in the event of device loss or theft) rests with the User. We strongly advise utilizing standard Android OS security mechanisms (such as a password, PIN, fingerprint scanner, or facial recognition). Upon uninstallation of the Application, all stored data is irrecoverably deleted.
-
-
-6. Contact Information
-
-Should you have any questions, inquiries, or concerns regarding this Privacy Policy, please contact us via email at: avdeveloperstudio@gmail.com.
+Privacy Policy for GoService: Appointment Book
+Last updated: October 18, 2026
+1. Introduction
+This Privacy Policy explains how the GoService: Appointment Book mobile application ("Application"), developed by the GoService development team ("Developer"), handles user information.
+The Application helps service professionals manage clients, appointments, services, and business statistics.
+This Policy describes information stored locally on the user's device, information processed by third-party services, and the choices available to users.
+2. Client and Appointment Data
+The Application allows users to enter and manage:
+Client names, telephone numbers, social media details, and other contact information.
+Appointment dates, times, services, prices, and statuses.
+Client notes and custom fields.
+Information used to calculate and display business statistics.
+This information is stored locally in the Application's database on the user's device.
+The Developer does not automatically upload client records or appointment histories to the Developer's servers. This information is not intentionally shared with advertising providers.
+Users are responsible for ensuring that they have the appropriate rights to enter and manage their clients' personal information.
+3. Advertising and Third-Party Data Processing
+The Application displays advertisements using Yandex Mobile Ads SDK, provided by Yandex.
+To deliver advertisements and measure advertising performance, the SDK may process information associated with the user's device and advertising requests, including advertising identifiers when available, network information such as IP addresses, and information related to advertising interactions.
+This information may be transmitted to Yandex and processed in accordance with applicable privacy requirements and Yandex's policies.
+The Application does not intentionally provide its locally stored client database or appointment history to Yandex for advertising purposes.
+For more information, please review the Yandex Privacy Policy.
+4. Advertising Consent and User Choices
+The Application provides users with a choice regarding personal data processing for advertising purposes.
+Users can accept or decline advertising-related consent when prompted. Their selection is stored locally on their device and communicated to the advertising SDK as applicable.
+Users may change their selection through the Application's advertising preferences in Settings.
+Declining consent does not prevent access to the Application's core features. Advertising may still be displayed where permitted, subject to the advertising provider's data processing restrictions and applicable laws.
+5. Contacting the Developer
+The Application includes an optional feature for sending messages to the Developer.
+When users submit feedback or support requests through this feature, their email address and message content are transmitted through Formspree, a third-party form submission service.
+This information is used to receive, review, and respond to inquiries. Formspree may process associated technical information as described in its privacy policy.
+Users should avoid including confidential client records or other unnecessary sensitive personal information in support messages.
+For additional information, review the Formspree Privacy Policy.
+6. Internet Access and Security
+The Application uses internet connectivity to request advertisements and transmit user-initiated support messages.
+Client and appointment records are stored in the Application's private local storage. Network communications with the integrated advertising and feedback services use secure connections.
+The Developer takes reasonable steps to protect information handled by the Application. However, no method of electronic storage or transmission can guarantee absolute security.
+Users are encouraged to protect their devices using available Android security features.
+7. Data Retention and Deletion
+Client records and appointment information remain stored on the user's device until they are deleted through the Application or the Application's local data is removed.
+Uninstalling the Application normally removes its locally stored application data, subject to applicable device and operating-system behavior.
+Advertising consent preferences are stored locally and can be changed through the Application's settings.
+Users may contact the Developer to request information about, or deletion of, personal information submitted through the support feature that is under the Developer's control.
+Data processed by Yandex or Formspree may be subject to their respective retention and deletion policies and applicable legal obligations.
+8. Changes to This Privacy Policy
+The Developer may update this Privacy Policy to reflect changes to the Application, integrated services, or applicable requirements.
+The updated version will be published at the Application's official privacy policy URL with a revised date.
+9. Contact Information
+For privacy-related questions, inquiries, or requests, please contact:
+GoService development team
+Email: avdeveloperstudio@gmail.com

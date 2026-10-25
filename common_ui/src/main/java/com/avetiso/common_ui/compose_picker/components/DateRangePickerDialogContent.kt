@@ -33,22 +33,22 @@ fun DateRangePickerDialogContent(
     onConfirm: (Long, Long) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // Стейт инкапсулирован, корректно переживает поворот экрана внутри Compose
     val dateRangePickerState = rememberDateRangePickerState()
     val dialogColors = getCustomDatePickerColors()
+    val isRangeComplete = dateRangePickerState.selectedStartDateMillis != null &&
+        dateRangePickerState.selectedEndDateMillis != null
 
     Surface(
-        modifier = Modifier.fillMaxSize(), // Занимает всю высоту 85%, которую мы задали во Фрагменте!
-        shape = RoundedCornerShape(24.dp), // Твои фирменные скругления
+        modifier = Modifier.fillMaxSize(),
+        shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // 2. Сам календарь. weight(1f) заставит его растянуться на всё свободное пространство!
+        Column(modifier = Modifier.fillMaxSize()) {
             DateRangePicker(
                 state = dateRangePickerState,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 title = {
                     Text(
                         text = title,
@@ -65,7 +65,6 @@ fun DateRangePickerDialogContent(
                 showModeToggle = false
             )
 
-            // 3. Рисуем кнопки сами внизу
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,19 +94,16 @@ fun DateRangePickerDialogContent(
     }
 }
 
-/**
- * Изолированная приватная функция для форматирования заголовка диапазона дат.
- * Полностью решает проблему с отсутствующим DateRangePickerHeadline в SDK.
- */
 @Composable
 private fun CustomDateRangeHeadline(
     selectedStartDateMillis: Long?,
     selectedEndDateMillis: Long?,
     modifier: Modifier = Modifier
 ) {
-    // Берем строки строго из ресурсов (защита от голых стрингов)
-    val startDateText = formatHeadlineDate(selectedStartDateMillis) ?: stringResource(R.string.date_start)
-    val endDateText = formatHeadlineDate(selectedEndDateMillis) ?: stringResource(R.string.date_end)
+    val startDateText = formatHeadlineDate(selectedStartDateMillis)
+        ?: stringResource(R.string.date_start)
+    val endDateText = formatHeadlineDate(selectedEndDateMillis)
+        ?: stringResource(R.string.date_end)
 
     Text(
         text = "$startDateText — $endDateText",
@@ -120,9 +116,6 @@ private fun CustomDateRangeHeadline(
     )
 }
 
-/**
- * Изолированный форматтер для UI-слоя.
- */
 private fun formatHeadlineDate(millis: Long?): String? {
     if (millis == null) return null
     val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
